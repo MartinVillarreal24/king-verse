@@ -13,7 +13,7 @@ Push the cinematic home further: more animation, floating balloons, an implied I
 ## Tasks
 
 - [x] T1 — S1–S5 — worker — artboard design/home-cinematic/04-…html (builds on 01)
-- [ ] T2 — S1–S5 — after approval — implement in src/
+- [x] T2 — S1–S5 — after approval — implement in src/ — 4c02eb9
 
 ## Log
 
@@ -21,3 +21,4 @@ Push the cinematic home further: more animation, floating balloons, an implied I
 - L2 (user answers): Pennywise "Solo insinuado"; blood "Acentos"; process "Nuevo artboard y después implemento".
 - L3 (worker, T1): artboard design/home-cinematic/04-something-floats.html ("Something floats") added and appended to design.json; builds on 01 (same text, notes, map, rail). Covers S1 (balloon fields, boat into the drain, particles, fog), S2 (eyes in the drain that follow the pointer, white-gloved hand with a balloon, cone-hat clown shadow, flickering lamps; no face), S3 (title drip, bleeding years, splatter wipe, red seep), S4 (new artboard, 01–03 untouched, src/ untouched), S5 (still with reduced motion, readable without JS, text only on panels, disclaimer kept, one attributed quote). Verified in headless Chrome at 1440×900, 390×844, reduced motion and no JS; no console errors. Awaiting user approval before T2.
 - L4 (handoff, 2026-11-17): 04-something-floats approved and handed off for implementation (T2).
+- L5 (evidence): npm test 39/39; headless Chrome at 1440×900, 900×1000, 390×844, reduced motion and no JS, no console errors. Known gap: on mobile the 1988–89 crop leaves the storm drain (eyes, glove) out of frame.
