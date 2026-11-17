@@ -4,7 +4,7 @@ Unofficial, non-profit interactive fan site about Stephen King's universe, start
 
 ## Stack
 
-Astro (static output) + GSAP (ScrollTrigger). Spanish is the default locale at `/`; English lives under `/en/`. Deployed to Vercel (`vercel.json`).
+Astro (static output) + GSAP (ScrollTrigger). Spanish is the default locale at `/`; English lives under `/en/`. Deployed to Vercel (`vercel.json`): https://king-verse-pi.vercel.app
 
 ## Scripts
 

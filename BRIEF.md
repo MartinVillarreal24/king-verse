@@ -50,7 +50,7 @@ The novel uses 1957–58 and 1984–85; do **not** use the book's years on the t
 - Languages: **i18n from day one**: Spanish (neutral, "tú") as default locale, English as second locale (user decision, 2026-11-17).
 - First experience: **both** — the 27-year cycle journey as a scroll narrative **and** a Derry exploration (user decision, 2026-11-17).
 - Structure: the **cycle journey is the spine**; each cycle opens the Derry places of that era (user decision, 2026-11-17).
-- Hosting: **Vercel** for now (default Vercel URL). A subdomain of martinherrera.dev comes later; name not picked yet (user decision, 2026-11-17).
+- Hosting: **Vercel** for now, at https://king-verse-pi.vercel.app. A subdomain of martinherrera.dev comes later; name not picked yet (user decision, 2026-11-17).
 - Sources: **real, primary/original sources, cited professionally** (user decision, 2026-11-17). Every factual claim (dates, renewals, cast, plot facts) carries a numbered **inline note**, and a **sources page** lists the full bibliography; short quotes are attributed.
 
 ## Open questions
