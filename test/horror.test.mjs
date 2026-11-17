@@ -54,6 +54,34 @@ test('the drain eyes and the white glove live in the 1988–89 art; the clown sh
   }
 });
 
+test('on narrow screens the 1988–89 art reframes on the storm drain; desktop keeps the centered crop', () => {
+  for (const [lang, html] of Object.entries(homes)) {
+    const svg = eraArt(html, '1988').match(/<svg\b[^>]*>/)[0];
+    assert.match(svg, /data-narrow-focus="drain"/, `${lang}: 1988 art carries the narrow framing hook`);
+    assert.match(svg, /preserveAspectRatio="xMidYMid slice"/, `${lang}: desktop crop unchanged`);
+  }
+  const css = readdirSync(join(DIST, '_astro')).filter((f) => f.endsWith('.css'))
+    .map((f) => readFileSync(join(DIST, '_astro', f), 'utf8')).join('\n');
+  // Every rule on the hook sits inside a media query below the 64rem cinema breakpoint (phones and tablets), so
+  // desktop is untouched.
+  const rules = [...css.matchAll(/([^{}]*\[data-narrow-focus="?drain"?\][^{}]*)\{([^}]*)\}/g)];
+  assert.ok(rules.length > 0, 'a framing rule targets the hook');
+  for (const rule of rules) {
+    const before = css.slice(0, rule.index);
+    const media = before.slice(before.lastIndexOf('@media')).match(/^@media\s*([^{]*)\{/)?.[1] ?? '';
+    const max = media.match(/\((?:max-width:\s*|width\s*<=?\s*)([\d.]+)rem\)/)?.[1];
+    assert.ok(max && Number(max) >= 48 && Number(max) < 64, `framing rule only below the 64rem desktop breakpoint: ${media}`);
+    assert.doesNotMatch(media, /min-width|width\s*>/, `framing rule has no lower bound: ${media}`);
+    assert.doesNotMatch(before.slice(before.lastIndexOf('@media')), /\}\s*\}/, 'rule is inside the media block');
+    const decl = rule[2];
+    assert.match(decl, /aspect-ratio:\s*16\s*\/\s*9/, 'art keeps its 16:9 box');
+    assert.match(decl, /max-width:\s*none/, 'the box may overflow the stage');
+    // Anchored right (drain at x 1290–1490 of 1600) and raised (drain above the giant year).
+    assert.match(decl, /(?:inset:\s*-\d+%\s+0\s+auto\s+auto|right:\s*0)/, 'anchored to the right edge');
+    assert.match(decl, /(?:inset|top):\s*-\d+%/, 'raised above the giant year');
+  }
+});
+
 test('blood accents are decorative: title drip, hero year drips, giant year drips, lake seep and one wipe', () => {
   for (const [lang, html] of Object.entries(homes)) {
     const h = hero(html);

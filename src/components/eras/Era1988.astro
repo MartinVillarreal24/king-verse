@@ -14,7 +14,7 @@ const riders = [[0, 1], [70, 0.96], [136, 1], [206, 0.92], [270, 0.98], [340, 0.
 const drops = scatter(1989, 100, { x: [0, 1600], y: [0, 900], r: [0, 1] }).map((p) => `M${p.cx} ${p.cy}l-5 22`);
 const rain = [drops.slice(0, 60).join(''), drops.slice(60).join('')];
 ---
-<svg class="art" data-era-art="1988" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+<svg class="art" data-era-art="1988" data-narrow-focus="drain" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
   <defs>
     <linearGradient id="e88-sky" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" class="st-night" /><stop offset="0.4" class="st-dusk" /><stop offset="0.75" class="st-rose" /><stop offset="1" class="st-amber" />
@@ -87,6 +87,15 @@ const rain = [drops.slice(0, 60).join(''), drops.slice(60).join('')];
 </svg>
 
 <style>
+  /* Phones and tablets below the cinema breakpoint (data-narrow-focus="drain"): the centered slice crop would cut
+     the storm drain (eyes, glove, the boat's arrival) at the right edge. The art keeps its own 16:9 box, height of
+     the stage, anchored to the stage's right edge (on a phone roughly x 1060–1600 shows) and raised 12 % so the drain
+     sits between the slate and the giant year, never under text. The exposed band at the bottom continues the art's
+     darkest ground (box-shadow), under the letterbox and the giant year. Desktop (64rem and up, the cinema
+     breakpoint) keeps the centered crop untouched. */
+  @media (max-width: 63.99rem) {
+    svg.art[data-narrow-focus='drain'] { left: auto; right: 0; top: -12%; bottom: auto; width: auto; max-width: none; height: 100%; aspect-ratio: 16 / 9; box-shadow: 0 0 0 100vmax var(--era-1988-silhouette-deep); }
+  }
   .st-night { stop-color: var(--color-night); }
   .st-dusk { stop-color: var(--era-1988-dusk); }
   .st-rose { stop-color: var(--era-1988-rose); }
