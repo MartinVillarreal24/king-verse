@@ -3,10 +3,13 @@
 import { ui, type Locale } from '../i18n/ui';
 import type { Cycle } from '../data/cycles';
 import Note from './Note.astro';
+import { noteNumber } from '../data/sources';
 
 interface Props { locale: Locale; cycle: Cycle; first: boolean }
 const { locale, cycle, first } = Astro.props;
 const t = ui[locale].home;
+// Notes read in ascending order whatever order the data lists them in.
+const notes = [...cycle.sourceIds].sort((a, b) => noteNumber(a) - noteNumber(b));
 ---
 <section class="cycle" id={`cycle-${cycle.id}`} data-cycle data-upcoming={cycle.upcoming ? '' : undefined} aria-labelledby={`cycle-${cycle.id}-title`}>
   {!first && <p class="gap" aria-hidden="true">{t.gap}</p>}
@@ -19,7 +22,7 @@ const t = ui[locale].home;
     </p>
     <p class="status">
       {cycle.status[locale]}
-      {cycle.sourceIds.map((id) => <Note locale={locale} source={id} />)}
+      {notes.map((id) => <Note locale={locale} source={id} />)}
     </p>
   </header>
   <p class="body">{t.bodyEmpty}</p>

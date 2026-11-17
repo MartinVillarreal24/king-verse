@@ -68,6 +68,15 @@ test('each sources page links its alternate and every inline note points to a li
   }
 });
 
+test('every cycle cites at least one source with a numbered note', () => {
+  for (const html of Object.values(homes)) {
+    for (const year of CYCLES) {
+      const section = html.split(`id="cycle-${year}"`)[1].split('</section>')[0];
+      assert.match(section, /<a[^>]*data-note[^>]*>\[\d+\]<\/a>/, `cycle ${year} note`);
+    }
+  }
+});
+
 test('content is readable without JS and motion respects reduced-motion', () => {
   for (const html of Object.values(homes)) {
     // Nothing is hidden or pre-armed in the static HTML; the script arms animations at runtime.

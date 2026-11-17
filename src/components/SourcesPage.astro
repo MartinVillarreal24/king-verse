@@ -7,6 +7,7 @@ import { sources } from '../data/sources';
 interface Props { locale: Locale }
 const { locale } = Astro.props;
 const t = ui[locale].sources;
+const [open, close] = locale === 'es' ? ['«', '»'] : ['“', '”'];
 const formatDate = (iso: string) =>
   new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
 ---
@@ -19,8 +20,9 @@ const formatDate = (iso: string) =>
     <ol class="sources" data-sources>
       {sources.map((s) => (
         <li id={`source-${s.id}`}>
-          {s.author}. {s.url ? <a href={s.url} rel="noopener">{s.title}</a> : <cite>{s.title}</cite>}. {s.publisher},{' '}
-          <time datetime={s.date}>{formatDate(s.date)}</time>.
+          {s.author !== s.publisher && <>{s.author}. </>}
+          {open}{s.url ? <a href={s.url} rel="noopener">{s.title}</a> : <cite>{s.title}</cite>}{close}. <cite>{s.publisher}</cite>
+          {s.date && <>, <time datetime={s.date}>{formatDate(s.date)}</time></>}.
           {s.accessed && <> {t.accessed} <time datetime={s.accessed}>{formatDate(s.accessed)}</time>.</>}
         </li>
       ))}
