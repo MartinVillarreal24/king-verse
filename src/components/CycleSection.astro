@@ -1,0 +1,52 @@
+---
+// One 27-year cycle on the home spine. It opens the Derry places of its era (filled in later).
+import { ui, type Locale } from '../i18n/ui';
+import type { Cycle } from '../data/cycles';
+import Note from './Note.astro';
+import { noteNumber } from '../data/sources';
+
+interface Props { locale: Locale; cycle: Cycle; first: boolean }
+const { locale, cycle, first } = Astro.props;
+const t = ui[locale].home;
+// Notes read in ascending order whatever order the data lists them in.
+const notes = [...cycle.sourceIds].sort((a, b) => noteNumber(a) - noteNumber(b));
+---
+<section class="cycle" id={`cycle-${cycle.id}`} data-cycle data-upcoming={cycle.upcoming ? '' : undefined} aria-labelledby={`cycle-${cycle.id}-title`}>
+  {!first && <p class="gap" aria-hidden="true">{t.gap}</p>}
+  <header class="cycle-head">
+    <span class="dot" aria-hidden="true"></span>
+    <h2 id={`cycle-${cycle.id}-title`} class="year">{cycle.year}</h2>
+    <p class="source">
+      {cycle.source[locale]}
+      {cycle.upcoming && <span class="upcoming">{t.upcoming}</span>}
+    </p>
+    <p class="status">
+      {cycle.status[locale]}
+      {notes.map((id) => <Note locale={locale} source={id} />)}
+    </p>
+  </header>
+  <p class="body">{t.bodyEmpty}</p>
+  <div class="places" data-places>
+    <h3>{t.placesTitle}</h3>
+    <p>{t.placesEmpty}</p>
+  </div>
+</section>
+
+<style>
+  .cycle { position: relative; padding-block: 4rem; border-left: 1px solid color-mix(in srgb, var(--color-err) 55%, transparent); padding-left: 2rem; }
+  .cycle[data-upcoming] { border-left-style: dashed; }
+  .gap { position: absolute; top: 0.75rem; left: -0.25rem; transform: translateX(-50%); margin: 0; padding: 0.125rem 0.25rem; font: 0.75rem/1 var(--font-mono); color: var(--color-err); background: var(--color-ink); }
+  .cycle-head { position: relative; }
+  .dot { position: absolute; left: calc(-2rem - 0.5rem); top: 0.75rem; width: 1rem; height: 1rem; border-radius: 9999px; border: 1px solid var(--color-err); background: var(--color-err); box-shadow: 0 0 10px #ff5c7a99, 0 0 22px #ff5c7a40; }
+  .cycle[data-upcoming] .dot { background: var(--color-ink); border-style: dashed; box-shadow: none; }
+  .year { margin: 0; font: 700 clamp(2.5rem, 8vw, 4.5rem)/1 var(--font-mono); letter-spacing: -0.02em; }
+  .cycle[data-upcoming] .year { color: var(--color-subtext); }
+  .source { margin: 0.75rem 0 0; font-family: var(--font-mono); color: var(--color-subtext); }
+  .cycle[data-upcoming] .source { font-style: italic; }
+  .upcoming { margin-left: 0.75rem; padding: 0.125rem 0.375rem; border: 1px solid color-mix(in srgb, var(--color-err) 45%, transparent); border-radius: 0.25rem; font-style: normal; font-size: 0.75rem; color: var(--color-err); }
+  .status { margin: 0.25rem 0 0; color: var(--color-comment); }
+  .body { max-width: 40rem; color: var(--color-subtext); }
+  .places { max-width: 40rem; margin-top: 1.5rem; padding: 1rem 1.25rem; border: 1px solid var(--color-overlay); border-radius: 0.5rem; background: var(--color-night); }
+  .places h3 { margin: 0 0 0.25rem; font: 600 0.875rem/1.4 var(--font-mono); color: var(--color-text); }
+  .places p { margin: 0; color: var(--color-subtext); }
+</style>
