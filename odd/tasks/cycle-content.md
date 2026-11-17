@@ -14,7 +14,7 @@ Real content for 1962, 1988–89 and 2016: one to two paragraphs per cycle (full
 ## Tasks
 
 - [x] T1 — S1, S5 — explore — research plot and on-screen places per cycle with verified sources — research in L4 (no commit)
-- [ ] T2 — S3, S4 — inline — places data model + accessible SVG mini-map with no-JS list fallback, tests
+- [x] T2 — S3, S4 — inline — places data model + accessible SVG mini-map with no-JS list fallback, tests — 986fcd5
 - [ ] T3 — S1, S2, S3, S5, S6 — inline — 1962 text, places and sources
 - [ ] T4 — S1, S2, S3, S5, S6 — inline — 1988–89 text, places and sources
 - [ ] T5 — S1, S2, S3, S5, S6 — inline — 2016 text, places and sources
