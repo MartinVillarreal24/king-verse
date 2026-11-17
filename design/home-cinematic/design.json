@@ -1,0 +1,28 @@
+{
+  "title": "Home — cinematic directions",
+  "brief": "Make the King Verse home a professional, cinematic fan experience that showcases original illustration and animation: Derry skyline hero with the floating red balloon and years flickering on, original layered SVG art per era (1962, 1988–89, 2016) with the real body text and notes, and the Derry mini-map transitioning between eras. Reduced-motion and no-JS fallbacks; disclaimer visible.",
+  "feature": "odd/tasks/visual-polish.md",
+  "artboards": [
+    {
+      "file": "01-cinematic-chapters.html",
+      "title": "Cinematic chapters",
+      "tradeoff": "Strongest film feel and the most room for illustration and motion (pinned full-viewport chapters, parallax, letterbox, giant years, chapter rail); the longest scroll, and text panels overlay the art, so reading is sequential and the map only appears at the end of each chapter",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "02-editorial-atlas.html",
+      "title": "Editorial atlas",
+      "tradeoff": "Best for reading and orientation: one large persistent map morphs beside illustrated plates and two-column articles, with a contents index; less immersive (art is framed, not full-bleed) and it introduces a system serif stack as a new token",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "03-lake-timeline.html",
+      "title": "Lake timeline",
+      "tradeoff": "Most original idea: one continuous lake panorama whose sky, season and town change per era, with a HUD year, corner map and a scrubbable timeline; heaviest to build (stacked full-scene layers, scroll-to-time mapping) and the fixed scrubber and map take screen space from the text",
+      "width": 1440,
+      "height": 900
+    }
+  ]
+}

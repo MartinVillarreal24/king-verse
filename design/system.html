@@ -1,0 +1,213 @@
+<!doctype html>
+<!-- King Verse design system board. Renders only values recorded in design/system.md (synced from src/). -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>King Verse — sistema de diseño</title>
+<style>
+  :root {
+    --color-ink: #070b10; --color-night: #0f1724; --color-surface: #141e2c; --color-overlay: #22303f;
+    --color-text: #e6edf3; --color-subtext: #b3c0cf; --color-comment: #8b9bb0; --color-err: #ff5c7a;
+    --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { background: var(--color-ink); color: var(--color-text); font-family: var(--font-sans); line-height: 1.6; }
+  body { margin: 0; width: 1440px; padding: 3rem 4rem 4rem; }
+  a { color: var(--color-err); text-underline-offset: 0.2em; }
+  a:hover { color: var(--color-text); }
+  :focus-visible { outline: 2px solid var(--color-err); outline-offset: 3px; }
+  h1 { margin: 0; font: 800 3rem/1 var(--font-mono); letter-spacing: -0.03em; }
+  h2 { margin: 3rem 0 1rem; font: 600 1.125rem/1.3 var(--font-mono); color: var(--color-text); }
+  .meta { margin: 0.5rem 0 0; color: var(--color-comment); font: 0.8125rem/1.4 var(--font-mono); }
+  .grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 1rem; }
+  .sw { border: 1px solid var(--color-overlay); border-radius: 0.375rem; overflow: hidden; }
+  .sw b { display: block; height: 4.5rem; }
+  .sw span { display: block; padding: 0.5rem; font: 0.75rem/1.4 var(--font-mono); color: var(--color-subtext); }
+  .lit { grid-template-columns: repeat(7, 1fr); }
+  .type { display: grid; grid-template-columns: 14rem 1fr; gap: 0.75rem 2rem; align-items: baseline; }
+  .type dt { font: 0.75rem/1.4 var(--font-mono); color: var(--color-comment); }
+  .type dd { margin: 0; }
+  .row { display: flex; gap: 2rem; align-items: flex-end; flex-wrap: wrap; }
+  .sp div { background: var(--color-err); height: 1rem; }
+  .sp span, .rd span { display: block; margin-top: 0.375rem; font: 0.75rem var(--font-mono); color: var(--color-comment); }
+  .rd div { width: 5rem; height: 5rem; border: 1px solid var(--color-overlay); background: var(--color-surface); }
+  .comp { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .card { border: 1px solid var(--color-overlay); border-radius: 0.5rem; padding: 1.25rem; }
+  /* Components, copied from src/ */
+  .header-row { display: flex; align-items: center; justify-content: space-between; padding-block: 0.875rem; border-bottom: 1px solid var(--color-overlay); }
+  .brand { font: 700 1rem/1 var(--font-mono); color: var(--color-text); text-decoration: none; letter-spacing: 0.04em; }
+  nav ul { display: flex; gap: 1.25rem; margin: 0; padding: 0; list-style: none; font: 0.875rem/1 var(--font-mono); }
+  nav a { color: var(--color-subtext); text-decoration: none; }
+  nav a:hover, nav a[aria-current='page'] { color: var(--color-text); text-decoration: underline; }
+  .cycle { position: relative; padding: 1.5rem 0 1.5rem 2rem; border-left: 1px solid color-mix(in srgb, var(--color-err) 55%, transparent); }
+  .cycle.up { border-left-style: dashed; }
+  .dot { position: absolute; left: -0.5rem; top: 2.25rem; width: 1rem; height: 1rem; border-radius: 9999px; border: 1px solid var(--color-err); background: var(--color-err); box-shadow: 0 0 10px #ff5c7a99, 0 0 22px #ff5c7a40; }
+  .up .dot { background: var(--color-ink); border-style: dashed; box-shadow: none; }
+  .year { margin: 0; font: 700 4.5rem/1 var(--font-mono); letter-spacing: -0.02em; }
+  .up .year { color: var(--color-subtext); }
+  .source { margin: 0.75rem 0 0; font-family: var(--font-mono); color: var(--color-subtext); }
+  .up .source { font-style: italic; }
+  .badge { margin-left: 0.75rem; padding: 0.125rem 0.375rem; border: 1px solid color-mix(in srgb, var(--color-err) 45%, transparent); border-radius: 0.25rem; font-style: normal; font-size: 0.75rem; color: var(--color-err); }
+  .status { margin: 0.25rem 0 0; color: var(--color-comment); }
+  .gap { font: 0.75rem/1 var(--font-mono); color: var(--color-err); }
+  .note { font: 0.7em/1 var(--font-mono); } .note a { text-decoration: none; }
+  .places { padding: 1rem 1.25rem; border: 1px solid var(--color-overlay); border-radius: 0.5rem; background: var(--color-night); }
+  .places h3 { margin: 0 0 0.5rem; font: 600 0.875rem/1.4 var(--font-mono); }
+  .place-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.5rem; }
+  .place-list li { display: grid; grid-template-columns: 1.5rem 1fr; gap: 0.625rem; padding: 0.5rem 0.625rem; border: 1px solid transparent; border-radius: 0.375rem; }
+  .place-list li.on { border-color: var(--color-err); background: var(--color-surface); }
+  .place-num { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 9999px; background: var(--color-err); color: var(--color-ink); font: 700 0.75rem/1 var(--font-mono); }
+  .place-name { display: block; font: 600 0.9375rem/1.4 var(--font-sans); }
+  .place-desc { margin: 0.125rem 0 0; font-size: 0.9375rem; color: var(--color-subtext); }
+  .map svg { width: 100%; height: auto; border: 1px solid var(--color-overlay); border-radius: 0.375rem; }
+  .map figcaption { margin-top: 0.5rem; font: 0.8125rem/1.4 var(--font-mono); color: var(--color-comment); }
+  .land { fill: #0b121b; } .river-wide { fill: #16263a; }
+  .stream { fill: none; stroke: #2b4562; stroke-width: 4; stroke-linecap: round; }
+  .canal { fill: none; stroke: #2b4562; stroke-width: 5; }
+  .hill ellipse { fill: none; stroke: #22303f; }
+  .woods circle { fill: #15241f; stroke: #1f3329; }
+  .quarry path { fill: none; stroke: #33404f; stroke-width: 1.2; stroke-dasharray: 3 2; }
+  .blocks rect { fill: #141e2c; stroke: #22303f; stroke-width: 0.8; }
+  .runway rect { fill: #141e2c; stroke: #33404f; stroke-width: 0.8; }
+  .label { font: italic 7px var(--font-mono); fill: #8b9bb0; letter-spacing: 0.08em; }
+  .pin { fill: var(--color-err); stroke: var(--color-ink); stroke-width: 1.5; }
+  .num { font: 700 8px var(--font-mono); fill: var(--color-ink); text-anchor: middle; dominant-baseline: central; }
+  .ring { fill: none; stroke: var(--color-text); stroke-width: 2.5; }
+  .footer { border-top: 1px solid var(--color-overlay); padding-block: 1.5rem; font-size: 0.875rem; }
+  .footer p { margin: 0 0 0.25rem; color: var(--color-subtext); } .footer .credits { color: var(--color-comment); }
+  .skip { display: inline-block; padding: 0.5rem 0.75rem; background: var(--color-err); color: var(--color-ink); font-weight: 700; }
+  .scene { border: 1px solid var(--color-overlay); border-radius: 0.375rem; overflow: hidden; height: 300px; }
+  .scene svg { width: 100%; height: 100%; display: block; }
+  @media (prefers-reduced-motion: no-preference) {
+    .balloon { transform-box: fill-box; transform-origin: 50% 100%; animation: float 6s ease-in-out infinite alternate; }
+  }
+  @keyframes float { from { transform: translateY(3px) rotate(-3deg); } to { transform: translateY(-6px) rotate(3deg); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>King Verse — sistema de diseño</h1>
+  <p class="meta">Sincronizado desde src/styles/global.css, src/layouts/Base.astro y src/components/*.astro. Solo valores reales; ver design/system.md.</p>
+</header>
+<main>
+  <h2>Colores · tokens (global.css)</h2>
+  <div class="grid">
+    <div class="sw"><b style="background:#070b10"></b><span>--color-ink<br>#070b10</span></div>
+    <div class="sw"><b style="background:#0f1724"></b><span>--color-night<br>#0f1724</span></div>
+    <div class="sw"><b style="background:#141e2c"></b><span>--color-surface<br>#141e2c</span></div>
+    <div class="sw"><b style="background:#22303f"></b><span>--color-overlay<br>#22303f</span></div>
+    <div class="sw"><b style="background:#e6edf3"></b><span>--color-text<br>#e6edf3</span></div>
+    <div class="sw"><b style="background:#b3c0cf"></b><span>--color-subtext<br>#b3c0cf</span></div>
+    <div class="sw"><b style="background:#8b9bb0"></b><span>--color-comment<br>#8b9bb0</span></div>
+    <div class="sw"><b style="background:#ff5c7a"></b><span>--color-err (acento)<br>#ff5c7a</span></div>
+  </div>
+  <h2>Colores · literales en componentes (mapa y escena)</h2>
+  <div class="grid lit">
+    <div class="sw"><b style="background:#0b121b"></b><span>tierra / lago<br>#0b121b</span></div>
+    <div class="sw"><b style="background:#16263a"></b><span>Penobscot<br>#16263a</span></div>
+    <div class="sw"><b style="background:#2b4562"></b><span>arroyo, canal<br>#2b4562</span></div>
+    <div class="sw"><b style="background:#15241f"></b><span>bosque<br>#15241f</span></div>
+    <div class="sw"><b style="background:#33404f"></b><span>cantera, pista<br>#33404f</span></div>
+    <div class="sw"><b style="background:#3a1b2a"></b><span>cielo horizonte<br>#3a1b2a</span></div>
+    <div class="sw"><b style="background:#04070b"></b><span>silueta<br>#04070b</span></div>
+    <div class="sw"><b style="background:#0a1018"></b><span>reflejo<br>#0a1018</span></div>
+    <div class="sw"><b style="background:#d94a66"></b><span>nudo del globo<br>#d94a66</span></div>
+    <div class="sw"><b style="background:#c9d3df"></b><span>hilo (55 %)<br>#c9d3df</span></div>
+    <div class="sw"><b style="background:#1f3329"></b><span>borde bosque<br>#1f3329</span></div>
+    <div class="sw"><b style="box-shadow: inset 0 0 0 1px #22303f; background: linear-gradient(#070b10,#0f1724 45%,#3a1b2a)"></b><span>degradé cielo</span></div>
+    <div class="sw"><b style="background: linear-gradient(#141e2c,#0b121b 60%,#070b10)"></b><span>degradé lago</span></div>
+    <div class="sw"><b style="background:#070b10; display:grid; place-items:center"><i style="width:1rem;height:1rem;border-radius:9999px;background:#ff5c7a;box-shadow:0 0 10px #ff5c7a99,0 0 22px #ff5c7a40"></i></b><span>brillo del punto</span></div>
+  </div>
+
+  <h2>Tipografía (solo pilas del sistema)</h2>
+  <dl class="type">
+    <dt>--font-sans</dt><dd style="font-family:var(--font-sans)">ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif</dd>
+    <dt>--font-mono</dt><dd style="font-family:var(--font-mono)">ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace</dd>
+    <dt>h1 · mono 800 · 5.5rem máx.</dt><dd style="font:800 5.5rem/1 var(--font-mono);letter-spacing:-0.03em">Cada 27 años</dd>
+    <dt>año · mono 700 · 4.5rem máx.</dt><dd style="font:700 4.5rem/1 var(--font-mono);letter-spacing:-0.02em">1988–89</dd>
+    <dt>lead · sans 1.125rem</dt><dd style="font-size:1.125rem;color:var(--color-subtext);max-width:36rem">Derry despierta cada 27 años. Recorre sus ciclos, de 1908 a 2016, tal como los cuentan Welcome to Derry y las películas.</dd>
+    <dt>cuerpo · sans 1rem / 1.65</dt><dd style="line-height:1.65;color:var(--color-subtext);max-width:40rem">Juntos salvan a Mike de la pandilla de Bowers en los Barrens con una guerra de piedras, y Ben descubre que la casa de la calle Neibolt es el centro de todo.<sup class="note"><a href="#notas" aria-label="Nota 16">[16]</a></sup></dd>
+    <dt>h3 · mono 600 · 0.875rem</dt><dd style="font:600 0.875rem/1.4 var(--font-mono)">Derry en esta época</dd>
+    <dt>nav · mono 0.875rem</dt><dd style="font:0.875rem/1 var(--font-mono);color:var(--color-subtext)">Inicio · Fuentes · English</dd>
+    <dt>caption · mono 0.8125rem</dt><dd style="font:0.8125rem/1.4 var(--font-mono);color:var(--color-comment)">Mapa ilustrativo: no a escala, posiciones aproximadas.</dd>
+    <dt>etiqueta · mono 0.75rem</dt><dd class="gap">+27 años</dd>
+  </dl>
+
+  <h2>Espaciado y radios</h2>
+  <div class="row">
+    <div class="sp"><div style="width:0.5rem"></div><span>0.5rem</span></div>
+    <div class="sp"><div style="width:0.875rem"></div><span>0.875rem</span></div>
+    <div class="sp"><div style="width:1.25rem"></div><span>1.25rem</span></div>
+    <div class="sp"><div style="width:1.5rem"></div><span>1.5rem</span></div>
+    <div class="sp"><div style="width:2rem"></div><span>2rem</span></div>
+    <div class="sp"><div style="width:3rem"></div><span>3rem</span></div>
+    <div class="sp"><div style="width:4rem"></div><span>4rem</span></div>
+    <div class="sp"><div style="width:16rem"></div><span>.wrap 64rem (escala ¼)</span></div>
+    <div class="rd"><div style="border-radius:0.25rem"></div><span>0.25rem</span></div>
+    <div class="rd"><div style="border-radius:0.375rem"></div><span>0.375rem</span></div>
+    <div class="rd"><div style="border-radius:0.5rem"></div><span>0.5rem</span></div>
+    <div class="rd"><div style="border-radius:9999px"></div><span>9999px</span></div>
+  </div>
+
+  <h2>Componentes</h2>
+  <div class="card"><div class="header-row"><a class="brand" href="#">King Verse</a><nav aria-label="Principal"><ul><li><a href="#" aria-current="page">Inicio</a></li><li><a href="#">Fuentes</a></li><li><a href="#" lang="en">English</a></li></ul></nav></div>
+    <p style="margin:1rem 0 0"><a class="skip" href="#">Saltar al contenido</a> <span class="meta" style="margin-left:1rem">enlace de salto (visible al enfocar) · foco: contorno 2px #ff5c7a</span></p>
+  </div>
+  <div class="comp" style="margin-top:2rem">
+    <div>
+      <div class="cycle up"><span class="dot"></span><p class="year">1935</p><p class="source">Welcome to Derry, temporada 2<span class="badge">Próximamente</span></p><p class="status">Renovada por HBO el 17 de agosto de 2026.<sup class="note"><a href="#notas" aria-label="Nota 2">[2]</a></sup><sup class="note"><a href="#notas" aria-label="Nota 3">[3]</a></sup></p></div>
+      <p class="gap" style="margin:0 0 0 -1rem">+27 años</p>
+      <div class="cycle"><span class="dot"></span><p class="year">1962</p><p class="source">Welcome to Derry, temporada 1</p><p class="status">Estrenada el 26 de octubre de 2025; final el 14 de diciembre de 2025.<sup class="note"><a href="#notas" aria-label="Nota 2">[2]</a></sup><sup class="note"><a href="#notas" aria-label="Nota 4">[4]</a></sup></p></div>
+      <div class="scene" style="margin-top:1.5rem">
+        <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070b10"/><stop offset=".45" stop-color="#0f1724"/><stop offset="1" stop-color="#3a1b2a"/></linearGradient><linearGradient id="l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141e2c"/><stop offset=".6" stop-color="#0b121b"/><stop offset="1" stop-color="#070b10"/></linearGradient></defs>
+          <rect width="400" height="96" fill="url(#s)"/>
+          <g transform="translate(0 -16)"><g class="balloon"><path d="M232 64C229 74 236 84 231 96C228 104 232 108 230 112" fill="none" stroke="#c9d3df" stroke-opacity=".55" stroke-width=".7"/><path d="M229.6 63.5H234.4L232 60.5Z" fill="#d94a66"/><ellipse cx="232" cy="50" rx="9" ry="11" fill="#ff5c7a"/><ellipse cx="228.5" cy="45.5" rx="2.4" ry="3.6" fill="#fff" opacity=".35"/></g></g>
+          <g fill="#04070b"><path d="M0 96V78H18V70L28 62L38 70V78H52V66H70V74H84V60L92 52L100 60V74H112V80H124V72H176V72L188 64L200 72V82H216V68H232V76H246V84H262V70L272 60L282 70V80H300V60H305L311 44L317 60H322V78H340V68L352 60L364 68V82H380V74H400V96Z"/><path d="M132 48H168V64H132ZM128 48L150 36L172 48Z"/><path d="M137 64L134 96M146 64V96M154 64V96M163 64L166 96M135 76H165M134 88H166" fill="none" stroke="#04070b" stroke-width="2"/></g>
+          <rect y="96" width="400" height="84" fill="url(#l)"/>
+          <g transform="translate(0 192) scale(1 -1)" fill="#0a1018" opacity=".7"><path d="M0 96V78H18V70L28 62L38 70V78H52V66H70V74H84V60L92 52L100 60V74H112V80H124V72H176V72L188 64L200 72V82H216V68H232V76H246V84H262V70L272 60L282 70V80H300V60H305L311 44L317 60H322V78H340V68L352 60L364 68V82H380V74H400V96Z"/></g>
+          <g stroke="#22303f" stroke-opacity=".6" stroke-width=".6"><path d="M20 106H90M130 114H210M290 110H380M60 126H140M230 130H300"/></g>
+        </svg>
+      </div>
+      <p class="meta">Escena (DerryScene.astro): decorativa, globo flotante 6s; estática con movimiento reducido.</p>
+    </div>
+    <div class="places">
+      <h3>Derry en esta época</h3>
+      <figure class="map" style="margin:0">
+        <svg viewBox="0 0 320 220" role="group" aria-label="Mapa de Derry, 1988–89">
+          <g aria-hidden="true">
+            <rect width="320" height="220" rx="6" class="land"/>
+            <path d="M296 0C288 50 304 96 292 142C284 176 300 200 294 220H320V0Z" class="river-wide"/>
+            <g class="hill"><ellipse cx="232" cy="38" rx="44" ry="22"/><ellipse cx="232" cy="38" rx="30" ry="14"/><ellipse cx="232" cy="38" rx="16" ry="7"/></g>
+            <g class="woods"><circle cx="22" cy="84" r="7"/><circle cx="34" cy="76" r="6"/><circle cx="30" cy="94" r="8"/><circle cx="46" cy="88" r="6"/><circle cx="18" cy="108" r="6"/><circle cx="36" cy="116" r="7"/><circle cx="60" cy="98" r="5"/><circle cx="62" cy="124" r="6"/><circle cx="26" cy="132" r="7"/><circle cx="46" cy="138" r="6"/><circle cx="74" cy="112" r="5"/><circle cx="52" cy="70" r="5"/></g>
+            <g class="quarry"><path d="M44 178C52 164 82 162 94 174C104 186 92 204 70 204C50 204 38 192 44 178Z"/><path d="M56 180C62 172 80 172 86 180C90 188 82 196 70 196C60 196 52 190 56 180Z"/></g>
+            <g class="blocks"><rect x="140" y="82" width="12" height="10" rx="1"/><rect x="156" y="82" width="12" height="10" rx="1"/><rect x="180" y="82" width="12" height="10" rx="1"/><rect x="196" y="82" width="12" height="10" rx="1"/><rect x="134" y="98" width="12" height="10" rx="1"/><rect x="184" y="98" width="12" height="10" rx="1"/><rect x="200" y="98" width="12" height="10" rx="1"/><rect x="162" y="128" width="12" height="10" rx="1"/><rect x="178" y="128" width="12" height="10" rx="1"/><rect x="194" y="128" width="12" height="10" rx="1"/><rect x="210" y="128" width="12" height="10" rx="1"/><rect x="162" y="142" width="12" height="10" rx="1"/><rect x="178" y="142" width="12" height="10" rx="1"/><rect x="194" y="142" width="12" height="10" rx="1"/></g>
+            <g class="runway"><rect x="176" y="196" width="88" height="6" rx="1" transform="rotate(-8 220 199)"/></g>
+            <path d="M92 0C104 28 82 50 112 68C136 82 128 104 146 116L150 120" class="stream"/>
+            <path d="M150 120H206" class="canal"/>
+            <path d="M206 120C232 120 246 148 296 140" class="stream"/>
+            <text x="70" y="40" class="label" transform="rotate(-62 70 40)">Kenduskeag</text>
+            <text x="306" y="64" class="label" transform="rotate(90 306 64)">Penobscot</text>
+          </g>
+          <a href="#notas" aria-label="4. La cantera"><circle class="ring" cx="70" cy="186" r="11"/><circle class="pin" cx="70" cy="186" r="7.5"/><text class="num" x="70" y="186" aria-hidden="true">4</text></a>
+          <a href="#notas" aria-label="5. Calle Neibolt 29"><circle class="pin" cx="126" cy="178" r="7.5"/><text class="num" x="126" y="178" aria-hidden="true">5</text></a>
+        </svg>
+        <figcaption>Mapa ilustrativo: no a escala, posiciones aproximadas.</figcaption>
+      </figure>
+      <ol class="place-list" style="margin-top:0.75rem">
+        <li class="on"><span class="place-num" aria-hidden="true">4</span><div><strong class="place-name">La cantera</strong><p class="place-desc">Los chicos nadan aquí y Ben les cuenta la historia oscura de Derry.<sup class="note"><a href="#notas" aria-label="Nota 16">[16]</a></sup></p></div></li>
+        <li><span class="place-num" aria-hidden="true">5</span><div><strong class="place-name">Calle Neibolt 29</strong><p class="place-desc">Eddie ve aquí al leproso; en la primera visita se rompe el brazo y Bev le clava un atizador a Pennywise, y en agosto bajan por su pozo.<sup class="note"><a href="#notas" aria-label="Nota 16">[16]</a></sup><sup class="note"><a href="#notas" aria-label="Nota 18">[18]</a></sup></p></div></li>
+      </ol>
+      <p class="meta">Punto 4: anillo de foco (2.5px #e6edf3). Fila activa: borde acento + --color-surface.</p>
+    </div>
+  </div>
+  <footer class="footer" id="notas" style="margin-top:2.5rem">
+    <p data-disclaimer>Sitio de fans no oficial y sin fines de lucro. No está afiliado a Stephen King, Warner Bros. ni HBO.</p>
+    <p class="credits">Arte y textos originales de Martín Herrera.</p>
+  </footer>
+</main>
+</body>
+</html>

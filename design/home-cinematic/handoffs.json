@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "chosen": "01-cinematic-chapters.html",
+  "handoffs": {
+    "01-cinematic-chapters.html": {
+      "status": "sent",
+      "queued": true,
+      "sentAt": "2026-11-17T19:17:25.403Z",
+      "startedAt": null,
+      "implementedAt": null,
+      "feature": "odd/tasks/visual-polish.md"
+    }
+  }
+}
