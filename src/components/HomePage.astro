@@ -46,6 +46,7 @@ const titleLast = titleWords.pop();
           </li>
         ))}
       </ol>
+      <p class="content-note" data-content-note>{t.contentNote}</p>
       <p class="hero-disclaimer">{ui[locale].disclaimer}</p>
     </div>
     <a class="cue" href={`#cycle-${cycles[0].id}`}>{t.cue} <span aria-hidden="true">↓</span></a>
@@ -389,6 +390,9 @@ const titleLast = titleWords.pop();
   .yr:hover { color: var(--color-err); }
   .soon .yr { color: var(--color-subtext); text-shadow: none; text-decoration: underline dashed var(--color-comment); text-underline-offset: 0.35em; }
   .yr small { margin-left: 0.5rem; font: 400 0.75rem/1 var(--font-mono); color: var(--color-err); }
+  /* Content note (horror and blood): plain text, always visible, never a gate in front of the content. */
+  .content-note { margin: 1.5rem 0 0; padding-left: 0.625rem; border-left: 2px solid var(--color-err); font: 0.8125rem/1.4 var(--font-mono); color: var(--color-subtext); }
+  .content-note + .hero-disclaimer { margin-top: 0.75rem; }
   .hero-disclaimer { margin: 1.5rem 0 0; font-size: 0.8125rem; color: var(--color-subtext); }
 
   /* Blood accents (04). The title drip hangs under the last letter and stops short of the lead, which sits right below
