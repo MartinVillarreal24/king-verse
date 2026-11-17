@@ -13,7 +13,7 @@ Raise the site from a plain skeleton to a professional, cinematic experience: fi
 - [x] T1 — S2, S3 — worker — design system sync + 3 design directions for the home (design/home-cinematic/)
 - [x] T2 — S1(2) — explore — primary HBO/WBD sources and the two conflicting facts
 - [x] T3 — S2 — user picked design/home-cinematic/01-cinematic-chapters.html (handoff) — see T4–T6
-- [x] T4 — S1(2) — inline — apply official sources and the resolved facts (epilogue October 1988, Eddie's fence post) to src/data
+- [x] T4 — S1(2) — inline — apply official sources and the resolved facts (epilogue October 1988, Eddie's fence post) to src/data — c7986d5
 - [ ] T5 — S1(1), S1(3), S2, S3 — worker — implement 01 Cinematic chapters: pinned full-viewport chapters, letterbox, giant years lighting up, chapter rail, era illustrations (1962, 1988–89, 2016; upcoming 1908/1935 kept simple), balloon drifting between chapters, map at the end of each chapter with era transition; reduced-motion and no-JS fallbacks
 - [ ] T6 — S2, S3 — inline — visual check vs artboard (desktop, mobile, reduced motion, no JS), handoff "implemented"
 
