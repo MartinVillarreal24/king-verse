@@ -1,0 +1,103 @@
+---
+// 1988–89 — summer in the Barrens (original art). A low sun over the quarry, the boarded-up Neibolt house on its rise,
+// a paper boat on the water, seven kids riding their bikes along the reeds and fireflies at dusk. No clown, no faces.
+import { scatter, treeline } from './art';
+
+const hillTrees = treeline(1988, -20, 1640, 560, [44, 110]);
+const fireflies = scatter(8889, 36, { x: [0, 1600], y: [560, 860], r: [1.5, 2.8] });
+const reeds = scatter(889, 40, { x: [0, 1600], y: [640, 700], r: [0, 1] }).map((p, i) => ({ x: 18 + i * 40 + (p.cx % 20), top: p.cy }));
+const cattails = [60, 230, 400, 510, 680, 850, 960, 1130, 1300, 1410];
+const riders = [[0, 1], [70, 0.96], [136, 1], [206, 0.92], [270, 0.98], [340, 0.94], [408, 1]];
+---
+<svg class="art" data-era-art="1988" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="e88-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" class="st-night" /><stop offset="0.4" class="st-dusk" /><stop offset="0.75" class="st-rose" /><stop offset="1" class="st-amber" />
+    </linearGradient>
+    <linearGradient id="e88-water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" class="st-water" /><stop offset="0.3" class="st-water-deep" /><stop offset="1" class="st-night" />
+    </linearGradient>
+    <radialGradient id="e88-glow">
+      <stop offset="0" class="st-sun" stop-opacity="0.9" /><stop offset="0.3" class="st-sun" stop-opacity="0.25" /><stop offset="1" class="st-sun" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#e88-sky)" />
+  <g data-depth="0.04"><circle cx="1060" cy="540" r="260" fill="url(#e88-glow)" /><circle cx="1060" cy="548" r="62" class="f-sun" opacity="0.75" /></g>
+  <g data-depth="0.1"><path d="M0 500C180 470 320 486 520 460C720 436 880 476 1080 456C1280 436 1440 470 1600 452V560H0Z" class="f-hills" /></g>
+  <g data-depth="0.18"><path d={hillTrees} class="f-hills-deep" /></g>
+  <g data-depth="0.28" class="f-silhouette">
+    <path d="M180 560C240 520 330 500 420 498C520 498 580 524 640 560Z" />
+    <path d="M330 506V430H470V506Z" /><path d="M318 432L400 380L482 432Z" /><path d="M440 432V392H470V432Z" /><path d="M434 392L455 340L476 392Z" />
+    <path d="M312 480L470 476V486L312 496Z" />
+    <path d="M322 494V512M360 492V512M400 490V512M440 488V512" class="s-silhouette" stroke-width="5" />
+    <rect x="350" y="446" width="22" height="26" class="f-sun" opacity="0.35" />
+    <path d="M398 446L420 472M420 446L398 472" class="s-hills" stroke-width="2" />
+    <path d="M560 560C560 500 548 470 566 430M566 470L600 440M560 492L530 466M566 430L580 404M566 430L548 410" class="s-silhouette" stroke-width="6" fill="none" stroke-linecap="round" />
+  </g>
+  <g data-depth="0.32">
+    <path d="M1180 560L1200 470L1260 452L1340 460L1420 440L1500 456L1600 446V560Z" class="f-quarry" />
+    <path d="M1210 490H1580M1204 516H1590M1200 540H1600" class="s-ledge" stroke-width="2" />
+    <path d="M1250 560C1280 520 1440 516 1520 560Z" class="f-quarry-water" />
+    <path d="M1290 556C1320 540 1420 538 1480 556" class="s-sun" stroke-opacity="0.4" stroke-width="2" fill="none" />
+  </g>
+  <rect y="560" width="1600" height="340" fill="url(#e88-water)" />
+  <g transform="matrix(1 0 0 -0.6 0 896)" opacity="0.3" class="f-silhouette">
+    <path d="M330 506V430H470V506Z" /><path d="M318 432L400 380L482 432Z" /><path d="M434 392L455 340L476 392Z" />
+  </g>
+  <g class="a-shimmer f-sun" opacity="0.5">
+    <rect x="1010" y="590" width="100" height="3" style="--d:1" /><rect x="1030" y="630" width="70" height="3" style="--d:2" />
+    <rect x="990" y="680" width="130" height="3" style="--d:0.3" /><rect x="1040" y="740" width="50" height="3" style="--d:1.6" />
+  </g>
+  <g data-depth="0.45">
+    <g transform="translate(760 700)"><g class="a-bob">
+      <path d="M0 0H44L35 12H9Z" fill="#e6edf3" opacity="0.85" /><path d="M11 0L22 -24L33 0Z" fill="#b3c0cf" opacity="0.85" />
+    </g></g>
+  </g>
+  <g data-depth="0.55">
+    <path d="M0 760C120 720 260 700 420 712C600 726 740 690 900 700C1080 712 1240 690 1400 704C1500 712 1560 706 1600 700V900H0Z" class="f-ground" />
+    <g class="s-ground" stroke-width="3" fill="none">
+      {reeds.map((r) => <path d={`M${r.x} 724Q${r.x + 6} ${Math.round((724 + r.top) / 2)} ${r.x + 4} ${r.top}`} />)}
+    </g>
+    <g class="f-ground">{cattails.map((x, i) => <rect x={x} y={662 - (i % 4) * 8} width="5" height="16" rx="2.5" />)}</g>
+  </g>
+  <g data-depth="0.6">
+    <g class="a-ride"><g transform="translate(0 690)">
+      {riders.map(([x, s]) => (
+        <g transform={`translate(${x} 0) scale(${s})`} fill="none" class="s-deep" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="-16" cy="0" r="11" /><circle cx="16" cy="0" r="11" />
+          <path d="M-16 0L-4 -14L10 -14L16 0M-4 -14L0 0L10 -14M10 -14L12 -22H18" />
+          <path d="M-4 -16L2 -34M2 -32L14 -20M-2 -18L4 -6" />
+          <circle cx="4" cy="-40" r="6" class="f-deep" stroke="none" />
+        </g>
+      ))}
+    </g></g>
+  </g>
+  <g class="a-fly f-firefly">
+    {fireflies.map((f) => <circle cx={f.cx} cy={f.cy} r={f.r} style={`--d:${f.d}`} />)}
+  </g>
+</svg>
+
+<style>
+  .st-night { stop-color: var(--color-night); }
+  .st-dusk { stop-color: var(--era-1988-dusk); }
+  .st-rose { stop-color: var(--era-1988-rose); }
+  .st-amber { stop-color: var(--era-1988-amber); }
+  .st-sun { stop-color: var(--era-1988-sun); }
+  .st-water { stop-color: var(--era-1988-water); }
+  .st-water-deep { stop-color: var(--era-1988-water-deep); }
+  .f-sun { fill: var(--era-1988-sun); }
+  .s-sun { stroke: var(--era-1988-sun); }
+  .f-hills { fill: var(--era-1988-hills); }
+  .s-hills { stroke: var(--era-1988-hills); }
+  .f-hills-deep { fill: var(--era-1988-hills-deep); }
+  .f-silhouette { fill: var(--era-1988-silhouette); }
+  .s-silhouette { stroke: var(--era-1988-silhouette); }
+  .f-deep { fill: var(--era-1988-silhouette-deep); }
+  .s-deep { stroke: var(--era-1988-silhouette-deep); }
+  .f-ground { fill: var(--era-1988-ground); }
+  .s-ground { stroke: var(--era-1988-ground); }
+  .f-quarry { fill: var(--era-1988-quarry); }
+  .s-ledge { stroke: var(--era-1988-quarry-ledge); }
+  .f-quarry-water { fill: var(--era-1988-quarry-water); }
+  .f-firefly { fill: var(--era-1988-firefly); }
+</style>

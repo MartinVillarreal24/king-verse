@@ -1,70 +1,170 @@
 ---
-// One 27-year cycle on the home spine. It opens the Derry places of its era: a mini-map once they are on screen.
+// One 27-year cycle on the home spine. A released cycle is a full-viewport "chapter": its original era illustration
+// as the stage (letterbox, slate, giant year), then glass panels with source, status, body and the Derry places of
+// that era (mini-map), which opens with a transition from the previous era. Upcoming cycles stay compact and hollow.
+// Static HTML is the readable, unpinned layout; HomePage's motion script pins and animates it only when allowed.
+// Render order (status notes, body notes, place notes) must mirror the walk in src/data/citations.ts.
 import { ui, type Locale } from '../i18n/ui';
 import type { Cycle } from '../data/cycles';
 import Note from './Note.astro';
 import DerryMap from './DerryMap.astro';
+import Era1962 from './eras/Era1962.astro';
+import Era1988 from './eras/Era1988.astro';
+import Era2016 from './eras/Era2016.astro';
+import EraUpcoming from './eras/EraUpcoming.astro';
 import { inNoteOrder } from '../data/citations';
 import { placesOf } from '../data/places';
 
-interface Props { locale: Locale; cycle: Cycle; first: boolean }
-const { locale, cycle, first } = Astro.props;
+// `follows`: the previous section is also a released chapter, so in cinema mode this chapter overlaps it and its
+// stage crossfades in over the previous one (no empty band). `leadsOn`: a chapter follows this one.
+interface Props { locale: Locale; cycle: Cycle; first: boolean; previous?: Cycle; follows?: boolean; leadsOn?: boolean }
+const { locale, cycle, first, previous, follows = false, leadsOn = false } = Astro.props;
 const t = ui[locale].home;
 const notes = inNoteOrder(cycle.sourceIds);
 const cyclePlaces = cycle.upcoming ? [] : placesOf(cycle.id);
+const chapter = t.chapters[cycle.id];
+const Era = ({ '1962': Era1962, '1988': Era1988, '2016': Era2016 } as Record<string, typeof Era1962>)[cycle.id];
+// The map transition starts from the previous released era (or from none, for the first one).
+const from = previous && !previous.upcoming ? { id: previous.id, places: placesOf(previous.id) } : undefined;
+const digits = [...cycle.year];
+// Where the traveling balloon rests (x %, y % of the viewport) while this chapter's stage is pinned: in the left
+// column, below the slate row and above the giant year, clear of every text panel.
+const drift: Record<string, string> = { '1962': '12,34', '1988': '15,32', '2016': '10,34' };
 ---
-<section class="cycle" id={`cycle-${cycle.id}`} data-cycle data-upcoming={cycle.upcoming ? '' : undefined} aria-labelledby={`cycle-${cycle.id}-title`}>
-  {!first && <p class="gap" aria-hidden="true">{t.gap}</p>}
-  <header class="cycle-head">
-    <span class="dot" aria-hidden="true"></span>
-    <h2 id={`cycle-${cycle.id}-title`} class="year">{cycle.year}</h2>
-    <p class="source">
-      {cycle.source[locale]}
-      {cycle.upcoming && <span class="upcoming">{t.upcoming}</span>}
-    </p>
-    <p class="status">
-      {cycle.status[locale]}
-      {notes.map((id) => <Note locale={locale} source={id} />)}
-    </p>
-  </header>
-  <div class="body" data-body>
-    {cycle.body && !cycle.upcoming
-      ? cycle.body.map((paragraph) => (
-          <p>
-            {paragraph.map((sentence) => (
-              <Fragment><span data-sentence>{sentence.text[locale]}{inNoteOrder(sentence.cite).map((id) => <Note locale={locale} source={id} />)}</span>{' '}</Fragment>
-            ))}
-          </p>
-        ))
-      : <p>{t.bodyEmpty}</p>}
-  </div>
-  <div class="places" data-places data-has-map={cyclePlaces.length > 0 ? '' : undefined}>
-    <h3>{t.placesTitle}</h3>
-    {cycle.upcoming
-      ? <p>{t.upcoming}</p>
-      : cyclePlaces.length > 0
-        ? <DerryMap locale={locale} cycleId={cycle.id} year={cycle.year} places={cyclePlaces} />
-        : <p>{t.placesEmpty}</p>}
+<section
+  class:list={['cycle', cycle.upcoming ? 'is-upcoming' : 'chapter', follows && 'follows', leadsOn && 'leads-on']}
+  id={`cycle-${cycle.id}`}
+  data-cycle
+  data-upcoming={cycle.upcoming ? '' : undefined}
+  data-chapter={cycle.upcoming ? undefined : cycle.id}
+  data-follows={follows ? '' : undefined}
+  data-drift={drift[cycle.id]}
+  aria-labelledby={`cycle-${cycle.id}-title`}
+>
+  {cycle.upcoming ? (
+    <div class="soon-art"><EraUpcoming seed={Number(cycle.id)} /></div>
+  ) : (
+    <div class="stage" data-stage>
+      <div class="frame" data-frame>
+        {Era && <Era />}
+        <div class="vignette" aria-hidden="true"></div>
+        <p class="slate" aria-hidden="true">
+          {!first && <span class="gap">{t.gap}</span>}
+          {chapter && <span>{chapter.label}</span>}
+          {chapter && <span>{chapter.mood}</span>}
+          <span>{cycle.source[locale]}</span>
+        </p>
+        <p class:list={['giant', digits.length > 4 && 'long']} data-giant aria-hidden="true">{digits.map((d) => <span class="dg">{d}</span>)}</p>
+      </div>
+    </div>
+  )}
+  <div class="track">
+    <header class:list={['cycle-head', !cycle.upcoming && 'panel']}>
+      {cycle.upcoming && !first && <p class="gap" aria-hidden="true">{t.gap}</p>}
+      {chapter && <p class="kicker">{chapter.label} · {chapter.mood}</p>}
+      <h2 id={`cycle-${cycle.id}-title`} class="year">{cycle.year}</h2>
+      <p class="source">
+        {cycle.source[locale]}
+        {cycle.upcoming && <span class="upcoming">{t.upcoming}</span>}
+      </p>
+      <p class="status">
+        {cycle.status[locale]}
+        {notes.map((id) => <Note locale={locale} source={id} />)}
+      </p>
+    </header>
+    <div class="body" data-body>
+      {cycle.body && !cycle.upcoming
+        ? cycle.body.map((paragraph) => (
+            <p class="panel">
+              {paragraph.map((sentence) => (
+                <Fragment><span data-sentence>{sentence.text[locale]}{inNoteOrder(sentence.cite).map((id) => <Note locale={locale} source={id} />)}</span>{' '}</Fragment>
+              ))}
+            </p>
+          ))
+        : <p>{t.bodyEmpty}</p>}
+    </div>
+    <div class:list={['places', !cycle.upcoming && 'panel']} data-places data-has-map={cyclePlaces.length > 0 ? '' : undefined}>
+      <h3>{t.placesTitle}</h3>
+      {cycle.upcoming
+        ? <p>{t.upcoming}</p>
+        : cyclePlaces.length > 0
+          ? <DerryMap locale={locale} cycleId={cycle.id} year={cycle.year} places={cyclePlaces} from={from ?? { id: 'none', places: [] }} />
+          : <p>{t.placesEmpty}</p>}
+    </div>
   </div>
 </section>
 
 <style>
-  .cycle { position: relative; padding-block: 4rem; border-left: 1px solid color-mix(in srgb, var(--color-err) 55%, transparent); padding-left: 2rem; }
-  .cycle[data-upcoming] { border-left-style: dashed; }
-  .gap { position: absolute; top: 0.75rem; left: -0.25rem; transform: translateX(-50%); margin: 0; padding: 0.125rem 0.25rem; font: 0.75rem/1 var(--font-mono); color: var(--color-err); background: var(--color-ink); }
-  .cycle-head { position: relative; }
-  .dot { position: absolute; left: calc(-2rem - 0.5rem); top: 0.75rem; width: 1rem; height: 1rem; border-radius: 9999px; border: 1px solid var(--color-err); background: var(--color-err); box-shadow: 0 0 10px #ff5c7a99, 0 0 22px #ff5c7a40; }
-  .cycle[data-upcoming] .dot { background: var(--color-ink); border-style: dashed; box-shadow: none; }
+  /* ---------- Shared ---------- */
+  .cycle { position: relative; }
   .year { margin: 0; font: 700 clamp(2.5rem, 8vw, 4.5rem)/1 var(--font-mono); letter-spacing: -0.02em; }
-  .cycle[data-upcoming] .year { color: var(--color-subtext); }
   .source { margin: 0.75rem 0 0; font-family: var(--font-mono); color: var(--color-subtext); }
-  .cycle[data-upcoming] .source { font-style: italic; }
-  .upcoming { margin-left: 0.75rem; padding: 0.125rem 0.375rem; border: 1px solid color-mix(in srgb, var(--color-err) 45%, transparent); border-radius: 0.25rem; font-style: normal; font-size: 0.75rem; color: var(--color-err); }
   .status { margin: 0.25rem 0 0; color: var(--color-comment); }
-  .body { max-width: 40rem; color: var(--color-subtext); }
-  .body p { margin: 1rem 0 0; line-height: 1.65; }
-  .places { max-width: 40rem; margin-top: 1.5rem; padding: 1rem 1.25rem; border: 1px solid var(--color-overlay); border-radius: 0.5rem; background: var(--color-night); }
-  .places[data-has-map] { max-width: 60rem; }
+  .upcoming { display: inline-block; margin-left: 0.75rem; padding: 0.125rem 0.375rem; border: 1px solid color-mix(in srgb, var(--color-err) 45%, transparent); border-radius: 0.25rem; font: normal 0.75rem/1.3 var(--font-mono); color: var(--color-err); }
   .places h3 { margin: 0 0 0.25rem; font: 600 0.875rem/1.4 var(--font-mono); color: var(--color-text); }
   .places p { margin: 0; color: var(--color-subtext); }
+  .gap { font: 0.75rem/1 var(--font-mono); color: var(--color-err); }
+
+  /* ---------- Upcoming: compact, hollow ---------- */
+  .is-upcoming { border-left: 1px dashed color-mix(in srgb, var(--color-err) 55%, transparent); padding: 0 0 2rem 1.5rem; }
+  .soon-art { height: 7rem; margin-bottom: 1rem; border-radius: 0.375rem; overflow: hidden; border: 1px solid var(--color-overlay); }
+  .soon-art :global(svg) { width: 100%; height: 100%; }
+  .is-upcoming .gap { margin: 0 0 0.5rem; }
+  .is-upcoming .year { font-size: 2rem; color: var(--color-subtext); }
+  .is-upcoming .source { font-style: italic; }
+  .is-upcoming .body { color: var(--color-subtext); }
+  .is-upcoming .body p { margin: 0.75rem 0 0; }
+  .is-upcoming .places { margin-top: 0.75rem; }
+  .is-upcoming .places h3 { display: inline; margin-right: 0.5rem; }
+  .is-upcoming .places p { display: inline; color: var(--color-err); font: 0.8125rem var(--font-mono); }
+
+  /* ---------- Released chapter: static, readable layout (no JS, reduced motion, narrow screens) ---------- */
+  .stage { position: relative; height: clamp(26rem, 78vh, 48rem); }
+  /* The frame holds everything drawn on the stage; it is what crossfades between chapters in cinema mode. */
+  .frame { position: absolute; inset: 0; overflow: hidden; isolation: isolate; }
+  .stage :global(.art) { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; }
+  .vignette { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at 30% 50%, transparent 40%, rgb(7 11 16 / 0.55) 100%), linear-gradient(to bottom, transparent 55%, rgb(7 11 16 / 0.6) 100%); }
+  /* Letterbox bars. */
+  .frame::before, .frame::after { content: ''; position: absolute; left: 0; right: 0; height: var(--letterbox); background: var(--color-ink); z-index: 1; }
+  .frame::before { top: 0; }
+  .frame::after { bottom: 0; }
+  .slate { position: absolute; z-index: 2; left: 1rem; right: 1rem; top: calc(var(--letterbox) + 1rem); margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; font: 0.75rem/1.4 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-subtext); text-shadow: 0 1px 6px var(--color-ink); }
+  .slate span + span::before { content: '— '; color: var(--color-err); }
+  .slate .gap { letter-spacing: normal; text-transform: none; }
+  .giant { position: absolute; z-index: 2; left: 0.75rem; bottom: calc(var(--letterbox) + 0.5rem); margin: 0; font: 800 clamp(5.5rem, 21vw, 19rem)/0.8 var(--font-mono); letter-spacing: -0.06em; color: var(--color-text); opacity: 0.92; text-shadow: 0 0 40px rgb(7 11 16 / 0.6); white-space: nowrap; }
+  .giant.long { font-size: clamp(3.75rem, 14.5vw, 13.5rem); }
+  .dg { display: inline-block; }
+
+  .chapter .track { position: relative; z-index: 3; display: grid; gap: 1.25rem; padding: 1.5rem 1rem 4rem; }
+  .chapter .body { display: grid; gap: 1.25rem; }
+  .panel { width: min(100%, 40rem); margin: 0; padding: 1.25rem 1.25rem; background: var(--color-panel); border: 1px solid var(--color-overlay); border-radius: 0.5rem; backdrop-filter: blur(6px); }
+  .chapter .cycle-head { border-top: 2px solid var(--color-err); }
+  .kicker { margin: 0 0 0.5rem; font: 0.75rem/1.4 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-err); }
+  .chapter .body p { font-size: 1.0625rem; line-height: 1.7; color: var(--color-subtext); }
+  .chapter .body p:first-child::first-letter { float: left; font: 800 3.4rem/0.9 var(--font-mono); margin: 0.2rem 0.35rem 0 0; color: var(--color-text); }
+  .chapter .places { width: min(100%, 60rem); }
+
+  @media (min-width: 48rem) {
+    .slate { left: 2.5rem; }
+    .giant { left: 2rem; }
+    .chapter .track { padding: 2rem 2.5rem 5rem; }
+    .panel { padding: 1.75rem 2rem; }
+  }
+  /* Room for the chapter rail on wide screens. */
+  @media (min-width: 64rem) {
+    .chapter .track { padding-right: 10rem; }
+    .slate { right: 10rem; }
+  }
+
+  /* ---------- Cinema: wide screens with motion, armed at runtime (HomePage adds .kv-cinema) ---------- */
+  /* The stage is pinned by GSAP for the whole chapter while the panels scroll over it. */
+  :global(.kv-cinema) .stage { height: 100vh; }
+  :global(.kv-cinema) .chapter .track { margin-top: -100vh; padding: 70vh 10rem 30vh 44vw; gap: var(--motion-chapter-gap); }
+  :global(.kv-cinema) .chapter .body { gap: var(--motion-chapter-gap); }
+  :global(.kv-cinema) .panel { width: min(100%, 36rem); }
+  :global(.kv-cinema) .chapter .places { width: min(60rem, 78vw - 12rem); margin-left: -22vw; }
+  /* Chapter to chapter: the next chapter overlaps this one's last viewport, and its stage, held in place and fading in,
+     covers this pinned stage (crossfade). The extra room lets the map panel leave before the art changes. */
+  :global(.kv-cinema) .chapter.follows { margin-top: -100vh; }
+  :global(.kv-cinema) .chapter.leads-on .track { padding-bottom: 150vh; }
 </style>

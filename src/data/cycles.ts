@@ -42,7 +42,7 @@ export const cycles: Cycle[] = [
     upcoming: true,
     source: { es: 'Welcome to Derry, temporada 2', en: 'Welcome to Derry, season 2' },
     status: { es: 'Renovada por HBO el 17 de agosto de 2026.', en: 'Renewed by HBO on August 17, 2026.' },
-    sourceIds: ['variety-derry-renewed', 'deadline-derry-renewed'],
+    sourceIds: ['hbo-derry-renewed', 'variety-derry-renewed'],
   },
   {
     id: '1962',
@@ -53,7 +53,7 @@ export const cycles: Cycle[] = [
       es: 'Estrenada el 26 de octubre de 2025; final el 14 de diciembre de 2025.',
       en: 'Premiered on October 26, 2025; finale on December 14, 2025.',
     },
-    sourceIds: ['deadline-derry-schedule', 'variety-derry-renewed'],
+    sourceIds: ['deadline-derry-schedule', 'hbo-derry-episode-two-early'],
     body: [
       [
         {
@@ -137,10 +137,10 @@ export const cycles: Cycle[] = [
         },
         {
           text: {
-            es: 'En la escena poscréditos, una Ingrid anciana conoce en Juniper Hill a la joven Beverly Marsh.',
-            en: 'In the post-credits scene, an elderly Ingrid meets young Beverly Marsh at Juniper Hill.',
+            es: 'En la escena poscréditos, ya en octubre de 1988, una Ingrid anciana conoce en Juniper Hill a la joven Beverly Marsh.',
+            en: 'In the post-credits scene, set in October 1988, an elderly Ingrid meets young Beverly Marsh at Juniper Hill.',
           },
-          cite: ['variety-derry-credits-scene', 'ign-derry-finale'],
+          cite: ['variety-derry-credits-scene', 'nerdist-derry-post-credits', 'radiotimes-derry-ending'],
         },
       ],
     ],
@@ -151,7 +151,7 @@ export const cycles: Cycle[] = [
     upcoming: false,
     source: { es: 'IT (2017)', en: 'IT (2017)' },
     status: { es: 'Estrenada el 8 de septiembre de 2017.', en: 'Released on September 8, 2017.' },
-    sourceIds: ['variety-it-sequel-date', 'latimes-it-review', 'laweekly-it-chapter-two-review'],
+    sourceIds: ['wb-it-2017', 'latimes-it-review', 'laweekly-it-chapter-two-review'],
     body: [
       [
         {
@@ -231,7 +231,7 @@ export const cycles: Cycle[] = [
       es: 'Estrenada el 6 de septiembre de 2019; aquí termina el ciclo.',
       en: 'Released on September 6, 2019; the cycle ends here.',
     },
-    sourceIds: ['variety-it-sequel-date', 'laweekly-it-chapter-two-review'],
+    sourceIds: ['wb-it-chapter-two', 'laweekly-it-chapter-two-review'],
     body: [
       [
         {
@@ -287,10 +287,10 @@ export const cycles: Cycle[] = [
         },
         {
           text: {
-            es: 'Cada Perdedor enfrenta su miedo; Eddie hiere a It para salvar a Richie y recibe una herida mortal.',
-            en: 'Each Loser faces a fear; Eddie wounds It to save Richie and is fatally stabbed.',
+            es: 'Cada Perdedor enfrenta su miedo; Eddie hiere a It con el poste de la reja de Neibolt para salvar a Richie y recibe una herida mortal.',
+            en: 'Each Loser faces a fear; Eddie wounds It with the fence post from the Neibolt house to save Richie and is fatally stabbed.',
           },
-          cite: ['collider-it-timeline', 'time-it2-ending'],
+          cite: ['time-it2-ending', 'looper-it2-ending'],
         },
         {
           text: {

@@ -1,0 +1,97 @@
+---
+// 2016 — Canal Days (original art). The Derry skyline at night, a fair with a turning wheel, tents and strings of
+// bulbs over the canal, and the Kissing Bridge with "R + E" carved in a heart. No clown, no faces.
+import { scatter, skyline, waterTower } from './art';
+
+const stars = scatter(2016, 50, { x: [0, 1600], y: [10, 360], r: [0.7, 1.8] });
+const glints = scatter(1620, 22, { x: [70, 1440], y: [590, 815], r: [0, 1], d: 3 }).map((g, i) => ({
+  x: g.cx, y: g.cy, w: 20 + Math.round(g.r * 50), d: g.d, red: i % 3 === 0,
+}));
+const cx = 1180;
+const cy = 400;
+const spokes = Array.from({ length: 16 }, (_, i) => {
+  const a = (i / 16) * Math.PI * 2;
+  return { x: Math.round(cx + Math.cos(a) * 130), y: Math.round(cy + Math.sin(a) * 130), d: (i * 0.3).toFixed(1) };
+});
+const cars = spokes.filter((_, i) => i % 2 === 0);
+// Strings of bulbs hanging between poles: [x0, y0, x1, sag, count].
+const strings: [number, number, number, number, number][] = [[0, 300, 520, 46, 14], [520, 330, 1000, 40, 13], [1300, 280, 1600, 36, 9]];
+const bulbs = strings.map(([x0, y0, x1, sag, n]) => ({
+  path: `M${x0} ${y0}Q${(x0 + x1) / 2} ${y0 + sag * 2} ${x1} ${y0}`,
+  dots: Array.from({ length: n }, (_, i) => {
+    const t = i / (n - 1);
+    return { x: Math.round(x0 + (x1 - x0) * t), y: Math.round(y0 + 4 * sag * t * (1 - t)), red: i % 3 === 0, d: (t * 4.8).toFixed(2) };
+  }),
+}));
+const fencePosts = Array.from({ length: 17 }, (_, i) => i * 100);
+---
+<svg class="art" data-era-art="2016" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="e16-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#070b10" /><stop offset="0.5" stop-color="#141e2c" /><stop offset="1" stop-color="#3a1b2a" />
+    </linearGradient>
+    <linearGradient id="e16-water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" class="st-water" /><stop offset="0.4" stop-color="#141e2c" /><stop offset="1" stop-color="#070b10" />
+    </linearGradient>
+    <radialGradient id="e16-glow"><stop offset="0" class="st-bulb" stop-opacity="0.35" /><stop offset="1" class="st-bulb" stop-opacity="0" /></radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#e16-sky)" />
+  <g data-depth="0.04" class="a-twinkle" fill="#8b9bb0">
+    {stars.map((s) => <circle cx={s.cx} cy={s.cy} r={s.r} style={`--d:${s.d}`} />)}
+  </g>
+  <g data-depth="0.1"><g transform="translate(0 176) scale(4)" fill="#04070b"><path d={skyline} /><path d={waterTower} /></g></g>
+  <g data-depth="0.2">
+    <circle cx={cx} cy={cy} r="260" fill="url(#e16-glow)" />
+    <path d={`M${cx} ${cy}L${cx - 80} 580M${cx} ${cy}L${cx + 80} 580M${cx - 60} 540H${cx + 60}`} stroke="#04070b" stroke-width="8" fill="none" />
+    <g class="a-spin">
+      <circle cx={cx} cy={cy} r="130" fill="none" stroke="#22303f" stroke-width="4" />
+      <circle cx={cx} cy={cy} r="122" fill="none" stroke="#22303f" stroke-width="1.5" />
+      {spokes.map((s) => <path d={`M${cx} ${cy}L${s.x} ${s.y}`} stroke="#22303f" stroke-width="1.5" />)}
+      <g class="a-bulbs">{spokes.map((s) => <circle cx={s.x} cy={s.y} r="5" class="f-bulb" style={`--d:${s.d}`} />)}</g>
+      {cars.map((s) => <rect x={s.x - 9} y={s.y + 4} width="18" height="14" rx="3" fill="#04070b" />)}
+    </g>
+    <circle cx={cx} cy={cy} r="8" fill="#04070b" />
+  </g>
+  <g data-depth="0.28" fill="#04070b">
+    <path d="M60 560L130 490L200 560Z" /><path d="M180 560L270 470L360 560Z" /><path d="M1380 560L1450 486L1520 560Z" />
+    <path d="M130 490L95 560M130 490L165 560M270 470L225 560M270 470L315 560M1450 486L1415 560M1450 486L1485 560" stroke="#ff5c7a" stroke-opacity="0.45" stroke-width="2" fill="none" />
+    <rect y="548" width="1600" height="14" />
+  </g>
+  <g data-depth="0.3">
+    {bulbs.map((b) => (
+      <Fragment>
+        <path d={b.path} stroke="#04070b" stroke-width="1.5" fill="none" />
+        <g class="a-bulbs">{b.dots.map((d) => <circle cx={d.x} cy={d.y} r="4" class={d.red ? 'f-red' : 'f-bulb'} style={`--d:${d.d}`} />)}</g>
+      </Fragment>
+    ))}
+  </g>
+  <rect y="560" width="1600" height="340" fill="url(#e16-water)" />
+  <g class="a-shimmer">
+    {glints.map((g) => <rect x={g.x} y={g.y} width={g.w} height="3" class={g.red ? 'f-red' : 'f-bulb'} style={`--d:${g.d}`} />)}
+  </g>
+  <g data-depth="0.5">
+    <path d="M380 660H1020V676H380Z" class="f-deck" />
+    <path d="M400 660V584H1000V660Z" fill="#0b121b" />
+    <path d="M400 584L500 660L600 584L700 660L800 584L900 660L1000 584M400 660L500 584L600 660L700 584L800 660L900 584L1000 660" stroke="#04070b" stroke-width="7" />
+    <path d="M380 590L700 528L1020 590Z" class="f-deck" /><path d="M380 590H1020" stroke="#22303f" stroke-width="3" />
+    <rect x="404" y="600" width="40" height="60" fill="#04070b" /><rect x="956" y="600" width="40" height="60" fill="#04070b" />
+    <circle cx="700" cy="600" r="9" class="f-bulb" opacity="0.9" /><circle cx="700" cy="600" r="40" fill="url(#e16-glow)" />
+    <path d="M380 676C380 700 360 760 360 900M1020 676C1020 700 1040 760 1040 900" stroke="#04070b" stroke-width="14" fill="none" />
+    <g transform="translate(980 640)">
+      <path d="M0 4C-6 -4 -14 2 -8 10L0 16L8 10C14 2 6 -4 0 4Z" fill="none" stroke="#b3c0cf" stroke-width="1.4" />
+      <text x="-12" y="34" fill="#b3c0cf" font-family="ui-monospace, monospace" font-size="11">R + E</text>
+    </g>
+  </g>
+  <g data-depth="0.8">
+    <path d="M0 830H1600V900H0Z" fill="#04070b" />
+    <g stroke="#04070b" stroke-width="8">{fencePosts.map((x) => <path d={`M${x} 780V840`} />)}<path d="M0 786H1600" /></g>
+  </g>
+</svg>
+
+<style>
+  .st-water { stop-color: var(--era-2016-water); }
+  .st-bulb { stop-color: var(--era-2016-bulb); }
+  .f-bulb { fill: var(--era-2016-bulb); }
+  .f-red { fill: var(--color-err); }
+  .f-deck { fill: var(--era-2016-deck); }
+</style>
