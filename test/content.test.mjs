@@ -72,8 +72,9 @@ test('1988 and 2016 render a mini-map whose points match their places, in order'
 test('conflicting or unverified facts never appear on any page', () => {
   for (const rel of allPages()) {
     const text = textOf(readFileSync(join(DIST, rel), 'utf8')).toLowerCase();
+    // Whole words only, so ordinary words such as "posted" or "posterior" never trip the check.
     for (const banned of ['1986', 'fence post', 'poste', 'sqoteawapskot']) {
-      assert.ok(!text.includes(banned), `${rel} mentions "${banned}"`);
+      assert.ok(!new RegExp(`\\b${banned}\\b`).test(text), `${rel} mentions "${banned}"`);
     }
   }
 });

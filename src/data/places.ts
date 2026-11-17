@@ -19,6 +19,14 @@ export interface Place {
 }
 
 // Listed in story order; the list order is the point number on the map.
+// Places that appear in more than one era share one position, so they never drift between maps.
+const spot = {
+  kissingBridge: { x: 186, y: 120 },
+  quarry: { x: 70, y: 186 },
+  neibolt: { x: 126, y: 178 },
+  library: { x: 160, y: 106 },
+};
+
 export const places: Place[] = [
   {
     id: 'capitol',
@@ -125,8 +133,7 @@ export const places: Place[] = [
       es: 'Henry Bowers empieza a grabar su nombre en el cuerpo de Ben, que escapa hacia los Barrens.',
       en: 'Henry Bowers starts carving his name into Ben, who escapes to the Barrens.',
     },
-    x: 186,
-    y: 120,
+    ...spot.kissingBridge,
     sourceIds: ['collider-it-timeline'],
   },
   {
@@ -149,8 +156,7 @@ export const places: Place[] = [
       es: 'Los chicos nadan aquí y Ben les cuenta la historia oscura de Derry.',
       en: 'The kids swim here and Ben tells them about Derry’s dark history.',
     },
-    x: 70,
-    y: 186,
+    ...spot.quarry,
     sourceIds: ['collider-it-timeline'],
   },
   {
@@ -161,8 +167,7 @@ export const places: Place[] = [
       es: 'Eddie ve aquí al leproso; en la primera visita se rompe el brazo y Bev le clava un atizador a Pennywise, y en agosto bajan por su pozo.',
       en: 'Eddie sees the leper here; on the first visit he breaks his arm and Bev drives a fire poker into Pennywise, and in August they climb down its well.',
     },
-    x: 126,
-    y: 178,
+    ...spot.neibolt,
     sourceIds: ['collider-it-timeline', 'collider-it-ending'],
   },
   {
@@ -173,8 +178,7 @@ export const places: Place[] = [
       es: 'Ben investiga aquí el pasado oscuro de Derry.',
       en: 'Ben researches Derry’s dark past here.',
     },
-    x: 160,
-    y: 106,
+    ...spot.library,
     sourceIds: ['collider-it-timeline'],
   },
   {
@@ -198,8 +202,7 @@ export const places: Place[] = [
       es: 'Tras el festival, arrojan a Adrian Mellon desde el puente; al final, Richie graba otra vez «R + E» en él.',
       en: 'After the festival, Adrian Mellon is thrown off the bridge; at the end, Richie re-carves "R + E" on it.',
     },
-    x: 186,
-    y: 120,
+    ...spot.kissingBridge,
     sourceIds: ['collider-it-timeline', 'time-it2-ending'],
   },
   {
@@ -222,8 +225,7 @@ export const places: Place[] = [
       es: 'Henry apuñala a Eddie, y Richie mata a Henry.',
       en: 'Henry stabs Eddie, and Richie kills Henry.',
     },
-    x: 160,
-    y: 106,
+    ...spot.library,
     sourceIds: ['collider-it-timeline'],
   },
   {
@@ -246,8 +248,7 @@ export const places: Place[] = [
       es: 'Bajo la casa, donde cayó It, el Ritual de Chüd fracasa, los Perdedores lo vencen y la cueva se derrumba con el cuerpo de Eddie.',
       en: 'Under the house, where It crashed, the Ritual of Chüd fails, the Losers defeat It and the cave collapses with Eddie’s body inside.',
     },
-    x: 126,
-    y: 178,
+    ...spot.neibolt,
     sourceIds: ['collider-it-timeline', 'time-it2-ending'],
   },
   {
@@ -258,8 +259,7 @@ export const places: Place[] = [
       es: 'Tras vencer a It, los Perdedores saltan a la cantera.',
       en: 'After defeating It, the Losers jump into the quarry.',
     },
-    x: 70,
-    y: 186,
+    ...spot.quarry,
     sourceIds: ['time-it2-ending'],
   },
 ];
