@@ -7,7 +7,7 @@ import { sources, type Source } from './sources';
 
 const citedIds = cycles.flatMap((cycle) => [
   ...cycle.sourceIds,
-  ...(cycle.bodySourceIds ?? []),
+  ...(cycle.body ?? []).flat().flatMap((sentence) => sentence.cite),
   ...placesOf(cycle.id).flatMap((place) => place.sourceIds),
 ]);
 

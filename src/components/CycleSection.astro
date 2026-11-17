@@ -11,7 +11,8 @@ interface Props { locale: Locale; cycle: Cycle; first: boolean }
 const { locale, cycle, first } = Astro.props;
 const t = ui[locale].home;
 // Notes read in ascending order whatever order the data lists them in.
-const notes = [...cycle.sourceIds].sort((a, b) => noteNumber(a) - noteNumber(b));
+const sorted = (ids: string[]) => [...ids].sort((a, b) => noteNumber(a) - noteNumber(b));
+const notes = sorted(cycle.sourceIds);
 const cyclePlaces = cycle.upcoming ? [] : placesOf(cycle.id);
 ---
 <section class="cycle" id={`cycle-${cycle.id}`} data-cycle data-upcoming={cycle.upcoming ? '' : undefined} aria-labelledby={`cycle-${cycle.id}-title`}>
@@ -28,7 +29,17 @@ const cyclePlaces = cycle.upcoming ? [] : placesOf(cycle.id);
       {notes.map((id) => <Note locale={locale} source={id} />)}
     </p>
   </header>
-  <p class="body">{t.bodyEmpty}</p>
+  <div class="body" data-body>
+    {cycle.body && !cycle.upcoming
+      ? cycle.body.map((paragraph) => (
+          <p>
+            {paragraph.map((sentence) => (
+              <Fragment><span data-sentence>{sentence.text[locale]}{sorted(sentence.cite).map((id) => <Note locale={locale} source={id} />)}</span>{' '}</Fragment>
+            ))}
+          </p>
+        ))
+      : <p>{t.bodyEmpty}</p>}
+  </div>
   <div class="places" data-places data-has-map={cyclePlaces.length > 0 ? '' : undefined}>
     <h3>{t.placesTitle}</h3>
     {cycle.upcoming
@@ -53,6 +64,7 @@ const cyclePlaces = cycle.upcoming ? [] : placesOf(cycle.id);
   .upcoming { margin-left: 0.75rem; padding: 0.125rem 0.375rem; border: 1px solid color-mix(in srgb, var(--color-err) 45%, transparent); border-radius: 0.25rem; font-style: normal; font-size: 0.75rem; color: var(--color-err); }
   .status { margin: 0.25rem 0 0; color: var(--color-comment); }
   .body { max-width: 40rem; color: var(--color-subtext); }
+  .body p { margin: 1rem 0 0; line-height: 1.65; }
   .places { max-width: 40rem; margin-top: 1.5rem; padding: 1rem 1.25rem; border: 1px solid var(--color-overlay); border-radius: 0.5rem; background: var(--color-night); }
   .places[data-has-map] { max-width: 60rem; }
   .places h3 { margin: 0 0 0.25rem; font: 600 0.875rem/1.4 var(--font-mono); color: var(--color-text); }
