@@ -4,15 +4,13 @@ import { ui, type Locale } from '../i18n/ui';
 import type { Cycle } from '../data/cycles';
 import Note from './Note.astro';
 import DerryMap from './DerryMap.astro';
-import { noteNumber } from '../data/citations';
+import { inNoteOrder } from '../data/citations';
 import { placesOf } from '../data/places';
 
 interface Props { locale: Locale; cycle: Cycle; first: boolean }
 const { locale, cycle, first } = Astro.props;
 const t = ui[locale].home;
-// Notes read in ascending order whatever order the data lists them in.
-const sorted = (ids: string[]) => [...ids].sort((a, b) => noteNumber(a) - noteNumber(b));
-const notes = sorted(cycle.sourceIds);
+const notes = inNoteOrder(cycle.sourceIds);
 const cyclePlaces = cycle.upcoming ? [] : placesOf(cycle.id);
 ---
 <section class="cycle" id={`cycle-${cycle.id}`} data-cycle data-upcoming={cycle.upcoming ? '' : undefined} aria-labelledby={`cycle-${cycle.id}-title`}>
@@ -34,7 +32,7 @@ const cyclePlaces = cycle.upcoming ? [] : placesOf(cycle.id);
       ? cycle.body.map((paragraph) => (
           <p>
             {paragraph.map((sentence) => (
-              <Fragment><span data-sentence>{sentence.text[locale]}{sorted(sentence.cite).map((id) => <Note locale={locale} source={id} />)}</span>{' '}</Fragment>
+              <Fragment><span data-sentence>{sentence.text[locale]}{inNoteOrder(sentence.cite).map((id) => <Note locale={locale} source={id} />)}</span>{' '}</Fragment>
             ))}
           </p>
         ))

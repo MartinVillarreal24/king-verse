@@ -5,14 +5,14 @@
 // With JS, a point selects its entry in place instead of jumping; hovering or focusing an entry lights its point.
 import { ui, type Locale } from '../i18n/ui';
 import type { Place } from '../data/places';
-import { noteNumber } from '../data/citations';
+import { inNoteOrder } from '../data/citations';
 import Note from './Note.astro';
 
 interface Props { locale: Locale; cycleId: string; year: string; places: Place[] }
 const { locale, cycleId, year, places } = Astro.props;
 const t = ui[locale].home;
 const anchor = (place: Place) => `place-${cycleId}-${place.id}`;
-const notesOf = (place: Place) => [...place.sourceIds].sort((a, b) => noteNumber(a) - noteNumber(b));
+const notesOf = (place: Place) => inNoteOrder(place.sourceIds);
 
 const kenduskeag = 'M92 0C104 28 82 50 112 68C136 82 128 104 146 116L150 120';
 const canal = 'M150 120H206';

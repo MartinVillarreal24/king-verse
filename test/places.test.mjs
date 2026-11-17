@@ -112,3 +112,16 @@ test('the sources page lists sources in note order: source N on the page is item
     }
   }
 });
+
+test('a place that appears in several eras keeps the same position on every map', () => {
+  for (const html of Object.values(homes)) {
+    const positions = new Map();
+    for (const m of html.matchAll(/<a[^>]*data-point[^>]*href="#place-(\d{4})-([\w-]+)"[^>]*>\s*<circle[^>]*cx="(\d+)" cy="(\d+)"/g)) {
+      const [, year, id, cx, cy] = m;
+      const seen = positions.get(id);
+      if (seen) assert.equal(`${cx},${cy}`, seen.at, `${id} in ${year} moved from ${seen.year}`);
+      else positions.set(id, { year, at: `${cx},${cy}` });
+    }
+    assert.ok(positions.size >= 7, `parsed ${positions.size} places`);
+  }
+});
