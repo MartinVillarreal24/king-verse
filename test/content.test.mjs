@@ -73,8 +73,34 @@ test('conflicting or unverified facts never appear on any page', () => {
   for (const rel of allPages()) {
     const text = textOf(readFileSync(join(DIST, rel), 'utf8')).toLowerCase();
     // Whole words only, so ordinary words such as "posted" or "posterior" never trip the check.
-    for (const banned of ['1986', 'fence post', 'poste', 'sqoteawapskot']) {
+    for (const banned of ['1986', 'sqoteawapskot']) {
       assert.ok(!new RegExp(`\\b${banned}\\b`).test(text), `${rel} mentions "${banned}"`);
+    }
+  }
+});
+
+test('resolved conflicts are stated with their majority sources', () => {
+  const expect = {
+    es: { 1962: 'en octubre de 1988', 2016: 'poste de la reja de Neibolt' },
+    en: { 1962: 'in October 1988', 2016: 'fence post from the Neibolt house' },
+  };
+  for (const [lang, html] of Object.entries(homes)) {
+    for (const [year, phrase] of Object.entries(expect[lang])) {
+      const sentence = [...section(html, year).matchAll(/<span[^>]*data-sentence[^>]*>((?:(?!<\/span>)[\s\S])*)<\/span>/g)]
+        .find((m) => m[1].includes(phrase));
+      assert.ok(sentence, `${lang} ${year}: "${phrase}"`);
+      assert.ok((sentence[1].match(/data-note/g) ?? []).length >= 2, `${lang} ${year}: needs two sources`);
+    }
+    // The minority version (Eddie's "fire poker") never reaches 2016.
+    assert.doesNotMatch(section(html, '2016'), /fire poker|atizador/);
+  }
+});
+
+test('release and renewal dates cite the official HBO and Warner Bros. pages', () => {
+  const official = { es: page('/fuentes'), en: page('/en/sources') };
+  for (const html of Object.values(official)) {
+    for (const url of ['webwire.com/ViewPressRel.asp?aId=358966', 'warnerbros.com/movies/it-chapter-two', 'warnerbros.com/movies/it"', 'hbo-max-announces-early-debut']) {
+      assert.ok(html.includes(url), `sources list ${url}`);
     }
   }
 });
