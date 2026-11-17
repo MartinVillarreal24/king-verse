@@ -14,6 +14,7 @@ Astro (static output) + GSAP (ScrollTrigger). Spanish is the default locale at `
 | `npm run build` | Static build into `dist/` |
 | `npm run preview` | Serve the build locally |
 | `npm test` | Build, then run the checks in `test/` against `dist/` (Node test runner) |
+| `npm run check:a11y` | Accessibility check of `dist/` (run `npm run build` or `npm test` first): axe WCAG 2.1 A/AA on every page in both locales, desktop 1440×900 and mobile 390×844, with reduced motion on and off, and the home after scrolling to each chapter. Text that axe cannot judge (over gradients and art) is measured from rendered pixels. Uses the installed Chrome; exits 1 on any violation |
 
 ## Structure
 
