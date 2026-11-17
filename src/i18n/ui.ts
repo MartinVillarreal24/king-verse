@@ -10,6 +10,9 @@ export const routes = {
 } as const;
 export type RouteKey = keyof typeof routes;
 
+/** A short quote with its attribution: speaker, work (cited) and year. */
+export interface Quote { text: string; speaker: string; work: string; year: string }
+
 export const ui = {
   es: {
     siteName: 'King Verse',
@@ -43,6 +46,10 @@ export const ui = {
         '1988': { label: 'Capítulo II', mood: 'Verano en los Barrens' },
         '2016': { label: 'Capítulo III', mood: 'Canal Days' },
       } as Record<string, { label: string; mood: string }>,
+      // Short attributed quotes shown on their own panel inside a chapter (design/home-cinematic/04).
+      quotes: {
+        '1988': { text: '«Aquí abajo todos flotan.»', speaker: 'Pennywise', work: 'IT', year: '2017' },
+      } as Record<string, Quote>,
     },
     sources: {
       title: 'Fuentes',
@@ -84,6 +91,9 @@ export const ui = {
         '1988': { label: 'Chapter II', mood: 'Summer in the Barrens' },
         '2016': { label: 'Chapter III', mood: 'Canal Days' },
       } as Record<string, { label: string; mood: string }>,
+      quotes: {
+        '1988': { text: '“We all float down here.”', speaker: 'Pennywise', work: 'IT', year: '2017' },
+      } as Record<string, Quote>,
     },
     sources: {
       title: 'Sources',

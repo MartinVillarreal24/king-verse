@@ -3,9 +3,15 @@
 // in sequence, a chapter rail, the upcoming cycles as a short prelude, then one full-viewport chapter per released
 // cycle. The static HTML is the complete, readable, unpinned page; the script below only enhances it when JS is on
 // and prefers-reduced-motion is no-preference (pinning and the traveling balloon only on wide screens).
+// "Something floats" (design/home-cinematic/04) adds a living layer on top: floating balloons, an implied It (eyes
+// in the drain, a white glove, a clown's shadow) and blood accents (title drip, year drips, splatter wipe). Every
+// effect is decorative (aria-hidden) and ships at rest: still, with the years already bled, and no wipe.
 import Base from '../layouts/Base.astro';
 import DerryScene from './DerryScene.astro';
 import CycleSection from './CycleSection.astro';
+import BalloonSymbol from './fx/BalloonSymbol.astro';
+import BalloonField from './fx/BalloonField.astro';
+import BloodWipe from './fx/BloodWipe.astro';
 import { ui, type Locale } from '../i18n/ui';
 import { cycles } from '../data/cycles';
 
@@ -18,19 +24,25 @@ const prelude = cycles.slice(0, Math.max(firstReleased, 0));
 const chapters = cycles.slice(prelude.length);
 const previousOf = (index: number) => (index > 0 ? cycles[index - 1] : undefined);
 const released = (index: number) => index >= 0 && index < cycles.length && !cycles[index].upcoming;
+// The title drip hangs from the last word ("años" / "Years").
+const titleWords = t.title.split(' ');
+const titleLast = titleWords.pop();
 ---
 <Base locale={locale} route="home" title={t.title} description={t.description}>
-  <section class="hero" data-hero data-drift="58,26" aria-labelledby="home-title">
+  <BalloonSymbol />
+  <BloodWipe />
+  <section class="hero" data-hero data-fx-scene data-drift="58,26" aria-labelledby="home-title">
     <div class="hero-scene"><DerryScene /></div>
+    <BalloonField scene="hero" />
     <div class="hero-text">
       <p class="eyebrow">{t.eyebrow}</p>
-      <h1 id="home-title">{t.title}</h1>
+      <h1 id="home-title">{titleWords.join(' ')} <span class="drip-word">{titleLast}<span class="t-drip" aria-hidden="true"></span></span></h1>
       <p class="lead">{t.lead}</p>
       <ol class="years" data-years aria-label={t.cyclesLabel}>
         {cycles.map((cycle, i) => (
           <li class:list={[cycle.upcoming && 'soon']}>
             {i > 0 && <span class="plus" aria-hidden="true">+27</span>}
-            <a class="yr" href={`#cycle-${cycle.id}`}>{cycle.year}{cycle.upcoming && <small>{t.upcoming}</small>}</a>
+            <a class="yr" href={`#cycle-${cycle.id}`} style={`--i:${i}`}>{cycle.year}{cycle.upcoming && <small>{t.upcoming}</small>}</a>
           </li>
         ))}
       </ol>
@@ -88,6 +100,8 @@ const released = (index: number) => index >= 0 && index < cycles.length && !cycl
   // - always (JS on): the chapter rail marks the chapter in view with aria-current;
   // - prefers-reduced-motion: no-preference: years wake up, era maps transition, ambient art loops (.kv-motion);
   // - and (min-width: 64rem): stages pin while panels scroll over them, layers parallax, the balloon drifts (.kv-cinema).
+  // - with motion, the 04 effects: balloons and ambient loops (CSS, paused off screen via .is-on), giant years that bleed
+  //   (.is-lit), one splatter wipe per chapter change, and, only with (pointer: fine), drain eyes that follow the pointer.
   // gsap.matchMedia reverts all of it (inline styles, pins, classes) as soon as a condition stops matching.
   gsap.registerPlugin(ScrollTrigger);
   const root = document.documentElement;
@@ -119,12 +133,93 @@ const released = (index: number) => index >= 0 && index < cycles.length && !cycl
 
   const mm = gsap.matchMedia();
   mm.add(
-    { motion: '(prefers-reduced-motion: no-preference)', wide: '(min-width: 64rem)' },
+    { motion: '(prefers-reduced-motion: no-preference)', wide: '(min-width: 64rem)', fine: '(pointer: fine)' },
     (context) => {
-      const { motion, wide } = context.conditions as { motion: boolean; wide: boolean };
+      const { motion, wide, fine } = context.conditions as { motion: boolean; wide: boolean; fine: boolean };
       if (!motion) return;
       root.classList.add('kv-motion');
       if (wide) root.classList.add('kv-cinema');
+      const cleanups: (() => void)[] = [];
+
+      // Scenes loop only while on screen: CSS pauses every animation inside a [data-fx-scene] without .is-on.
+      for (const scene of gsap.utils.toArray<HTMLElement>('[data-fx-scene]')) {
+        ScrollTrigger.create({ trigger: scene, start: 'top bottom', end: 'bottom top', toggleClass: 'is-on' });
+      }
+      cleanups.push(() => document.querySelectorAll('[data-fx-scene].is-on').forEach((el) => el.classList.remove('is-on')));
+
+      // Splatter wipe: plays once when a new chapter takes the middle of the viewport, never twice within 1.5 s,
+      // and not when going back to the intro (hero and prelude).
+      const wipe = document.querySelector<HTMLElement>('[data-wipe]');
+      if (wipe) {
+        let last: string | null = null;
+        let lastAt = -Infinity;
+        const enter = (id: string) => {
+          const now = performance.now();
+          if (last !== null && id !== last && id !== 'intro' && now - lastAt > 1500) {
+            wipe.classList.remove('is-wiping');
+            void wipe.offsetWidth;
+            wipe.classList.add('is-wiping');
+            lastAt = now;
+          }
+          last = id;
+        };
+        const done = (e: AnimationEvent) => { if (e.target === wipe) wipe.classList.remove('is-wiping'); };
+        wipe.addEventListener('animationend', done);
+        cleanups.push(() => { wipe.removeEventListener('animationend', done); wipe.classList.remove('is-wiping'); });
+        // Chapters overlap in cinema mode, so the current one is the last section (in page order) across the middle.
+        const parts = gsap.utils.toArray<HTMLElement>('[data-hero], .prelude, [data-chapter]');
+        const across = new Set<HTMLElement>();
+        const update = () => {
+          const current = parts.filter((el) => across.has(el)).pop();
+          if (current) enter(current.dataset.chapter ?? 'intro');
+        };
+        for (const el of parts) {
+          ScrollTrigger.create({
+            trigger: el, start: 'top 50%', end: 'bottom 50%',
+            onToggle: (self) => { if (self.isActive) across.add(el); else across.delete(el); update(); },
+          });
+        }
+      }
+
+      // It watches: the pupils turn toward a fine pointer (mouse or pen only) and, when it comes close, the stage is
+      // marked .is-close (the eyes stay open, the drain lamp stutters).
+      if (fine) {
+        const eyes = gsap.utils.toArray<SVGGElement>('[data-eyes]');
+        let px = -1e4;
+        let py = -1e4;
+        let queued = false;
+        const update = () => {
+          queued = false;
+          for (const group of eyes) {
+            const stage = group.closest('[data-stage]');
+            const box = group.getBoundingClientRect();
+            if (!box.width || box.bottom < 0 || box.top > window.innerHeight) { stage?.classList.remove('is-close'); continue; }
+            const dx = px - (box.left + box.width / 2);
+            const dy = py - (box.top + box.height / 2);
+            const d = Math.hypot(dx, dy) || 1;
+            const k = Math.min(1, d / 300);
+            for (const pupil of group.querySelectorAll<SVGGElement>('[data-pupil]')) {
+              pupil.style.transform = `translate(${((dx / d) * 2.6 * k).toFixed(2)}px,${((dy / d) * 1.3 * k).toFixed(2)}px)`;
+            }
+            stage?.classList.toggle('is-close', d < 240);
+          }
+        };
+        const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+        const move = (e: PointerEvent) => {
+          if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
+          px = e.clientX;
+          py = e.clientY;
+          queue();
+        };
+        window.addEventListener('pointermove', move, { passive: true });
+        window.addEventListener('scroll', queue, { passive: true });
+        cleanups.push(() => {
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('scroll', queue);
+          document.querySelectorAll('.is-close').forEach((el) => el.classList.remove('is-close'));
+          document.querySelectorAll<SVGGElement>('[data-pupil]').forEach((pupil) => { pupil.style.transform = ''; });
+        });
+      }
 
       // Hero: the years flicker on, one after another, in a short intro (done in about 2 s), and then rest fully lit:
       // the inline opacity is cleared at the end, so the stylesheet's AA colors apply. Skipped if the hero is not in view.
@@ -144,12 +239,15 @@ const released = (index: number) => index >= 0 && index < cycles.length && !cycl
       const maps: { svg: SVGSVGElement; own: string }[] = [];
       for (const chapter of chapters) {
         // The giant year lights up digit by digit when the chapter arrives.
+        const giant = chapter.querySelector<HTMLElement>('[data-giant]');
         const digits = chapter.querySelectorAll<HTMLElement>('[data-giant] .dg');
         gsap.set(digits, { opacity: 0.08 });
         let lit = false;
         const light = () => {
           if (lit) return;
           lit = true;
+          // Then it bleeds from the bottom and two digits drip (CSS transitions on .is-lit).
+          giant?.classList.add('is-lit');
           digits.forEach((digit, i) => gsap.to(digit, { keyframes: flicker, duration: 1.1, delay: i * 0.14, ease: 'none' }));
         };
         ScrollTrigger.create({ trigger: chapter, start: 'top 55%', onEnter: light, onEnterBack: light, onLeave: light });
@@ -255,6 +353,8 @@ const released = (index: number) => index >= 0 && index < cycles.length && !cycl
 
       ScrollTrigger.refresh();
       return () => {
+        for (const cleanup of cleanups) cleanup();
+        document.querySelectorAll('[data-giant].is-lit').forEach((el) => el.classList.remove('is-lit'));
         root.classList.remove('kv-motion', 'kv-cinema');
         for (const { svg, own } of maps) svg.dataset.era = own;
       };
@@ -290,6 +390,24 @@ const released = (index: number) => index >= 0 && index < cycles.length && !cycl
   .soon .yr { color: var(--color-subtext); text-shadow: none; text-decoration: underline dashed var(--color-comment); text-underline-offset: 0.35em; }
   .yr small { margin-left: 0.5rem; font: 400 0.75rem/1 var(--font-mono); color: var(--color-err); }
   .hero-disclaimer { margin: 1.5rem 0 0; font-size: 0.8125rem; color: var(--color-subtext); }
+
+  /* Blood accents (04). The title drip hangs under the last letter and stops short of the lead, which sits right below
+     whenever the title wraps; its drop swells in place instead of falling over the text. Each released year drips once
+     lit. At rest they are shown full; with motion they grow (scaleY) and the drop swells (scale), on wide screens only. */
+  .drip-word { position: relative; white-space: nowrap; }
+  .t-drip { position: absolute; right: 0.24em; top: 0.83em; width: 0.05em; height: 0.16em; border-radius: 0 0 1em 1em; background: linear-gradient(to bottom, var(--blood), var(--blood-dark)); transform-origin: top; pointer-events: none; }
+  .t-drip::after { content: ''; position: absolute; left: 50%; bottom: -0.05em; width: 0.1em; height: 0.11em; margin-left: -0.05em; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; background: var(--blood-dark); transform-origin: 50% 0; }
+  li:not(.soon) > .yr { position: relative; }
+  li:not(.soon) > .yr::after { content: ''; position: absolute; left: 0.4em; top: calc(100% - 0.55rem); width: 2px; height: 0.8rem; border-radius: 0 0 2px 2px; background: linear-gradient(var(--color-err), var(--blood-dark)); transform-origin: top; }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.kv-motion) .t-drip { animation: drip-in 5s 2.6s cubic-bezier(0.6, 0, 0.4, 1) both; }
+    :global(.kv-motion) li:not(.soon) > .yr::after { animation: drip-in 2.2s calc(1.2s + var(--i) * 0.3s) cubic-bezier(0.5, 0, 0.6, 1) both; }
+  }
+  @media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+    :global(.kv-motion) .t-drip::after { animation: swell 7s 8s ease-in-out infinite; }
+  }
+  @keyframes drip-in { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  @keyframes swell { 0%, 60%, 100% { transform: scale(1); } 80% { transform: scale(1.35, 1.5); } 86% { transform: scale(0.9); } }
   .cue { display: none; }
 
   @media (min-width: 48rem) {
@@ -297,7 +415,7 @@ const released = (index: number) => index >= 0 && index < cycles.length && !cycl
   }
   @media (min-width: 64rem) {
     .hero-text { padding-right: 10rem; }
-    .cue { display: block; position: absolute; right: 10rem; bottom: 3.5rem; padding: 0.75rem 1rem; border: 1px solid var(--color-overlay); border-radius: 9999px; background: var(--color-veil); font: 0.8125rem/1.4 var(--font-mono); color: var(--color-subtext); text-decoration: none; }
+    .cue { display: block; position: absolute; right: 10rem; bottom: 3.5rem; padding: 0.75rem 1rem; border: 1px solid var(--color-overlay); border-radius: 9999px; background: var(--color-panel); font: 0.8125rem/1.4 var(--font-mono); color: var(--color-subtext); text-decoration: none; }
     .cue:hover { color: var(--color-text); }
   }
 

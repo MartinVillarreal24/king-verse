@@ -1,7 +1,9 @@
 ---
 // 2016 — Canal Days (original art). The Derry skyline at night, a fair with a turning wheel, tents and strings of
-// bulbs over the canal, and the Kissing Bridge with "R + E" carved in a heart. No clown, no faces.
+// bulbs over the canal, and the Kissing Bridge with "R + E" carved in a heart. No faces: the fun house wall only
+// carries a clown's shadow (ClownShadow, design/home-cinematic/04). Fog and dust motes drift over the fair.
 import { scatter, skyline, waterTower } from './art';
+import ClownShadow from './ClownShadow.astro';
 
 const stars = scatter(2016, 50, { x: [0, 1600], y: [10, 360], r: [0.7, 1.8] });
 const glints = scatter(1620, 22, { x: [70, 1440], y: [590, 815], r: [0, 1], d: 3 }).map((g, i) => ({
@@ -24,6 +26,7 @@ const bulbs = strings.map(([x0, y0, x1, sag, n]) => ({
   }),
 }));
 const fencePosts = Array.from({ length: 17 }, (_, i) => i * 100);
+const motes = scatter(1627, 40, { x: [0, 1600], y: [280, 800], r: [0.6, 1.4], d: 16 });
 ---
 <svg class="art" data-era-art="2016" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
   <defs>
@@ -33,6 +36,7 @@ const fencePosts = Array.from({ length: 17 }, (_, i) => i * 100);
     <linearGradient id="e16-water" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" class="st-water" /><stop offset="0.4" stop-color="#141e2c" /><stop offset="1" stop-color="#070b10" />
     </linearGradient>
+    <filter id="e16-blur"><feGaussianBlur stdDeviation="20" /></filter>
     <radialGradient id="e16-glow"><stop offset="0" class="st-bulb" stop-opacity="0.35" /><stop offset="1" class="st-bulb" stop-opacity="0" /></radialGradient>
   </defs>
   <rect width="1600" height="900" fill="url(#e16-sky)" />
@@ -52,6 +56,7 @@ const fencePosts = Array.from({ length: 17 }, (_, i) => i * 100);
     </g>
     <circle cx={cx} cy={cy} r="8" fill="#04070b" />
   </g>
+  <ClownShadow />
   <g data-depth="0.28" fill="#04070b">
     <path d="M60 560L130 490L200 560Z" /><path d="M180 560L270 470L360 560Z" /><path d="M1380 560L1450 486L1520 560Z" />
     <path d="M130 490L95 560M130 490L165 560M270 470L225 560M270 470L315 560M1450 486L1415 560M1450 486L1485 560" stroke="#ff5c7a" stroke-opacity="0.45" stroke-width="2" fill="none" />
@@ -86,6 +91,10 @@ const fencePosts = Array.from({ length: 17 }, (_, i) => i * 100);
     <path d="M0 830H1600V900H0Z" fill="#04070b" />
     <g stroke="#04070b" stroke-width="8">{fencePosts.map((x) => <path d={`M${x} 780V840`} />)}<path d="M0 786H1600" /></g>
   </g>
+  <g class="a-fog" filter="url(#e16-blur)" fill="#b3c0cf" opacity="0.08">
+    <rect x="-100" y="680" width="900" height="70" rx="35" /><rect x="800" y="720" width="900" height="60" rx="30" />
+  </g>
+  <g class="a-motes f-bulb" fill-opacity="0.5">{motes.map((m) => <circle cx={m.cx} cy={m.cy} r={m.r} style={`--d:${m.d}`} />)}</g>
 </svg>
 
 <style>

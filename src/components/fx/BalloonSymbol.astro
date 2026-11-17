@@ -1,0 +1,18 @@
+---
+// The red balloon drawn once per page as an SVG symbol; every floating balloon (BalloonField) reuses it with <use>.
+// Same drawing as the scene and traveling balloons. Decorative.
+---
+<svg class="balloon-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="kv-balloon" viewBox="0 0 40 92">
+      <path d="M20 42C17 55 24 66 19 78C17 84 21 88 20 92" fill="none" stroke="#c9d3df" stroke-opacity="0.55" stroke-width="1.1" />
+      <path d="M16.5 42H23.5L20 37.5Z" fill="#d94a66" />
+      <ellipse cx="20" cy="20" rx="16" ry="19.5" fill="#ff5c7a" />
+      <ellipse cx="13.8" cy="12.5" rx="4.2" ry="6.4" fill="#fff" opacity="0.35" />
+    </symbol>
+  </defs>
+</svg>
+
+<style>
+  .balloon-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+</style>

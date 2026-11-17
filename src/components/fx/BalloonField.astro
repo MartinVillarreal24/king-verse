@@ -1,0 +1,79 @@
+---
+// Balloons floating at three depths behind a scene (design/home-cinematic/04): near / mid / far lanes differ in size,
+// blur, speed and parallax depth, each sways on its string, and one drifter crosses the scene through a text-free band.
+// Rest positions (no JS, reduced motion) avoid all text; with motion (.kv-motion) each balloon rises from --y0.
+// Decorative only. Phones: lighter (no far lane, no drifter) and kept clear of the slate and the hero text.
+interface Props { scene: 'hero' | '1962' | '1988' | '2016' }
+const { scene } = Astro.props;
+
+// [depth, x %, rest y %, start y %, seconds, delay s, scale, wind px, left column?, drifter?]
+type Lane = ['near' | 'mid' | 'far', number, number, number, number, number, number, number, boolean?, boolean?];
+const lanes: Record<Props['scene'], Lane[]> = {
+  hero: [
+    ['near', 86, 16, 104, 26, -4, 1.1, 22], ['mid', 78, 24, 108, 34, -15, 0.75, 14], ['far', 89, 10, 102, 44, -30, 0.5, 14],
+    ['far', 82, 12, 106, 30, -24, 0.6, 34], ['mid', 75, 19, 110, 38, -8, 0.85, -18], ['near', 84, 29, 104, 22, -12, 1.25, 22],
+    ['far', 80, 8, 100, 50, -40, 0.4, -18], ['mid', 40, 14, 14, 46, -20, 0.7, -18, false, true],
+  ],
+  '1962': [
+    ['near', 66, 20, 104, 28, -6, 1, -30], ['mid', 72, 34, 106, 36, -18, 0.7, 14], ['far', 85, 14, 102, 46, -30, 0.45, -18],
+    ['mid', 81, 42, 108, 32, -11, 0.9, 34], ['mid', 16, 30, 55, 26, -9, 0.6, -18, true], ['far', 36, 36, 58, 34, -20, 0.45, 14, true],
+    ['near', 48, 18, 54, 22, -3, 0.8, 22, true], ['far', 28, 26, 26, 52, -26, 0.55, 22, false, true],
+  ],
+  '1988': [
+    ['near', 63, 23, 104, 29, -10, 1, 14], ['mid', 74, 37, 106, 37, -22, 0.7, -30], ['far', 87, 17, 102, 47, -34, 0.45, -18],
+    ['mid', 78, 45, 108, 33, -15, 0.9, 34], ['mid', 13, 33, 55, 27, -13, 0.6, -30, true], ['far', 33, 39, 58, 35, -24, 0.45, 34, true],
+    ['near', 50, 21, 54, 23, -7, 0.8, -30, true], ['far', 30, 29, 26, 53, -30, 0.55, -18, false, true],
+  ],
+  '2016': [
+    ['near', 65, 20, 104, 30, -14, 1, -30], ['mid', 71, 34, 106, 38, -26, 0.7, 34], ['far', 84, 14, 102, 48, -38, 0.45, 22],
+    ['mid', 80, 42, 108, 34, -19, 0.9, 34], ['mid', 15, 30, 55, 28, -17, 0.6, -30, true], ['far', 35, 36, 58, 36, -28, 0.45, 22, true],
+    ['near', 52, 18, 54, 24, -11, 0.8, -30, true], ['far', 32, 26, 26, 54, -34, 0.55, -18, false, true],
+  ],
+};
+const depth = { near: 0.45, mid: 0.25, far: 0.1 };
+---
+<div class:list={['field', scene === 'hero' ? 'field-hero' : 'field-stage']} data-field aria-hidden="true">
+  {lanes[scene].map(([kind, x, rest, start, seconds, delay, scale, wind, left, drift]) => (
+    <span
+      class:list={['fb', `fb-${kind}`, left && 'fb-l', drift && 'fb-drift']}
+      data-depth={depth[kind]}
+      style={`--x:${x}%;--yr:${rest}%;--y0:${start}%;--t:${seconds}s;--dl:${delay}s;--s:${scale};--wx:${wind}px`}
+    ><span class="fb-rise"><svg class="fb-sway" viewBox="0 0 40 92" focusable="false"><use href="#kv-balloon" /></svg></span></span>
+  ))}
+</div>
+
+<style>
+  .field { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .fb { position: absolute; left: var(--x); top: var(--yr); width: calc(34px * var(--s, 1)); --tr: 118vh; }
+  .fb-l { --tr: 44vh; }
+  .fb-rise, .fb-sway { display: block; }
+  .fb svg { width: 100%; height: auto; overflow: visible; }
+  .fb-mid { opacity: 0.8; filter: blur(0.4px); }
+  .fb-far { opacity: 0.5; filter: blur(1.2px); }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.kv-motion) .fb { top: var(--y0); }
+    :global(.kv-motion) .fb-rise { opacity: 0; animation: rise var(--t) linear infinite; animation-delay: var(--dl); }
+    :global(.kv-motion) .fb-sway { transform-origin: 50% 100%; animation: sway calc(var(--t) / 6) ease-in-out infinite alternate; }
+    :global(.kv-motion) .fb-drift { left: -80px; }
+    :global(.kv-motion) .fb-drift .fb-rise { animation-name: cross; }
+  }
+  @keyframes rise { 0% { transform: translate(0, 0); opacity: 0; } 8%, 82% { opacity: 1; } 100% { transform: translate(var(--wx, 26px), calc(var(--tr) * -1)); opacity: 0; } }
+  @keyframes cross { 0% { transform: translate(0, 0); opacity: 0; } 8%, 90% { opacity: 1; } 100% { transform: translate(calc(100vw + 160px), -9vh); opacity: 0; } }
+  @keyframes sway { from { transform: translateY(3px) rotate(-3deg); } to { transform: translateY(-6px) rotate(3deg); } }
+
+  /* Narrow screens: no drifter. In the hero, balloons stay small inside the top padding band (the hero text always
+     starts 6rem down); on a stage, between the slate and the giant year. */
+  @media (max-width: 64rem) {
+    .fb-drift { display: none; }
+    .field-hero { bottom: auto; height: 6rem; }
+    .field-hero .fb { top: calc(var(--yr) * 0.4 + 30%); width: calc(18px * var(--s, 1)); }
+    .field-stage .fb { top: calc(var(--yr) * 0.6 + 24%); }
+  }
+  @media (max-width: 64rem) and (prefers-reduced-motion: no-preference) {
+    :global(.kv-motion) .field-hero .fb { top: 45%; --tr: 6rem; }
+    :global(.kv-motion) .field-stage .fb { top: 62%; --tr: 20vh; }
+  }
+  @media (max-width: 48rem) {
+    .fb-far { display: none; }
+  }
+</style>

@@ -12,6 +12,7 @@ import Era1962 from './eras/Era1962.astro';
 import Era1988 from './eras/Era1988.astro';
 import Era2016 from './eras/Era2016.astro';
 import EraUpcoming from './eras/EraUpcoming.astro';
+import BalloonField from './fx/BalloonField.astro';
 import { inNoteOrder } from '../data/citations';
 import { placesOf } from '../data/places';
 
@@ -30,6 +31,16 @@ const digits = [...cycle.year];
 // Where the traveling balloon rests (x %, y % of the viewport) while this chapter's stage is pinned: in the left
 // column, below the slate row and above the giant year, clear of every text panel.
 const drift: Record<string, string> = { '1962': '12,34', '1988': '15,32', '2016': '10,34' };
+// Blood (design/home-cinematic/04): two digits of each giant year drip into the letterbox once it bleeds.
+// [digit index, x within the digit, drip length].
+const drips: Record<string, [number, string, string][]> = {
+  '1962': [[1, '46%', '0.15em'], [3, '30%', '0.2em']],
+  '1988': [[2, '52%', '0.17em'], [6, '38%', '0.13em']],
+  '2016': [[1, '60%', '0.19em'], [3, '34%', '0.14em']],
+};
+const dripOf = (i: number) => drips[cycle.id]?.find(([at]) => at === i);
+// A short attributed quote on its own panel, after the first body paragraph.
+const quote = t.quotes[cycle.id];
 ---
 <section
   class:list={['cycle', cycle.upcoming ? 'is-upcoming' : 'chapter', follows && 'follows', leadsOn && 'leads-on']}
@@ -37,6 +48,7 @@ const drift: Record<string, string> = { '1962': '12,34', '1988': '15,32', '2016'
   data-cycle
   data-upcoming={cycle.upcoming ? '' : undefined}
   data-chapter={cycle.upcoming ? undefined : cycle.id}
+  data-fx-scene={cycle.upcoming ? undefined : ''}
   data-follows={follows ? '' : undefined}
   data-drift={drift[cycle.id]}
   aria-labelledby={`cycle-${cycle.id}-title`}
@@ -48,13 +60,17 @@ const drift: Record<string, string> = { '1962': '12,34', '1988': '15,32', '2016'
       <div class="frame" data-frame>
         {Era && <Era />}
         <div class="vignette" aria-hidden="true"></div>
+        <BalloonField scene={cycle.id as '1962' | '1988' | '2016'} />
         <p class="slate" aria-hidden="true">
           {!first && <span class="gap">{t.gap}</span>}
           {chapter && <span>{chapter.label}</span>}
           {chapter && <span>{chapter.mood}</span>}
           <span>{cycle.source[locale]}</span>
         </p>
-        <p class:list={['giant', digits.length > 4 && 'long']} data-giant aria-hidden="true">{digits.map((d) => <span class="dg">{d}</span>)}</p>
+        <p class:list={['giant', digits.length > 4 && 'long']} data-giant aria-hidden="true">{digits.map((d, i) => {
+          const drip = dripOf(i);
+          return <span class="dg" data-d={d} data-drip={drip ? '' : undefined} style={drip ? `--drip-x:${drip[1]};--drip-len:${drip[2]}` : undefined}>{d}</span>;
+        })}</p>
       </div>
     </div>
   )}
@@ -74,12 +90,20 @@ const drift: Record<string, string> = { '1962': '12,34', '1988': '15,32', '2016'
     </header>
     <div class="body" data-body>
       {cycle.body && !cycle.upcoming
-        ? cycle.body.map((paragraph) => (
-            <p class="panel">
-              {paragraph.map((sentence) => (
-                <Fragment><span data-sentence>{sentence.text[locale]}{inNoteOrder(sentence.cite).map((id) => <Note locale={locale} source={id} />)}</span>{' '}</Fragment>
-              ))}
-            </p>
+        ? cycle.body.map((paragraph, i) => (
+            <Fragment>
+              <p class="panel">
+                {paragraph.map((sentence) => (
+                  <Fragment><span data-sentence>{sentence.text[locale]}{inNoteOrder(sentence.cite).map((id) => <Note locale={locale} source={id} />)}</span>{' '}</Fragment>
+                ))}
+              </p>
+              {quote && i === 0 && (
+                <figure class="panel quote" data-quote>
+                  <blockquote>{quote.text}</blockquote>
+                  <figcaption>— {quote.speaker}, <cite>{quote.work}</cite> ({quote.year})</figcaption>
+                </figure>
+              )}
+            </Fragment>
           ))
         : <p>{t.bodyEmpty}</p>}
     </div>
@@ -133,7 +157,17 @@ const drift: Record<string, string> = { '1962': '12,34', '1988': '15,32', '2016'
   .slate .gap { letter-spacing: normal; text-transform: none; }
   .giant { position: absolute; z-index: 2; left: 0.75rem; bottom: calc(var(--letterbox) + 0.5rem); margin: 0; font: 800 clamp(5.5rem, 21vw, 19rem)/0.8 var(--font-mono); letter-spacing: -0.06em; color: var(--color-text); opacity: 0.92; text-shadow: 0 0 40px rgb(7 11 16 / 0.6); white-space: nowrap; }
   .giant.long { font-size: clamp(3.75rem, 14.5vw, 13.5rem); }
-  .dg { display: inline-block; }
+  /* Blood: the giant year bleeds red from the bottom (a red copy of each digit fades in over it: opacity only) and two
+     digits drip into the letterbox (scaleY). At rest (no JS, reduced motion) the year is shown already bled. */
+  .dg { position: relative; display: inline-block; }
+  .dg::before { content: attr(data-d); position: absolute; inset: 0; color: transparent; text-shadow: none; background: linear-gradient(to bottom, transparent 52%, var(--color-err) 80%, var(--blood) 100%); -webkit-background-clip: text; background-clip: text; pointer-events: none; }
+  .dg[data-drip]::after { content: ''; position: absolute; left: var(--drip-x, 50%); top: 79%; width: 0.03em; height: var(--drip-len, 0.16em); border-radius: 0 0 1em 1em; background: linear-gradient(to bottom, var(--color-err), var(--blood) 35%, var(--blood-dark)); transform-origin: top; }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.kv-motion) .dg::before { opacity: 0; transition: opacity 2.2s ease-in 0.9s; }
+    :global(.kv-motion) .giant:global(.is-lit) .dg::before { opacity: 1; }
+    :global(.kv-motion) .dg[data-drip]::after { transform: scaleY(0); transition: transform 2.8s cubic-bezier(0.5, 0, 0.6, 1) 1.6s; }
+    :global(.kv-motion) .giant:global(.is-lit) .dg[data-drip]::after { transform: scaleY(1); }
+  }
 
   .chapter .track { position: relative; z-index: 3; display: grid; gap: 1.25rem; padding: 1.5rem 1rem 4rem; }
   .chapter .body { display: grid; gap: 1.25rem; }
@@ -141,8 +175,13 @@ const drift: Record<string, string> = { '1962': '12,34', '1988': '15,32', '2016'
   .chapter .cycle-head { border-top: 2px solid var(--color-err); }
   .kicker { margin: 0 0 0.5rem; font: 0.75rem/1.4 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-err); }
   .chapter .body p { font-size: 1.0625rem; line-height: 1.7; color: var(--color-subtext); }
-  .chapter .body p:first-child::first-letter { float: left; font: 800 3.4rem/0.9 var(--font-mono); margin: 0.2rem 0.35rem 0 0; color: var(--color-text); }
+  .chapter .body > p:first-child::first-letter { float: left; font: 800 3.4rem/0.9 var(--font-mono); margin: 0.2rem 0.35rem 0 0; color: var(--color-text); }
   .chapter .places { width: min(100%, 60rem); }
+  /* Quote panel: a short attributed line, ruled in blood (the rule is decorative; the text stays on the ink panel). */
+  .quote { border-left: 3px solid var(--blood); }
+  .quote blockquote { margin: 0; font: 700 clamp(1.5rem, 3vw, 2.25rem)/1.2 var(--font-mono); letter-spacing: -0.01em; color: var(--color-text); }
+  .quote figcaption { margin-top: 0.75rem; font: 0.875rem/1.4 var(--font-mono); color: var(--color-subtext); }
+  .quote cite { font-style: italic; }
 
   @media (min-width: 48rem) {
     .slate { left: 2.5rem; }

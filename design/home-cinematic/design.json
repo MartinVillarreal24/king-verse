@@ -23,6 +23,13 @@
       "tradeoff": "Most original idea: one continuous lake panorama whose sky, season and town change per era, with a HUD year, corner map and a scrubbable timeline; heaviest to build (stacked full-scene layers, scroll-to-time mapping) and the fixed scrubber and map take screen space from the text",
       "width": 1440,
       "height": 900
+    },
+    {
+      "file": "04-something-floats.html",
+      "title": "Something floats",
+      "tradeoff": "01 made scarier and alive: balloons at three depths, the paper boat sailing into the drain, It only implied (eyes that follow the pointer, a gloved hand, a clown shadow, flickering lamps) and blood as accents (title drip, bleeding years, splatter wipe, red seep); far more mood and portfolio value, but more art and motion to build and keep performant, the splatter wipe briefly covers the screen on every chapter change, and the horror tone may put off younger or more sensitive readers",
+      "width": 1440,
+      "height": 900
     }
   ]
 }
