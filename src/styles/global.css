@@ -13,7 +13,7 @@
 
   /* Cinematic chapters (design/home-cinematic/01): glass panels, letterbox and chapter rhythm. */
   --color-panel: rgb(7 11 16 / 0.9); /* --color-ink at 90 %: text panels over the era art */
-  --color-veil: rgb(7 11 16 / 0.6); /* rail links and the scroll cue */
+  --color-veil: rgb(7 11 16 / 0.85); /* rail links: raised from 0.6 so floating balloons never lower their contrast */
   --letterbox: 5vh;
   --motion-chapter-gap: 55vh;
 
@@ -47,6 +47,13 @@
   --era-2016-bulb: #ffcf7a;
   --era-2016-water: #2a1a2c;
   --era-2016-deck: #05090e;
+
+  /* Something floats (design/home-cinematic/04): blood accents and the implied It. Illustration only, never text on them. */
+  --blood: #9e1028; /* drips, seep, splatter body, quote rule */
+  --blood-dark: #4a0812; /* drip tails, wipe */
+  --eye-glow: #f2c84b; /* eyes in the drain */
+  --eye-pupil: #1a1206; /* pupils */
+  --wipe: 1.2s; /* splatter wipe between chapters */
 
   color-scheme: dark;
 }
@@ -82,6 +89,27 @@ img, svg { display: block; max-width: 100%; }
   .kv-motion .a-spin { transform-box: fill-box; transform-origin: 50% 50%; animation: kv-spin 60s linear infinite; }
   .kv-motion .a-shimmer rect { animation: kv-shimmer 3.2s ease-in-out infinite alternate; animation-delay: calc(var(--d) * -1s); }
 }
+/* 04 Something floats: shared loops (transform and opacity only). Lamps flicker at most twice per second and only dim
+   small, dark areas (WCAG 2.3.1). Scenes off screen pause: HomePage toggles .is-on on each [data-fx-scene]. */
+@media (prefers-reduced-motion: no-preference) {
+  .kv-motion .a-seep { animation: kv-seep 9s ease-in-out infinite alternate; }
+  .kv-motion .a-motes circle { animation: kv-mote 16s linear infinite; animation-delay: calc(var(--d) * -1s); }
+  .kv-motion .a-rain { animation: kv-rain 1.3s linear infinite; }
+  .kv-motion .a-flow { animation: kv-flow 1.8s linear infinite; }
+  .kv-motion .lamp { animation: kv-flicker 9s linear infinite; animation-delay: var(--ld, 0s); }
+  .kv-motion [data-fx-scene]:not(.is-on) * { animation-play-state: paused !important; }
+}
+@keyframes kv-seep { from { opacity: 0.35; } to { opacity: 0.85; } }
+@keyframes kv-mote { 0% { transform: translate(0, 0); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.5; } 100% { transform: translate(24px, -160px); opacity: 0; } }
+@keyframes kv-rain { from { transform: translateY(-900px); } to { transform: translateY(0); } }
+/* One dash period along the gutter's slope, so the water runs toward the drain. */
+@keyframes kv-flow { to { transform: translate(44px, -1.3px); } }
+@keyframes kv-flicker { 0%, 62%, 100% { opacity: 1; } 64% { opacity: 0.3; } 66% { opacity: 0.95; } 70% { opacity: 0.25; } 73% { opacity: 1; } }
+/* Small screens: fewer particles (the art stays the same picture). */
+@media (max-width: 48rem) {
+  .a-snow circle:nth-child(2n), .a-motes circle:nth-child(2n), .a-fly circle:nth-child(2n), .a-twinkle circle:nth-child(3n), .fx-dense { display: none; }
+}
+
 @keyframes kv-drift { from { transform: translateX(-900px); } to { transform: translateX(1100px); } }
 @keyframes kv-fog { from { transform: translateX(-80px); } to { transform: translateX(80px); } }
 @keyframes kv-beam { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "chosen": "01-cinematic-chapters.html",
+  "chosen": "04-something-floats.html",
   "handoffs": {
     "01-cinematic-chapters.html": {
       "status": "implemented",
@@ -11,6 +11,15 @@
       "feature": "odd/tasks/visual-polish.md",
       "note": "Already implemented on feat/visual-polish (4731c91, PR #5). Leave canvas comments for any adjustment.",
       "previewUrl": "http://localhost:4321/"
+    },
+    "04-something-floats.html": {
+      "status": "in_progress",
+      "queued": false,
+      "sentAt": "2026-11-17T20:28:19.450Z",
+      "startedAt": "2026-11-17T20:28:19.737Z",
+      "implementedAt": null,
+      "feature": "odd/tasks/visual-polish.md",
+      "note": "Implementing on feat/horror-motion: balloons, drain eyes, glove, clown shadow, blood accents."
     }
   }
 }

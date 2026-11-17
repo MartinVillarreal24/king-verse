@@ -1,6 +1,7 @@
 ---
 // 1962 — winter at the air base (original art). Searchlights, a bomber silhouette, quonset huts and the control tower
 // over the frozen Penobscot, where small figures follow a red balloon toward the gnarled tree. No clown, no faces.
+// It is near (design/home-cinematic/04): the base lamps flicker and a red glow seeps under the ice.
 // Layers marked data-depth drift on scroll (parallax) when motion is allowed; ambient loops arm with .kv-motion.
 import { scatter, treeline } from './art';
 
@@ -11,6 +12,8 @@ const fencePosts = Array.from({ length: 30 }, (_, i) => i * 24);
 const runwayLights = Array.from({ length: 14 }, (_, i) => 80 + i * 46);
 const walkers = [[760, 668, 1], [800, 664, 0.95], [842, 660, 0.9], [880, 656, 0.86], [916, 652, 0.82], [948, 648, 0.78]];
 const walker = 'M-3 0L-2 -10L-4 -10L-4 -20Q0 -23 4 -20L4 -10L2 -10L3 0Z';
+// Base lamps: [x, top of the post, flicker delay].
+const lamps: [number, number, number][] = [[140, 470, -1], [420, 476, -4.5], [690, 466, -7]];
 const huts = ['M120 560V532A62 44 0 0 1 244 532V560Z', 'M262 560V530A66 46 0 0 1 394 530V560Z', 'M412 560V534A58 40 0 0 1 528 534V560Z'];
 ---
 <svg class="art" data-era-art="1962" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
@@ -25,6 +28,13 @@ const huts = ['M120 560V532A62 44 0 0 1 244 532V560Z', 'M262 560V530A66 46 0 0 1
       <stop offset="0" stop-color="#e6edf3" stop-opacity="0.16" /><stop offset="1" stop-color="#e6edf3" stop-opacity="0" />
     </linearGradient>
     <filter id="e62-blur"><feGaussianBlur stdDeviation="22" /></filter>
+    <linearGradient id="e62-lamp-cone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" class="st-window" stop-opacity="0.38" /><stop offset="1" class="st-window" stop-opacity="0" />
+    </linearGradient>
+    <radialGradient id="e62-lamp-glow"><stop offset="0" class="st-window" stop-opacity="0.55" /><stop offset="1" class="st-window" stop-opacity="0" /></radialGradient>
+    <radialGradient id="e62-seep">
+      <stop offset="0" class="st-blood" stop-opacity="0.6" /><stop offset="0.6" class="st-blood-dark" stop-opacity="0.25" /><stop offset="1" class="st-blood-dark" stop-opacity="0" />
+    </radialGradient>
   </defs>
   <rect width="1600" height="900" fill="url(#e62-sky)" />
   <g data-depth="0.04" class="a-twinkle" fill="#8b9bb0">
@@ -59,7 +69,22 @@ const huts = ['M120 560V532A62 44 0 0 1 244 532V560Z', 'M262 560V530A66 46 0 0 1
     </g>
     <g class="f-window" opacity="0.8">{runwayLights.map((x) => <circle cx={x} cy="566" r="2" />)}</g>
   </g>
+  <g data-depth="0.25">
+    {lamps.map(([x, top, delay]) => (
+      <g>
+        <rect x={x - 1.5} y={top} width="3" height={560 - top} class="f-deep" /><path d={`M${x - 8} ${top}H${x + 8}L${x + 5} ${top - 6}H${x - 5}Z`} class="f-deep" />
+        <g class="lamp" data-lamp style={`--ld:${delay}s`}>
+          <path d={`M${x - 4} ${top + 2}L${x - 40} 560H${x + 40}L${x + 4} ${top + 2}Z`} fill="url(#e62-lamp-cone)" />
+          <circle cx={x} cy={top + 3} r="26" fill="url(#e62-lamp-glow)" /><circle cx={x} cy={top + 2} r="2.8" class="f-window" />
+        </g>
+      </g>
+    ))}
+  </g>
   <rect y="560" width="1600" height="340" fill="url(#e62-ice)" />
+  <g class="a-seep" data-seep>
+    <ellipse cx="880" cy="688" rx="210" ry="34" fill="url(#e62-seep)" />
+    <path d="M820 640L800 700L860 760" class="s-blood" stroke-opacity="0.45" stroke-width="2.5" fill="none" />
+  </g>
   <g opacity="0.25" class="f-silhouette" transform="matrix(1 0 0 -0.5 0 840)">{huts.map((d) => <path d={d} />)}</g>
   <g data-depth="0.35" fill="none" class="s-crack" stroke-opacity="0.28" stroke-width="1.4">
     <path d="M120 640L260 660L330 652L470 690M330 652L360 620M700 610L820 640L900 630L1020 668M820 640L800 700L860 760M200 760L380 740L520 790L640 780M1100 720L1260 700L1400 740M1260 700L1280 650" />
@@ -104,4 +129,8 @@ const huts = ['M120 560V532A62 44 0 0 1 244 532V560Z', 'M262 560V530A66 46 0 0 1
   .f-deep { fill: var(--era-1962-silhouette-deep); }
   .f-window { fill: var(--era-1962-window); }
   .s-crack { stroke: var(--era-1962-crack); }
+  .st-window { stop-color: var(--era-1962-window); }
+  .st-blood { stop-color: var(--blood); }
+  .st-blood-dark { stop-color: var(--blood-dark); }
+  .s-blood { stroke: var(--blood); }
 </style>

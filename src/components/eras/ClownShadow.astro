@@ -1,0 +1,51 @@
+---
+// 2016 fun house (design/home-cinematic/04), drawn inside Era2016's SVG: a lit wall with a boarded window and an arched
+// door, and the long shadow of a generic cone-hat clown holding a balloon, leaning across it. Only the shadow: no face,
+// no makeup, no costume, not the films' character. The shadow dims with the lamp that casts it (same flicker, same
+// delay) and leans slowly; both are still at rest (no JS, reduced motion).
+---
+<defs>
+  <linearGradient id="e16-wash" x1="1" y1="0" x2="0" y2="0">
+    <stop offset="0" class="st-bulb" stop-opacity="0.3" /><stop offset="0.85" class="st-bulb" stop-opacity="0" />
+  </linearGradient>
+  <linearGradient id="e16-lamp-cone" x1="1" y1="0" x2="0" y2="0.4">
+    <stop offset="0" class="st-bulb" stop-opacity="0.32" /><stop offset="1" class="st-bulb" stop-opacity="0" />
+  </linearGradient>
+  <radialGradient id="e16-lamp-glow"><stop offset="0" class="st-bulb" stop-opacity="0.35" /><stop offset="1" class="st-bulb" stop-opacity="0" /></radialGradient>
+  <clipPath id="e16-wall"><rect x="430" y="340" width="330" height="180" /></clipPath>
+</defs>
+<g data-depth="0.22">
+  <rect x="430" y="340" width="330" height="180" fill="#141e2c" /><rect x="430" y="340" width="330" height="180" fill="url(#e16-wash)" />
+  <rect x="420" y="330" width="350" height="12" class="f-deck" />
+  <g class="f-bulb" opacity="0.45">{Array.from({ length: 16 }, (_, i) => <circle cx={436 + i * 22} cy="336" r="2.2" />)}</g>
+  <rect x="452" y="376" width="52" height="36" fill="#0b121b" stroke="#22303f" stroke-width="2" /><path d="M452 384L504 404M452 402L504 390" stroke="#22303f" stroke-width="5" />
+  <path d="M560 520V462Q595 436 630 462V520Z" fill="#04070b" />
+  <g clip-path="url(#e16-wall)">
+    <g class="cshadow" data-clown-shadow style="--ld:-2s">
+      <g transform="translate(712 520) skewX(16) scale(1.15 0.88)" fill="#04070b" fill-opacity="0.82">
+        <ellipse cx="-13" cy="-3" rx="13" ry="4" /><ellipse cx="13" cy="-3" rx="13" ry="4" />
+        <path d="M-15 -5L-19 -62H19L15 -5H5L2 -40H-2L-5 -5Z" /><path d="M-24 -60C-30 -80 -26 -100 -16 -108H16C26 -100 30 -80 24 -60Z" />
+        <path d="M-24 -106L-22 -113L-17 -108L-12 -115L-6 -109L0 -116L6 -109L12 -115L17 -108L22 -113L24 -106Z" /><circle cy="-124" r="11" />
+        <path d="M-10 -131L2 -168L10 -131Z" /><circle cx="2" cy="-170" r="4" /><circle cx="-34" cy="-58" r="6" /><circle cx="42" cy="-139" r="6" />
+        <path d="M-22 -100C-34 -88 -36 -74 -34 -62M22 -100C34 -110 40 -124 42 -136" stroke="#04070b" stroke-width="8" fill="none" stroke-linecap="round" />
+        <path d="M42 -142C46 -156 40 -166 46 -176" stroke="#04070b" stroke-width="1.6" fill="none" /><ellipse cx="47" cy="-189" rx="11" ry="14" />
+      </g>
+    </g>
+  </g>
+  <rect x="798" y="392" width="4" height="128" fill="#04070b" /><path d="M800 394H784" stroke="#04070b" stroke-width="3" /><path d="M776 394H792L789 388H779Z" fill="#04070b" />
+  <g class="lamp" data-lamp style="--ld:-2s">
+    <path d="M782 398L430 350V520L782 410Z" fill="url(#e16-lamp-cone)" opacity="0.6" />
+    <circle cx="784" cy="399" r="40" fill="url(#e16-lamp-glow)" /><circle cx="784" cy="399" r="3.4" class="f-bulb" />
+  </g>
+</g>
+
+<style>
+  .st-bulb { stop-color: var(--era-2016-bulb); }
+  .f-bulb { fill: var(--era-2016-bulb); }
+  .f-deck { fill: var(--era-2016-deck); }
+  .cshadow { transform-box: view-box; transform-origin: 712px 520px; }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.kv-motion) .cshadow { animation: lean 11s ease-in-out infinite alternate, kv-flicker 9s linear infinite; animation-delay: 0s, var(--ld, 0s); }
+  }
+  @keyframes lean { from { transform: skewX(0deg); } to { transform: skewX(-7deg); } }
+</style>

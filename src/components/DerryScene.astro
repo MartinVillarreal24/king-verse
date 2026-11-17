@@ -3,9 +3,11 @@
 // and moon, a treeline, Derry's rooftops, steeple and water tower over a still lake that mirrors them, fog, and a red
 // balloon floating slowly. Purely decorative. Layers marked data-depth drift on scroll when motion is allowed.
 // Without JS or with reduced motion it is a still picture (the balloon only bobs under no-preference).
+// design/home-cinematic/04: red seeps into the lake under the balloon's reflection, and dust motes drift.
 import { scatter, skyline, towerLegs, treeline, waterTower } from './eras/art';
 
 const stars = scatter(27, 70, { x: [0, 1600], y: [10, 420], r: [0.8, 2] });
+const motes = scatter(4207, 36, { x: [600, 1480], y: [140, 860], r: [0.6, 1.6], d: 16 });
 const trees = treeline(1600, -20, 1640, 560, [30, 70]);
 ---
 <svg class="scene" data-scene viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
@@ -26,6 +28,9 @@ const trees = treeline(1600, -20, 1640, 560, [30, 70]);
       <stop offset="1" stop-color="#e6edf3" stop-opacity="0" />
     </radialGradient>
     <filter id="scene-blur"><feGaussianBlur stdDeviation="14" /></filter>
+    <radialGradient id="scene-seep">
+      <stop offset="0" class="st-blood" stop-opacity="0.7" /><stop offset="0.5" class="st-blood-dark" stop-opacity="0.35" /><stop offset="1" class="st-blood-dark" stop-opacity="0" />
+    </radialGradient>
   </defs>
   <rect width="1600" height="560" fill="url(#scene-sky)" />
   <g data-depth="0.05">
@@ -56,6 +61,10 @@ const trees = treeline(1600, -20, 1640, 560, [30, 70]);
     <path d={skyline} />
     <path d={waterTower} />
   </g>
+  <g class="a-seep" data-seep>
+    <ellipse cx="960" cy="700" rx="240" ry="44" fill="url(#scene-seep)" />
+    <path d="M960 612C955 640 965 668 957 700C953 720 963 740 959 770" class="s-blood" stroke-opacity="0.5" stroke-width="5" fill="none" filter="url(#scene-blur)" />
+  </g>
   <g class="reflection" opacity="0.16">
     <ellipse cx="932" cy="606" rx="8" ry="20" fill="#ff5c7a" />
   </g>
@@ -69,10 +78,14 @@ const trees = treeline(1600, -20, 1640, 560, [30, 70]);
   <g class="a-shimmer" fill="#e6edf3" opacity="0.5">
     <rect x="1210" y="600" width="60" height="2" style="--d:1" /><rect x="1225" y="640" width="36" height="2" style="--d:2" /><rect x="1200" y="690" width="80" height="2" style="--d:0.4" />
   </g>
+  <g class="a-motes" fill="#b3c0cf" fill-opacity="0.5">{motes.map((m) => <circle cx={m.cx} cy={m.cy} r={m.r} style={`--d:${m.d}`} />)}</g>
 </svg>
 
 <style>
   .scene { width: 100%; height: 100%; }
+  .st-blood { stop-color: var(--blood); }
+  .st-blood-dark { stop-color: var(--blood-dark); }
+  .s-blood { stroke: var(--blood); }
   .balloon, .reflection, .ripple { transform-box: fill-box; }
   @media (prefers-reduced-motion: no-preference) {
     .balloon { transform-origin: 50% 100%; animation: float 6s ease-in-out infinite alternate; }

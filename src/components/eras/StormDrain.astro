@@ -1,0 +1,112 @@
+---
+// 1988–89 foreground (design/home-cinematic/04), drawn inside Era1988's SVG: the rain-swollen street and gutter, red
+// seeping toward the storm drain, the streetlamp beside it, and the implied It. Yellow eyes open in the drain's
+// darkness and blink (HomePage's motion script turns the pupils toward a fine pointer and marks the stage .is-close,
+// which keeps the eyes open and makes the lamp stutter); a balloon rises out of the drain, then the white-gloved hand
+// holding its string. The paper boat sails down the gutter into the drain. No face, no makeup, no costume.
+// At rest (no JS, reduced motion) the eyes are open and the hand holds the balloon above the drain.
+---
+<defs>
+  <linearGradient id="e88-lamp-cone" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" class="st-sun" stop-opacity="0.4" /><stop offset="1" class="st-sun" stop-opacity="0" />
+  </linearGradient>
+  <radialGradient id="e88-lamp-glow"><stop offset="0" class="st-sun" stop-opacity="0.6" /><stop offset="1" class="st-sun" stop-opacity="0" /></radialGradient>
+  <linearGradient id="e88-seep" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" class="st-blood" stop-opacity="0" /><stop offset="0.7" class="st-blood" stop-opacity="0.45" /><stop offset="1" class="st-blood-dark" stop-opacity="0.9" />
+  </linearGradient>
+  <radialGradient id="e88-eye"><stop offset="0" class="st-eye" stop-opacity="0.75" /><stop offset="1" class="st-eye" stop-opacity="0" /></radialGradient>
+  <clipPath id="e88-mouth"><path d="M1290 803.7L1490 797.6V0H1290Z" /></clipPath>
+</defs>
+<g data-depth="0.62">
+  <path d="M-20 776L1620 717L1620 744.2L-20 800Z" class="f-curb" />
+  <path d="M-20 800L1620 744.2L1620 796.8L-20 846Z" class="f-ground" />
+  <path d="M-20 846L1620 796.8L1620 816.1L-20 862Z" class="f-gutter" />
+  <path d="M-20 862L1620 816.1V900H-20Z" class="f-deep" />
+  <path d="M-20 800L1620 744.2" class="s-ledge" stroke-width="2" />
+  <path class="a-seep" data-seep d="M900 818.4L1620 796.8L1620 816.1L900 836.2Z" fill="url(#e88-seep)" />
+  <path class="a-flow s-sun" d="M-80 854.8L1300 813.4" stroke-opacity="0.35" stroke-width="1.6" stroke-dasharray="14 30" fill="none" />
+  <path class="a-flow a-flow-slow" d="M-80 859.8L1300 818.4" stroke="#b3c0cf" stroke-opacity="0.2" stroke-width="1.2" stroke-dasharray="8 36" fill="none" />
+  <rect x="1234.5" y="560" width="3" height="170" class="f-post" /><path d="M1228 560H1244L1241 554H1231Z" class="f-post" />
+  <g class="lamp-it" data-lamp-it>
+    <path d="M1232 562L1196 730H1276L1240 562Z" fill="url(#e88-lamp-cone)" />
+    <circle cx="1236" cy="563" r="26" fill="url(#e88-lamp-glow)" /><circle cx="1236" cy="562" r="2.8" class="f-sun" />
+  </g>
+  <path d="M1290 761.5L1490 754.7L1490 797.7L1290 803.7Z" class="f-mouth" />
+  <path d="M1290 761.5L1490 754.7" class="s-deep" stroke-width="3" />
+  <g class="lurk" data-eyes>
+    {[[1412, 779], [1452, 778]].map(([x, y]) => (
+      <g transform={`translate(${x} ${y}) scale(1.6)`}>
+        <circle r="14" fill="url(#e88-eye)" />
+        <path class="eye f-eye" d="M-7 0Q0 -5.5 7 0Q0 5.5 -7 0Z" />
+        <g data-pupil><ellipse rx="1.3" ry="3.4" class="f-pupil" /></g>
+      </g>
+    ))}
+  </g>
+  <g clip-path="url(#e88-mouth)">
+    <g class="glove" data-glove>
+      <g class="glove-balloon">
+        <path d="M1358 755C1349 700 1361 660 1341 613" stroke="#c9d3df" stroke-opacity="0.7" stroke-width="1.2" fill="none" />
+        <path d="M1337 614H1345L1341 609Z" fill="#d94a66" />
+        <ellipse cx="1341" cy="585" rx="21" ry="26" fill="#ff5c7a" /><ellipse cx="1333" cy="575" rx="5.5" ry="8.5" fill="#fff" opacity="0.35" />
+      </g>
+      <path d="M1339 808L1343 788H1373L1377 808Z" fill="#b3c0cf" /><rect x="1341" y="785" width="34" height="5" rx="2.5" fill="#e6edf3" />
+      <rect x="1342" y="758" width="32" height="29" rx="8" fill="#e6edf3" />
+      <g fill="#e6edf3"><circle cx="1346.5" cy="759" r="4.6" /><circle cx="1354.5" cy="757.5" r="4.6" /><circle cx="1362.5" cy="757.5" r="4.6" /><circle cx="1370" cy="759" r="4.4" /></g>
+      <ellipse cx="1376" cy="772" rx="4.6" ry="8.5" transform="rotate(-22 1376 772)" fill="#e6edf3" />
+      <path d="M1351 768V780M1358 767V780M1365 768V780" stroke="#8b9bb0" stroke-width="1.3" stroke-linecap="round" />
+      <path d="M1350.5 755V761M1358.5 754V760M1366.5 755V761" stroke="#b3c0cf" stroke-width="1" />
+    </g>
+  </g>
+  <g class="boat" data-boat transform="translate(1180 816)">
+    <path d="M-18 -6H18L12 4H-12Z" fill="#e6edf3" opacity="0.9" /><path d="M-9 -6L0 -26L9 -6Z" fill="#b3c0cf" opacity="0.9" />
+    <path d="M-18 6H18" class="s-blood" stroke-opacity="0.4" stroke-width="2" />
+  </g>
+</g>
+
+<style>
+  .st-sun { stop-color: var(--era-1988-sun); }
+  .st-blood { stop-color: var(--blood); }
+  .st-blood-dark { stop-color: var(--blood-dark); }
+  .st-eye { stop-color: var(--eye-glow); }
+  .f-sun { fill: var(--era-1988-sun); }
+  .s-sun { stroke: var(--era-1988-sun); }
+  .f-curb { fill: var(--era-1988-quarry); }
+  .s-ledge { stroke: var(--era-1988-quarry-ledge); }
+  .f-ground { fill: var(--era-1988-ground); }
+  .f-gutter { fill: var(--era-1988-water-deep); }
+  .f-deep { fill: var(--era-1988-silhouette-deep); }
+  .s-deep { stroke: var(--era-1988-silhouette-deep); }
+  .f-post { fill: var(--era-2016-deck); }
+  .f-mouth { fill: #04070b; }
+  .f-eye { fill: var(--eye-glow); }
+  .f-pupil { fill: var(--eye-pupil); }
+  .s-blood { stroke: var(--blood); }
+
+  .eye { transform-box: fill-box; transform-origin: 50% 50%; }
+  [data-pupil] { transition: transform 0.35s ease-out; }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.kv-motion) .a-flow-slow { animation-duration: 2.3s; }
+    :global(.kv-motion) .lurk { animation: lurk 12s ease-in-out infinite; }
+    :global(.kv-motion) .eye { animation: eyeblink 4.6s ease-in-out infinite; }
+    :global(.kv-motion) .lamp-it { animation: flicker-it 12s linear infinite; }
+    /* The pointer came close: the eyes stay open and the lamp stutters. */
+    :global(.kv-motion) :global(.is-close) .lurk { animation: none; opacity: 1; }
+    :global(.kv-motion) :global(.is-close) .lamp-it { animation: flicker-close 2.8s linear infinite; }
+    :global(.kv-motion) .glove { animation: glove 24s ease-in-out infinite; animation-delay: -1.5s; }
+    :global(.kv-motion) .glove-balloon { transform-box: fill-box; transform-origin: 50% 100%; animation: glove-sway 3.4s ease-in-out infinite alternate; }
+    :global(.kv-motion) .boat { animation: boat 14s linear infinite; }
+  }
+  @keyframes lurk { 0%, 22% { opacity: 0; } 30%, 64% { opacity: 1; } 72%, 100% { opacity: 0; } }
+  @keyframes eyeblink { 0%, 90%, 100% { transform: scaleY(1); } 93% { transform: scaleY(0.08); } }
+  /* At most two dips inside any second, on a small dark area (WCAG 2.3.1). */
+  @keyframes flicker-it { 0%, 17% { opacity: 1; } 18% { opacity: 0.35; } 19.5% { opacity: 0.9; } 22% { opacity: 0.3; } 24%, 64% { opacity: 0.55; } 72%, 100% { opacity: 1; } }
+  @keyframes flicker-close { 0%, 100% { opacity: 0.6; } 10% { opacity: 0.2; } 14% { opacity: 0.7; } 32% { opacity: 0.25; } 38% { opacity: 0.6; } }
+  @keyframes glove { 0%, 56% { transform: translateY(260px); } 68% { transform: translateY(0); } 72% { transform: translateY(-3px); } 84% { transform: translateY(0); } 95%, 100% { transform: translateY(260px); } }
+  @keyframes glove-sway { from { transform: translateY(3px) rotate(-3deg); } to { transform: translateY(-6px) rotate(3deg); } }
+  @keyframes boat {
+    0% { transform: translate(560px, 835px) rotate(-3deg); opacity: 0; } 5% { opacity: 1; }
+    35% { transform: translate(860px, 826px) rotate(3deg); } 62% { transform: translate(1110px, 819px) rotate(-3deg); }
+    82% { transform: translate(1285px, 813px) rotate(2deg) scale(0.95); opacity: 1; }
+    90% { transform: translate(1325px, 808px) rotate(-16deg) scale(0.75); opacity: 0; } 100% { transform: translate(1325px, 808px) scale(0.75); opacity: 0; }
+  }
+</style>

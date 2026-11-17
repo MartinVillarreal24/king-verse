@@ -1,0 +1,52 @@
+---
+// The splatter wipe (design/home-cinematic/04): a dark blood splat that bursts and sweeps across the screen once when
+// a new chapter starts. Original, generated shape (seeded, so the build is stable). Hidden at rest: HomePage's motion
+// script adds .is-wiping (JS on, prefers-reduced-motion: no-preference, never twice within 1.5 s). Decorative only.
+import { rng } from '../eras/art';
+
+const next = rng(2704);
+const cx = 820;
+const cy = 450;
+const n = 44;
+const points = Array.from({ length: n }, (_, i) => {
+  const a = (i / n) * Math.PI * 2;
+  const k = 0.86 + next() * 0.28;
+  return [cx + Math.cos(a) * 1010 * k, cy + Math.sin(a) * 590 * k].map(Math.round);
+});
+// Smooth closed outline: quadratic curves through the midpoints of the jagged polygon.
+const mid = (p: number[], q: number[]) => [Math.round((p[0] + q[0]) / 2), Math.round((p[1] + q[1]) / 2)];
+const start = mid(points[n - 1], points[0]);
+const blob = `M${start[0]} ${start[1]}` + points.map((p, i) => {
+  const m = mid(p, points[(i + 1) % n]);
+  return `Q${p[0]} ${p[1]} ${m[0]} ${m[1]}`;
+}).join('') + 'Z';
+const drops = Array.from({ length: 18 }, () => {
+  const a = next() * Math.PI * 2;
+  const k = 1.08 + next() * 0.22;
+  return { x: Math.round(cx + Math.cos(a) * 1010 * k), y: Math.round(cy + Math.sin(a) * 590 * k), r: Math.round(10 + next() * 24) };
+});
+---
+<div class="wipe" data-wipe aria-hidden="true">
+  <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" focusable="false">
+    <g class="splat">
+      <path d={blob} class="f-dark" />
+      <g class="f-dark">{drops.map((d) => <circle cx={d.x} cy={d.y} r={d.r} />)}</g>
+      <path d={blob} class="f-blood" transform={`translate(${cx} ${cy}) scale(0.55) translate(${-cx} ${-cy})`} />
+    </g>
+  </svg>
+</div>
+
+<style>
+  .wipe { position: fixed; inset: 0; z-index: 35; pointer-events: none; visibility: hidden; }
+  .wipe svg { width: 100%; height: 100%; max-width: none; }
+  .f-dark { fill: var(--blood-dark); fill-opacity: 0.9; }
+  .f-blood { fill: var(--blood); fill-opacity: 0.35; }
+  .splat { transform-box: view-box; transform-origin: 12% 50%; }
+  @media (prefers-reduced-motion: no-preference) {
+    .wipe.is-wiping { visibility: visible; animation: wipe-out var(--wipe) linear both; }
+    .wipe.is-wiping .splat { animation: splat var(--wipe) cubic-bezier(0.3, 0.7, 0.3, 1) both; }
+  }
+  @media (prefers-reduced-motion: reduce) { .wipe { display: none; } }
+  @keyframes splat { 0% { transform: translateX(0) scale(0.04); } 38% { transform: translateX(0) scale(1.05); } 100% { transform: translateX(118%) scale(1.05); } }
+  @keyframes wipe-out { 0%, 99% { visibility: visible; } 100% { visibility: hidden; } }
+</style>
