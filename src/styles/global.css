@@ -10,6 +10,44 @@
   --color-err: #ff5c7a;
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  /* Cinematic chapters (design/home-cinematic/01): glass panels, letterbox and chapter rhythm. */
+  --color-panel: rgb(7 11 16 / 0.9); /* --color-ink at 90 %: text panels over the era art */
+  --color-veil: rgb(7 11 16 / 0.6); /* rail links and the scroll cue */
+  --letterbox: 5vh;
+  --motion-chapter-gap: 55vh;
+
+  /* Era palettes: illustration only, never text on them. */
+  --era-1962-sky-mid: #13202e;
+  --era-1962-fog: #2c3d50;
+  --era-1962-horizon: #42566b;
+  --era-1962-ice: #5d7389;
+  --era-1962-crack: #a9bccf;
+  --era-1962-silhouette: #0a1119;
+  --era-1962-silhouette-deep: #05090e;
+  --era-1962-ridge: #1a2735;
+  --era-1962-ridge-deep: #152130;
+  --era-1962-window: #e9b872;
+  --era-1988-dusk: #2b1f3a;
+  --era-1988-rose: #6b3a46;
+  --era-1988-amber: #c9784f;
+  --era-1988-sun: #f0a86a;
+  --era-1988-water: #8a4c4a;
+  --era-1988-water-deep: #3a2536;
+  --era-1988-hills: #2a2034;
+  --era-1988-hills-deep: #1c1526;
+  --era-1988-silhouette: #0d0a12;
+  --era-1988-silhouette-deep: #0a0710;
+  --era-1988-ground: #120e18;
+  --era-1988-quarry: #231a2a;
+  --era-1988-quarry-ledge: #3a2a3c;
+  --era-1988-quarry-water: #1e3346;
+  --era-1988-firefly: #f3d27a;
+  --map-1988-woods: #2f4a2a;
+  --era-2016-bulb: #ffcf7a;
+  --era-2016-water: #2a1a2c;
+  --era-2016-deck: #05090e;
+
   color-scheme: dark;
 }
 
@@ -26,6 +64,33 @@ img, svg { display: block; max-width: 100%; }
 
 .skip-link { position: absolute; left: 1rem; top: -3rem; padding: 0.5rem 0.75rem; background: var(--color-err); color: var(--color-ink); font-weight: 700; z-index: 10; }
 .skip-link:focus { top: 1rem; }
+
+/* Ambient loops of the era art (src/components/eras, DerryScene). Decorative only; they arm when the home motion
+   script adds .kv-motion (JS on and prefers-reduced-motion: no-preference), so without JS the art is a still picture. */
+@media (prefers-reduced-motion: no-preference) {
+  .kv-motion .a-drift { animation: kv-drift 38s linear infinite; }
+  .kv-motion .a-fog { animation: kv-fog 22s ease-in-out infinite alternate; }
+  .kv-motion .a-fog2 { animation: kv-fog 30s ease-in-out infinite alternate-reverse; }
+  .kv-motion .a-beam { transform-box: view-box; animation: kv-beam 9s ease-in-out infinite alternate; }
+  .kv-motion .a-snow circle { animation: kv-snow 11s linear infinite; animation-delay: calc(var(--d) * -1s); }
+  .kv-motion .a-bob { transform-box: fill-box; transform-origin: 50% 100%; animation: kv-bob 4s ease-in-out infinite alternate; }
+  .kv-motion .a-ride { animation: kv-ride 26s linear infinite; }
+  .kv-motion .a-fly circle,
+  .kv-motion .a-bulbs circle,
+  .kv-motion .a-twinkle circle { animation: kv-blink 3s ease-in-out infinite; animation-delay: calc(var(--d) * -1s); }
+  .kv-motion .a-twinkle circle { animation-duration: 5s; }
+  .kv-motion .a-spin { transform-box: fill-box; transform-origin: 50% 50%; animation: kv-spin 60s linear infinite; }
+  .kv-motion .a-shimmer rect { animation: kv-shimmer 3.2s ease-in-out infinite alternate; animation-delay: calc(var(--d) * -1s); }
+}
+@keyframes kv-drift { from { transform: translateX(-900px); } to { transform: translateX(1100px); } }
+@keyframes kv-fog { from { transform: translateX(-80px); } to { transform: translateX(80px); } }
+@keyframes kv-beam { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
+@keyframes kv-snow { from { transform: translate(0, -120px); } to { transform: translate(-40px, 940px); } }
+@keyframes kv-bob { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-5px) rotate(2deg); } }
+@keyframes kv-ride { from { transform: translateX(-500px); } to { transform: translateX(1900px); } }
+@keyframes kv-blink { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
+@keyframes kv-spin { to { transform: rotate(360deg); } }
+@keyframes kv-shimmer { from { opacity: 0.15; transform: scaleX(0.7); } to { opacity: 0.6; transform: scaleX(1.2); } }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

@@ -33,6 +33,16 @@ export const ui = {
       mapCaption: 'Mapa ilustrativo: no a escala, posiciones aproximadas.',
       placesListLabel: 'Lugares',
       notesLabel: 'Notas',
+      eyebrow: 'Derry, Maine · un recorrido no oficial',
+      cue: 'Desliza para despertar a Derry',
+      railLabel: 'Capítulos',
+      prelude: 'Antes de 1962',
+      end: 'Aquí termina el ciclo.',
+      chapters: {
+        '1962': { label: 'Capítulo I', mood: 'Invierno en la base' },
+        '1988': { label: 'Capítulo II', mood: 'Verano en los Barrens' },
+        '2016': { label: 'Capítulo III', mood: 'Canal Days' },
+      } as Record<string, { label: string; mood: string }>,
     },
     sources: {
       title: 'Fuentes',
@@ -64,6 +74,16 @@ export const ui = {
       mapCaption: 'Illustrative map: not to scale, approximate positions.',
       placesListLabel: 'Places',
       notesLabel: 'Notes',
+      eyebrow: 'Derry, Maine · an unofficial journey',
+      cue: 'Scroll to wake Derry',
+      railLabel: 'Chapters',
+      prelude: 'Before 1962',
+      end: 'The cycle ends here.',
+      chapters: {
+        '1962': { label: 'Chapter I', mood: 'Winter at the base' },
+        '1988': { label: 'Chapter II', mood: 'Summer in the Barrens' },
+        '2016': { label: 'Chapter III', mood: 'Canal Days' },
+      } as Record<string, { label: string; mood: string }>,
     },
     sources: {
       title: 'Sources',

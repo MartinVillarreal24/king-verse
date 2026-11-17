@@ -1,12 +1,14 @@
 ---
-// Original decorative scene (no official art), adapted from the portfolio card: Derry rooftops, a steeple and the
-// water tower over a still lake that mirrors them, with a red balloon floating slowly. Purely decorative.
-// Without JS or with reduced motion it is a still picture.
-const skyline = 'M0 96V78H18V70L28 62L38 70V78H52V66H70V74H84V60L92 52L100 60V74H112V80H124V72H176V72L188 64L200 72V82H216V68H232V76H246V84H262V70L272 60L282 70V80H300V60H305L311 44L317 60H322V78H340V68L352 60L364 68V82H380V74H400V96Z';
-const tower = 'M132 48H168V64H132ZM128 48L150 36L172 48Z';
-const legs = 'M137 64L134 96M146 64V96M154 64V96M163 64L166 96M135 76H165M134 88H166';
+// Original decorative scene (no official art), grown from the portfolio card into the cinematic hero: a starry sky
+// and moon, a treeline, Derry's rooftops, steeple and water tower over a still lake that mirrors them, fog, and a red
+// balloon floating slowly. Purely decorative. Layers marked data-depth drift on scroll when motion is allowed.
+// Without JS or with reduced motion it is a still picture (the balloon only bobs under no-preference).
+import { scatter, skyline, towerLegs, treeline, waterTower } from './eras/art';
+
+const stars = scatter(27, 70, { x: [0, 1600], y: [10, 420], r: [0.8, 2] });
+const trees = treeline(1600, -20, 1640, 560, [30, 70]);
 ---
-<svg class="scene" data-scene viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+<svg class="scene" data-scene viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
   <defs>
     <linearGradient id="scene-sky" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#070b10" />
@@ -18,37 +20,54 @@ const legs = 'M137 64L134 96M146 64V96M154 64V96M163 64L166 96M135 76H165M134 88
       <stop offset="0.6" stop-color="#0b121b" />
       <stop offset="1" stop-color="#070b10" />
     </linearGradient>
+    <radialGradient id="scene-moon">
+      <stop offset="0" stop-color="#e6edf3" stop-opacity="0.9" />
+      <stop offset="0.35" stop-color="#e6edf3" stop-opacity="0.12" />
+      <stop offset="1" stop-color="#e6edf3" stop-opacity="0" />
+    </radialGradient>
+    <filter id="scene-blur"><feGaussianBlur stdDeviation="14" /></filter>
   </defs>
-  <rect width="400" height="96" fill="url(#scene-sky)" />
-  <g fill="#8b9bb0" opacity="0.35">
-    <circle cx="40" cy="40" r="0.8" /><circle cx="96" cy="30" r="0.6" /><circle cx="196" cy="42" r="0.7" />
-    <circle cx="330" cy="36" r="0.8" /><circle cx="372" cy="50" r="0.6" /><circle cx="224" cy="20" r="0.5" />
+  <rect width="1600" height="560" fill="url(#scene-sky)" />
+  <g data-depth="0.05">
+    <g class="a-twinkle" fill="#8b9bb0">{stars.map((s) => <circle cx={s.cx} cy={s.cy} r={s.r} style={`--d:${s.d}`} />)}</g>
+    <circle cx="1240" cy="170" r="150" fill="url(#scene-moon)" />
+    <circle cx="1240" cy="170" r="34" fill="#e6edf3" opacity="0.85" />
+    <circle cx="1228" cy="160" r="30" fill="#0f1724" opacity="0.25" />
   </g>
-  <!-- Raised above the rooftops so it floats in open sky instead of resting on a roof. -->
-  <g transform="translate(0 -16)">
-  <g class="balloon" data-balloon>
-    <path d="M232 64C229 74 236 84 231 96C228 104 232 108 230 112" fill="none" stroke="#c9d3df" stroke-opacity="0.55" stroke-width="0.7" />
-    <path d="M229.6 63.5H234.4L232 60.5Z" fill="#d94a66" />
-    <ellipse cx="232" cy="50" rx="9" ry="11" fill="#ff5c7a" />
-    <ellipse cx="228.5" cy="45.5" rx="2.4" ry="3.6" fill="#fff" opacity="0.35" />
+  <g data-depth="0.12"><path d={trees} fill="#0b121b" /></g>
+  <!-- Raised into open sky, clear of the rooftops, and near the middle so portrait crops keep it in view. -->
+  <g transform="translate(910 190) scale(1.1)">
+    <g class="balloon" data-balloon>
+      <path d="M20 42C17 55 24 66 19 78C17 84 21 88 20 92" fill="none" stroke="#c9d3df" stroke-opacity="0.55" stroke-width="1.1" />
+      <path d="M16.5 42H23.5L20 37.5Z" fill="#d94a66" />
+      <ellipse cx="20" cy="20" rx="16" ry="19.5" fill="#ff5c7a" />
+      <ellipse cx="13.8" cy="12.5" rx="4.2" ry="6.4" fill="#fff" opacity="0.35" />
+    </g>
   </g>
+  <g data-depth="0.2">
+    <g transform="translate(0 176) scale(4)" fill="#04070b">
+      <path d={skyline} />
+      <path d={waterTower} />
+      <path d={towerLegs} fill="none" stroke="#04070b" stroke-width="2" />
+    </g>
   </g>
-  <g fill="#04070b">
+  <rect y="560" width="1600" height="340" fill="url(#scene-lake)" />
+  <g transform="matrix(4 0 0 -4 0 944)" fill="#0a1018" opacity="0.7">
     <path d={skyline} />
-    <path d={tower} />
-    <path d={legs} fill="none" stroke="#04070b" stroke-width="2" />
-  </g>
-  <rect y="96" width="400" height="84" fill="url(#scene-lake)" />
-  <g transform="translate(0 192) scale(1 -1)" fill="#0a1018" opacity="0.7">
-    <path d={skyline} />
-    <path d={tower} />
+    <path d={waterTower} />
   </g>
   <g class="reflection" opacity="0.16">
-    <ellipse cx="232" cy="105" rx="2.5" ry="6" fill="#ff5c7a" />
+    <ellipse cx="932" cy="606" rx="8" ry="20" fill="#ff5c7a" />
   </g>
-  <ellipse class="ripple" cx="232" cy="102" rx="16" ry="1.6" fill="none" stroke="#ff5c7a" stroke-opacity="0.35" stroke-width="0.6" />
-  <g stroke="#22303f" stroke-opacity="0.6" stroke-width="0.6">
-    <path d="M20 106H90M130 114H210M290 110H380M60 126H140M230 130H300" />
+  <ellipse class="ripple" cx="932" cy="590" rx="56" ry="5" fill="none" stroke="#ff5c7a" stroke-opacity="0.35" stroke-width="2" />
+  <g class="a-fog" filter="url(#scene-blur)" fill="#8b9bb0" opacity="0.08">
+    <rect x="-100" y="520" width="900" height="60" rx="30" /><rect x="900" y="540" width="800" height="50" rx="25" />
+  </g>
+  <g data-depth="0.35" stroke="#22303f" stroke-opacity="0.7" stroke-width="2.4">
+    <path d="M80 600H360M520 632H840M1160 616H1520M240 690H560M920 720H1200M60 780H300M1300 800H1560" />
+  </g>
+  <g class="a-shimmer" fill="#e6edf3" opacity="0.5">
+    <rect x="1210" y="600" width="60" height="2" style="--d:1" /><rect x="1225" y="640" width="36" height="2" style="--d:2" /><rect x="1200" y="690" width="80" height="2" style="--d:0.4" />
   </g>
 </svg>
 
@@ -60,6 +79,8 @@ const legs = 'M137 64L134 96M146 64V96M154 64V96M163 64L166 96M135 76H165M134 88
     .reflection { transform-origin: 50% 0%; animation: float-reflect 6s ease-in-out infinite alternate; }
     .ripple { transform-origin: 50% 50%; animation: ripple 6s ease-in-out infinite alternate; }
   }
+  /* When the traveling balloon takes over (wide screens with motion), the scene's own balloon steps aside. */
+  :global(.kv-cinema) .balloon, :global(.kv-cinema) .reflection, :global(.kv-cinema) .ripple { visibility: hidden; }
   @keyframes float { from { transform: translateY(3px) rotate(-3deg); } to { transform: translateY(-6px) rotate(3deg); } }
   @keyframes float-reflect { from { transform: translateY(-3px) rotate(3deg); } to { transform: translateY(6px) rotate(-3deg); } }
   @keyframes ripple { from { transform: scaleX(0.8); opacity: 0.6; } to { transform: scaleX(1.15); opacity: 0.3; } }

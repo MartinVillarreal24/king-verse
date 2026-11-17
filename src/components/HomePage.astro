@@ -1,5 +1,8 @@
 ---
-// Home in either locale: the Derry scene as the opening, then the five cycles as the scroll spine.
+// Home in either locale, as "Cinematic chapters" (design/home-cinematic/01): a full-viewport hero whose years wake up
+// in sequence, a chapter rail, the upcoming cycles as a short prelude, then one full-viewport chapter per released
+// cycle. The static HTML is the complete, readable, unpinned page; the script below only enhances it when JS is on
+// and prefers-reduced-motion is no-preference (pinning and the traveling balloon only on wide screens).
 import Base from '../layouts/Base.astro';
 import DerryScene from './DerryScene.astro';
 import CycleSection from './CycleSection.astro';
@@ -9,46 +12,325 @@ import { cycles } from '../data/cycles';
 interface Props { locale: Locale }
 const { locale } = Astro.props;
 const t = ui[locale].home;
+// Upcoming cycles open the story as a prelude; render order stays the cycles' story order (notes depend on it).
+const firstReleased = cycles.findIndex((cycle) => !cycle.upcoming);
+const prelude = cycles.slice(0, Math.max(firstReleased, 0));
+const chapters = cycles.slice(prelude.length);
+const previousOf = (index: number) => (index > 0 ? cycles[index - 1] : undefined);
+const released = (index: number) => index >= 0 && index < cycles.length && !cycles[index].upcoming;
 ---
 <Base locale={locale} route="home" title={t.title} description={t.description}>
-  <div class="hero">
+  <section class="hero" data-hero data-drift="58,26" aria-labelledby="home-title">
     <div class="hero-scene"><DerryScene /></div>
-    <div class="wrap hero-text">
-      <h1>{t.title}</h1>
+    <div class="hero-text">
+      <p class="eyebrow">{t.eyebrow}</p>
+      <h1 id="home-title">{t.title}</h1>
       <p class="lead">{t.lead}</p>
+      <ol class="years" data-years aria-label={t.cyclesLabel}>
+        {cycles.map((cycle, i) => (
+          <li class:list={[cycle.upcoming && 'soon']}>
+            {i > 0 && <span class="plus" aria-hidden="true">+27</span>}
+            <a class="yr" href={`#cycle-${cycle.id}`}>{cycle.year}{cycle.upcoming && <small>{t.upcoming}</small>}</a>
+          </li>
+        ))}
+      </ol>
+      <p class="hero-disclaimer">{ui[locale].disclaimer}</p>
     </div>
+    <a class="cue" href={`#cycle-${cycles[0].id}`}>{t.cue} <span aria-hidden="true">↓</span></a>
+  </section>
+
+  <nav class="rail" data-rail aria-label={t.railLabel}>
+    <ol>
+      {cycles.map((cycle) => (
+        <li><a href={`#cycle-${cycle.id}`} data-soon={cycle.upcoming ? '' : undefined}>{cycle.year}</a></li>
+      ))}
+    </ol>
+  </nav>
+
+  <div class="traveler" data-traveler aria-hidden="true">
+    <svg viewBox="0 0 40 92" focusable="false">
+      <g class="sway">
+        <path d="M20 42C17 55 24 66 19 78C17 84 21 88 20 92" fill="none" stroke="#c9d3df" stroke-opacity="0.55" stroke-width="1.1" />
+        <path d="M16.5 42H23.5L20 37.5Z" fill="#d94a66" />
+        <ellipse cx="20" cy="20" rx="16" ry="19.5" fill="#ff5c7a" />
+        <ellipse cx="13.8" cy="12.5" rx="4.2" ry="6.4" fill="#fff" opacity="0.35" />
+      </g>
+    </svg>
   </div>
-  <div class="wrap cycles" role="list" aria-label={t.cyclesLabel}>
-    {cycles.map((cycle, i) => <div role="listitem"><CycleSection locale={locale} cycle={cycle} first={i === 0} /></div>)}
-  </div>
+
+  {prelude.length > 0 && (
+    <div class="prelude">
+      <p class="prelude-title">{t.prelude}</p>
+      {prelude.map((cycle, i) => <CycleSection locale={locale} cycle={cycle} first={i === 0} previous={previousOf(i)} />)}
+    </div>
+  )}
+  {chapters.map((cycle, i) => {
+    const index = prelude.length + i;
+    return (
+      <CycleSection
+        locale={locale}
+        cycle={cycle}
+        first={index === 0}
+        previous={previousOf(index)}
+        follows={released(index) && released(index - 1)}
+        leadsOn={released(index) && released(index + 1)}
+      />
+    );
+  })}
+  <div class="end"><p>{t.end}</p></div>
 </Base>
 
 <script>
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-  // Content is fully visible in the static HTML; animations only arm here, and only when motion is allowed.
-  if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-    gsap.registerPlugin(ScrollTrigger);
-    gsap.utils.toArray<HTMLElement>('[data-cycle]').forEach((section) => {
-      gsap.from(section.querySelector('.cycle-head'), {
-        autoAlpha: 0,
-        y: 24,
-        duration: 0.8,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: section, start: 'top 80%', once: true },
-      });
+  // Everything is visible and unpinned in the static HTML. This script only enhances it:
+  // - always (JS on): the chapter rail marks the chapter in view with aria-current;
+  // - prefers-reduced-motion: no-preference: years wake up, era maps transition, ambient art loops (.kv-motion);
+  // - and (min-width: 64rem): stages pin while panels scroll over them, layers parallax, the balloon drifts (.kv-cinema).
+  // gsap.matchMedia reverts all of it (inline styles, pins, classes) as soon as a condition stops matching.
+  gsap.registerPlugin(ScrollTrigger);
+  const root = document.documentElement;
+  const sections = gsap.utils.toArray<HTMLElement>('[data-cycle]');
+  const chapters = gsap.utils.toArray<HTMLElement>('[data-chapter]');
+  const flicker = { opacity: [0.7, 0.12, 0.9, 0.3, 1] };
+
+  // Chapter rail.
+  const railLinks = gsap.utils.toArray<HTMLAnchorElement>('[data-rail] a');
+  let current = '';
+  const mark = (id: string) => {
+    current = id;
+    for (const link of railLinks) {
+      if (id && link.getAttribute('href') === `#${id}`) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    }
+  };
+  for (const section of sections) {
+    ScrollTrigger.create({
+      trigger: section,
+      start: 'top 35%',
+      end: 'bottom 35%',
+      onToggle: (self) => {
+        if (self.isActive) mark(section.id);
+        else if (current === section.id) mark('');
+      },
     });
   }
+
+  const mm = gsap.matchMedia();
+  mm.add(
+    { motion: '(prefers-reduced-motion: no-preference)', wide: '(min-width: 64rem)' },
+    (context) => {
+      const { motion, wide } = context.conditions as { motion: boolean; wide: boolean };
+      if (!motion) return;
+      root.classList.add('kv-motion');
+      if (wide) root.classList.add('kv-cinema');
+
+      // Hero: the years flicker on, one after another, in a short intro (done in about 2 s), and then rest fully lit:
+      // the inline opacity is cleared at the end, so the stylesheet's AA colors apply. Skipped if the hero is not in view.
+      const heroBox = document.querySelector('[data-hero]')?.getBoundingClientRect();
+      if (heroBox && heroBox.bottom > 0) {
+        gsap.utils.toArray<HTMLElement>('[data-years] .yr').forEach((year, i) => {
+          gsap.set(year, { opacity: 0.3 });
+          gsap.to(year, { keyframes: { opacity: [0.85, 0.35, 1, 0.6, 1] }, duration: 0.9, delay: 0.2 + i * 0.22, ease: 'none', clearProps: 'opacity' });
+        });
+      }
+
+      // Panel heads rise in (opacity only: links inside stay focusable).
+      for (const head of gsap.utils.toArray<HTMLElement>('[data-cycle] .cycle-head')) {
+        gsap.from(head, { opacity: 0, y: 24, duration: 0.8, ease: 'power2.out', scrollTrigger: { trigger: head, start: 'top 85%', once: true } });
+      }
+
+      const maps: { svg: SVGSVGElement; own: string }[] = [];
+      for (const chapter of chapters) {
+        // The giant year lights up digit by digit when the chapter arrives.
+        const digits = chapter.querySelectorAll<HTMLElement>('[data-giant] .dg');
+        gsap.set(digits, { opacity: 0.08 });
+        let lit = false;
+        const light = () => {
+          if (lit) return;
+          lit = true;
+          digits.forEach((digit, i) => gsap.to(digit, { keyframes: flicker, duration: 1.1, delay: i * 0.14, ease: 'none' }));
+        };
+        ScrollTrigger.create({ trigger: chapter, start: 'top 55%', onEnter: light, onEnterBack: light, onLeave: light });
+
+        // Era transition: the map opens on the previous era and turns into its own.
+        const svg = chapter.querySelector<SVGSVGElement>('[data-places] svg[data-era]');
+        const figure = svg?.closest('figure');
+        if (svg && figure && svg.dataset.eraFrom) {
+          const own = svg.dataset.era ?? '';
+          maps.push({ svg, own });
+          svg.dataset.era = svg.dataset.eraFrom;
+          let shown = false;
+          const show = () => {
+            if (shown) return;
+            shown = true;
+            gsap.delayedCall(0.25, () => { svg.dataset.era = own; });
+          };
+          figure.addEventListener('focusin', show);
+          ScrollTrigger.create({ trigger: figure, start: 'top 75%', onEnter: show, onEnterBack: show, onLeave: show });
+        }
+
+        if (!wide) continue;
+        // Cinema: the stage stays pinned for the whole chapter while the glass panels scroll over it.
+        const stage = chapter.querySelector<HTMLElement>('[data-stage]');
+        if (!stage) continue;
+        ScrollTrigger.create({ trigger: chapter, start: 'top top', end: 'bottom bottom', pin: stage, pinSpacing: false });
+        // A chapter that follows another overlaps its last viewport: while it scrolls up that viewport, its frame is
+        // held in place (y counters the scroll) and fades in over the previous, still pinned, stage.
+        // The art crossfades over the whole viewport of scroll; the type does not: the previous slate and giant year
+        // leave first, this chapter's arrive last, so two years never sit on top of each other.
+        const frame = stage.querySelector<HTMLElement>('[data-frame]');
+        const previousStage = chapters[chapters.indexOf(chapter) - 1]?.querySelector('[data-stage]');
+        if (frame && previousStage && chapter.hasAttribute('data-follows')) {
+          const restOpacity = (_: number, el: Element) => (el.classList.contains('giant') ? 0.92 : 1);
+          const ownType = frame.querySelectorAll('.slate, .giant');
+          gsap.timeline({ scrollTrigger: { trigger: chapter, start: 'top bottom', end: 'top top', scrub: true, invalidateOnRefresh: true } })
+            .fromTo(frame, { y: () => -window.innerHeight, opacity: 0 }, { y: 0, opacity: 1, ease: 'none', duration: 1 }, 0)
+            .to(previousStage.querySelectorAll('.slate, .giant'), { opacity: 0, ease: 'none', duration: 0.3 }, 0)
+            .fromTo(ownType, { opacity: 0 }, { opacity: restOpacity, ease: 'none', duration: 0.3 }, 0.7);
+        }
+        for (const layer of stage.querySelectorAll<SVGGElement>('[data-depth]')) {
+          const depth = Number(layer.dataset.depth) * 130;
+          gsap.fromTo(layer, { y: depth }, { y: -depth, ease: 'none', scrollTrigger: { trigger: chapter, start: 'top bottom', end: 'bottom top', scrub: true } });
+        }
+      }
+
+      if (wide) {
+        // Hero parallax.
+        const hero = document.querySelector<HTMLElement>('[data-hero]');
+        for (const layer of hero?.querySelectorAll<SVGGElement>('[data-depth]') ?? []) {
+          gsap.to(layer, { y: -Number(layer.dataset.depth) * 260, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+        }
+
+        // One balloon: it rests in the hero, then in each pinned chapter (left column, below the slate, above the giant
+        // year), and drifts from one chapter's rest point to the next during their crossfade. It fades out wherever
+        // its path would cross text (leaving the hero, the prelude, after the last chapter).
+        const traveler = document.querySelector<HTMLElement>('[data-traveler]');
+        const heroEl = document.querySelector<HTMLElement>('[data-hero]');
+        const anchors = gsap.utils.toArray<HTMLElement>('[data-hero][data-drift], [data-chapter][data-drift]');
+        if (traveler && heroEl && anchors.length) {
+          const setX = gsap.quickSetter(traveler, 'x', 'px');
+          const setY = gsap.quickSetter(traveler, 'y', 'px');
+          type Rest = { start: number; end: number; x: number; y: number; hero: boolean };
+          let rests: Rest[] = [];
+          let shown: boolean | undefined;
+          const measure = () => {
+            rests = anchors.map((el) => {
+              const box = el.getBoundingClientRect();
+              const top = box.top + window.scrollY;
+              const [x, y] = (el.dataset.drift ?? '50,30').split(',').map(Number);
+              const hero = el === heroEl;
+              // Visible while the stage fills the viewport: hero until 40 % scrolled; a chapter while it is pinned.
+              return { start: hero ? -Infinity : top, end: hero ? top + box.height * 0.4 : top + box.height - window.innerHeight, x, y, hero };
+            });
+          };
+          const smooth = (p: number) => p * p * (3 - 2 * p);
+          const place = () => {
+            const at = window.scrollY;
+            const vh = window.innerHeight;
+            // Rest at the last anchor reached; drift toward the next one during the viewport before it starts.
+            let { x, y } = rests[0];
+            for (let i = 0; i < rests.length; i++) {
+              const next = rests[i + 1];
+              if (at < rests[i].start) break;
+              ({ x, y } = rests[i]);
+              if (next && !rests[i].hero && at >= next.start - vh && at < next.start) {
+                const p = smooth((at - (next.start - vh)) / vh);
+                x = rests[i].x + (next.x - rests[i].x) * p;
+                y = rests[i].y + (next.y - rests[i].y) * p + Math.sin(p * Math.PI) * 3;
+              }
+            }
+            setX((x / 100) * window.innerWidth - 22);
+            setY((y / 100) * vh - 40);
+            const visible = rests.some((r) => at >= r.start - 1 && at <= r.end);
+            if (visible !== shown) {
+              shown = visible;
+              gsap.to(traveler, { opacity: visible ? 1 : 0, duration: 0.35, overwrite: 'auto' });
+            }
+          };
+          ScrollTrigger.create({ start: 0, end: 'max', onUpdate: place, onRefresh: () => { measure(); place(); } });
+        }
+      }
+
+      ScrollTrigger.refresh();
+      return () => {
+        root.classList.remove('kv-motion', 'kv-cinema');
+        for (const { svg, own } of maps) svg.dataset.era = own;
+      };
+    },
+  );
 </script>
 
 <style>
-  .hero { position: relative; isolation: isolate; min-height: min(80vh, 40rem); display: flex; align-items: flex-end; overflow: hidden; }
-  .hero-scene { position: absolute; inset: 0; z-index: -1; }
-  /* Scrim so the title and lead stay AA over the lake. */
-  .hero-scene::after { content: ''; position: absolute; inset: auto 0 0; height: 55%; background: linear-gradient(to bottom, transparent, var(--color-ink) 75%); }
-  .hero-text { padding-block: 3rem; }
-  h1 { margin: 0; font: 800 clamp(2.5rem, 9vw, 5.5rem)/1 var(--font-mono); letter-spacing: -0.03em; }
-  .lead { max-width: 36rem; margin: 1rem 0 0; font-size: 1.125rem; color: var(--color-subtext); }
-  .cycles { padding-block: 2rem 4rem; padding-left: 2.5rem; }
+  /* ---------- Hero ---------- */
+  .hero { position: relative; isolation: isolate; min-height: 100vh; min-height: 100svh; display: flex; align-items: flex-end; overflow: hidden; }
+  .hero-scene { position: absolute; inset: 0; z-index: -2; }
+  /* Scrim so the title, lead and years stay AA over the lake. */
+  .hero-scene::after { content: ''; position: absolute; inset: auto 0 0; height: 62%; background: linear-gradient(to bottom, transparent, var(--color-ink) 78%); }
+  /* Letterbox bar. */
+  .hero::before { content: ''; position: absolute; inset: 0 0 auto; height: var(--letterbox); background: var(--color-ink); z-index: -1; }
+  .hero-text { width: 100%; max-width: 72rem; padding: 6rem 1rem 3rem; }
+  .eyebrow { margin: 0 0 1rem; font: 0.8125rem/1.4 var(--font-mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-subtext); }
+  h1 { margin: 0; font: 800 clamp(3rem, 10vw, 9rem)/0.92 var(--font-mono); letter-spacing: -0.04em; text-wrap: balance; }
+  .lead { max-width: 36rem; margin: 1.25rem 0 0; font-size: 1.25rem; color: var(--color-subtext); }
+  /* Each "+27" lives in the same item as the year it leads to, tight to it, with wider space between items.
+     Narrow screens stack the years so a label never ends up alone at a line start. */
+  .years { display: grid; gap: 0; margin: 1.75rem 0 0; padding: 0; list-style: none; font: 700 1.5rem/1 var(--font-mono); }
+  .years li { display: grid; grid-template-columns: 2.25rem auto; align-items: baseline; }
+  .years li:first-child { padding-left: 2.25rem; grid-template-columns: auto; }
+  @media (min-width: 48rem) {
+    .years { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 1.5rem; margin-top: 2rem; }
+    .years li { display: flex; align-items: baseline; gap: 0.4rem; white-space: nowrap; }
+    .years li:first-child { padding-left: 0; }
+  }
+  .plus { font: 400 0.75rem/1 var(--font-mono); color: var(--color-err); }
+  .yr { display: inline-block; padding: 0.5rem 0; color: var(--color-text); text-decoration: none; text-shadow: 0 0 18px #ff5c7a40; }
+  .yr:hover { color: var(--color-err); }
+  .soon .yr { color: var(--color-subtext); text-shadow: none; text-decoration: underline dashed var(--color-comment); text-underline-offset: 0.35em; }
+  .yr small { margin-left: 0.5rem; font: 400 0.75rem/1 var(--font-mono); color: var(--color-err); }
+  .hero-disclaimer { margin: 1.5rem 0 0; font-size: 0.8125rem; color: var(--color-subtext); }
+  .cue { display: none; }
+
+  @media (min-width: 48rem) {
+    .hero-text { padding: 6rem 2.5rem 3.5rem; }
+  }
+  @media (min-width: 64rem) {
+    .hero-text { padding-right: 10rem; }
+    .cue { display: block; position: absolute; right: 10rem; bottom: 3.5rem; padding: 0.75rem 1rem; border: 1px solid var(--color-overlay); border-radius: 9999px; background: var(--color-veil); font: 0.8125rem/1.4 var(--font-mono); color: var(--color-subtext); text-decoration: none; }
+    .cue:hover { color: var(--color-text); }
+  }
+
+  /* ---------- Chapter rail (wide screens; on phones the hero years are the chapter index) ---------- */
+  .rail { display: none; }
+  @media (min-width: 64rem) {
+    .rail { display: block; position: fixed; right: 1.25rem; top: 50%; transform: translateY(-50%); z-index: 40; }
+    .rail ol { display: grid; gap: 0.25rem; margin: 0; padding: 0 0 0 1rem; list-style: none; border-left: 1px solid color-mix(in srgb, var(--color-err) 55%, transparent); }
+    .rail a { position: relative; display: flex; align-items: center; min-height: 44px; padding: 0.5rem 0.75rem; border-radius: 0.25rem; background: var(--color-veil); font: 0.8125rem/1.2 var(--font-mono); color: var(--color-subtext); text-decoration: none; }
+    .rail a::before { content: ''; position: absolute; left: calc(-1rem - 5px); top: 50%; width: 9px; height: 9px; margin-top: -5px; border-radius: 9999px; border: 1px solid var(--color-err); background: var(--color-ink); }
+    .rail a[data-soon]::before { border-style: dashed; }
+    .rail a:hover, .rail a[aria-current] { color: var(--color-text); }
+    .rail a[aria-current] { text-decoration: underline; text-underline-offset: 0.3em; }
+    .rail a[aria-current]::before { background: var(--color-err); box-shadow: 0 0 10px #ff5c7a99, 0 0 22px #ff5c7a40; }
+  }
+
+  /* ---------- Traveling balloon (only in cinema mode) ---------- */
+  .traveler { display: none; }
+  :global(.kv-cinema) .traveler { display: block; position: fixed; left: 0; top: 0; z-index: 30; width: 44px; pointer-events: none; will-change: transform; }
+  .traveler svg { width: 44px; height: auto; overflow: visible; }
+  .sway { transform-box: fill-box; transform-origin: 50% 100%; }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.kv-motion) .sway { animation: sway 6s ease-in-out infinite alternate; }
+  }
+  @keyframes sway { from { transform: translateY(3px) rotate(-3deg); } to { transform: translateY(-6px) rotate(3deg); } }
+
+  /* ---------- Prelude (upcoming cycles) and ending ---------- */
+  .prelude { display: grid; gap: 1.5rem; max-width: 48rem; padding: 4rem 1rem 3rem; }
+  .prelude-title { margin: 0; font: 600 0.875rem/1.4 var(--font-mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-comment); }
+  .end { padding: 4rem 1rem 3rem; }
+  .end p { margin: 0; font: 700 1.5rem/1.3 var(--font-mono); color: var(--color-text); }
+  @media (min-width: 48rem) {
+    .prelude, .end { padding-inline: 2.5rem; }
+    .prelude { max-width: 52rem; }
+  }
 </style>
