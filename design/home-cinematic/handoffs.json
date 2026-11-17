@@ -3,13 +3,14 @@
   "chosen": "01-cinematic-chapters.html",
   "handoffs": {
     "01-cinematic-chapters.html": {
-      "status": "in_progress",
+      "status": "implemented",
       "queued": false,
       "sentAt": "2026-11-17T19:20:20.328Z",
       "startedAt": "2026-11-17T19:20:28.129Z",
-      "implementedAt": null,
+      "implementedAt": "2026-11-17T19:50:00.132Z",
       "feature": "odd/tasks/visual-polish.md",
-      "note": "Implementing in Astro + GSAP: chapters, era illustrations, motion; sources update."
+      "note": "Already implemented on feat/visual-polish (4731c91, PR #5). Leave canvas comments for any adjustment.",
+      "previewUrl": "http://localhost:4321/"
     }
   }
 }

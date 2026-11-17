@@ -24,3 +24,4 @@ Raise the site from a plain skeleton to a professional, cinematic experience: fi
 - L3 (T2 evidence): official sources and both conflicts resolved in odd/research/visual-polish-sources.md (epilogue = October 1988; Eddie = Neibolt fence post). Applying them to src/data is part of T3.
 - L4 (handoff, 2026-11-17): chosen artboard design/home-cinematic/01-cinematic-chapters.html; 02-editorial-atlas and 03-lake-timeline remain alternatives.
 - L5 (evidence): npm test 33/33; parent visual check with headless Chrome over CDP at 1440×900 (scroll positions per chapter) and 390×844; worker verified crossfade, balloon path, years opacity and reduced motion. Not measured with a contrast tool; 1024–1280px reasoned, not screenshotted.
+- L6 (handoff repeated, 2026-11-17): same artboard 01-cinematic-chapters handed off again with no open canvas comments; already implemented in 4731c91 (PR #5), no new work.
