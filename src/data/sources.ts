@@ -15,7 +15,7 @@ export interface Source {
   accessed?: string;
 }
 
-// Ordered by first appearance on the home, so note numbers read 1, 2, 3... down the page.
+// Any order: src/data/citations.ts numbers them by first appearance on the home.
 // Verified 2026-11-17: each claim was checked on the fetched page itself.
 export const sources: Source[] = [
   {
@@ -80,11 +80,119 @@ export const sources: Source[] = [
     url: 'https://www.laweekly.com/review-can-it-chapter-2-creep-into-our-contemporary-consciousness/',
     accessed: '2026-11-17',
   },
+  {
+    id: 'sky-derry-e1',
+    author: 'Sky',
+    title: "IT: Welcome to Derry - Season 1 Episode 1 'The Pilot' explained",
+    publisher: 'Sky',
+    url: 'https://www.sky.com/watch/it-welcome-to-derry/episode-1',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'nerdist-operation-precept',
+    author: 'Tai Gooden',
+    title: 'The Military and Operation Precept in WELCOME TO DERRY, Explained',
+    publisher: 'Nerdist',
+    date: '2025-10-31',
+    url: 'https://nerdist.com/article/the-military-and-operation-precept-in-welcome-to-derry-explained/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'cbr-derry-retcons',
+    author: 'Amy Watkins',
+    title: "6 Welcome to Derry Season 1 Retcons That Broke Stephen King's IT Lore",
+    publisher: 'CBR',
+    date: '2025-12-15',
+    url: 'https://www.cbr.com/welcome-to-derry-retcons-broke-stephen-king-it-lore/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'variety-derry-credits-scene',
+    author: 'Andrew McGowan',
+    title: "'It: Welcome to Derry' Finale Credits Scene: Sophia Lillis as Beverly",
+    publisher: 'Variety',
+    date: '2025-12-15',
+    url: 'https://variety.com/2025/tv/news/it-welcome-to-derry-finale-credits-scene-sophia-lillis-beverly-1236607044/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'collider-derry-e7',
+    author: 'Shawn Van Horn',
+    title: "'IT: Welcome to Derry' Episode 7 Recap: Prepare To Have Your Heart Ripped Out by the Season's Scariest, Saddest Hour",
+    publisher: 'Collider',
+    date: '2025-12-08',
+    url: 'https://collider.com/it-welcome-to-derry-episode-7-recap-hbo-pennywise/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'ign-derry-finale',
+    author: 'Tom Jorgensen',
+    title: 'It: Welcome to Derry Season Finale Review',
+    publisher: 'IGN Middle East',
+    date: '2025-12-15',
+    url: 'https://me.ign.com/en/it-welcome-to-derry-season-finale/239104/review/it-welcome-to-derry-season-finale-review',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'sky-derry-e2',
+    author: 'Sky',
+    title: "IT: Welcome to Derry - Season 1 Episode 2 'The Thing In The Dark' explained",
+    publisher: 'Sky',
+    url: 'https://www.sky.com/watch/it-welcome-to-derry/episode-2',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'polygon-derry-ending',
+    author: 'Chris Hayner',
+    title: 'It: Welcome to Derry ending and post-credits scene explained: How it changes Pennywise canon',
+    publisher: 'Polygon',
+    date: '2025-12-15',
+    url: 'https://www.polygon.com/it-welcome-to-derry-season-1-finale-spoilers-beverly-sophia-lillis/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'collider-it-timeline',
+    author: 'Alyse Wax',
+    title: 'It Movie Timeline Explained: A Complete Guide to the History of Pennywise',
+    publisher: 'Collider',
+    date: '2019-09-06',
+    url: 'https://collider.com/it-movie-timeline-recap-explained/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'collider-it-ending',
+    author: 'Haleigh Foutch',
+    title: "IT Movie Ending Explained: What's Next for Pennywise?",
+    publisher: 'Collider',
+    date: '2017-09-07',
+    url: 'https://collider.com/it-movie-ending-explained/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'time-it2-ending',
+    author: 'Megan McCluskey',
+    title: 'How to Make Sense of the Ending of IT Chapter Two',
+    publisher: 'TIME',
+    date: '2019-09-07',
+    url: 'https://time.com/5663676/it-chapter-2-ending-ritual-of-chud/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'variety-it-review',
+    author: 'Andrew Barker',
+    title: "'It' Review: Fresh Adaptation of Stephen King's Horror Tome",
+    publisher: 'Variety',
+    date: '2017-09-06',
+    url: 'https://variety.com/2017/film/reviews/it-review-stephen-king-1202547601/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'collider-jade-scene',
+    author: 'Matt Donato',
+    title: "How IT Chapter 2's Jade of the Orient Scene Reinvents an Iconic Moment",
+    publisher: 'Collider',
+    date: '2019-09-15',
+    url: 'https://collider.com/it-2-jade-of-the-orient-restaurant-scene-explained/',
+    accessed: '2026-11-17',
+  },
 ];
-
-/** Note number (1-based) of a source, in bibliography order, so inline notes and the sources page agree. */
-export const noteNumber = (id: string): number => {
-  const index = sources.findIndex((s) => s.id === id);
-  if (index === -1) throw new Error(`Unknown source "${id}" — add it to src/data/sources.ts first.`);
-  return index + 1;
-};

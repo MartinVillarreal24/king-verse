@@ -2,7 +2,7 @@
 // Sources page in either locale: the numbered bibliography that inline notes point to.
 import Base from '../layouts/Base.astro';
 import { ui, type Locale } from '../i18n/ui';
-import { sources } from '../data/sources';
+import { orderedSources as sources } from '../data/citations';
 
 interface Props { locale: Locale }
 const { locale } = Astro.props;

@@ -29,6 +29,9 @@ export const ui = {
       placesTitle: 'Derry en esta época',
       placesEmpty: 'Los lugares de esta época están en preparación.',
       bodyEmpty: 'Contenido en preparación.',
+      mapLabel: 'Mapa de Derry',
+      mapCaption: 'Mapa ilustrativo: no a escala, posiciones aproximadas.',
+      placesListLabel: 'Lugares',
       notesLabel: 'Notas',
     },
     sources: {
@@ -57,6 +60,9 @@ export const ui = {
       placesTitle: 'Derry in this era',
       placesEmpty: 'The places of this era are being prepared.',
       bodyEmpty: 'Content in preparation.',
+      mapLabel: 'Map of Derry',
+      mapCaption: 'Illustrative map: not to scale, approximate positions.',
+      placesListLabel: 'Places',
       notesLabel: 'Notes',
     },
     sources: {
