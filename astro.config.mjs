@@ -3,8 +3,9 @@ import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-  // Hosted on Vercel's default URL for now; set `site` once the martinherrera.dev subdomain is picked
-  // (canonical and hreflang URLs become absolute then).
+  // Vercel's default URL for now; switch to the martinherrera.dev subdomain once it is picked.
+  // Used for absolute canonical and hreflang URLs.
+  site: 'https://king-verse-pi.vercel.app',
   i18n: {
     defaultLocale: 'es',
     locales: ['es', 'en'],

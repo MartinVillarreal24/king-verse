@@ -16,8 +16,8 @@ test('each home links its alternate language and declares hreflang', () => {
   assert.match(es, /<a [^>]*href="\/en\/"[^>]*hreflang="en"/);
   assert.match(en, /<a [^>]*href="\/"[^>]*hreflang="es"/);
   for (const html of [es, en]) {
-    assert.match(html, /<link rel="alternate" hreflang="es" href="[^"]*\/"/);
-    assert.match(html, /<link rel="alternate" hreflang="en" href="[^"]*\/en\/"/);
+    assert.match(html, /<link rel="alternate" hreflang="es" href="https:\/\/king-verse-pi\.vercel\.app\/"/);
+    assert.match(html, /<link rel="alternate" hreflang="en" href="https:\/\/king-verse-pi\.vercel\.app\/en\/"/);
   }
 });
 
