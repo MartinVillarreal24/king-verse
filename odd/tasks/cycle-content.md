@@ -15,9 +15,9 @@ Real content for 1962, 1988–89 and 2016: one to two paragraphs per cycle (full
 
 - [x] T1 — S1, S5 — explore — research plot and on-screen places per cycle with verified sources — research in L4 (no commit)
 - [x] T2 — S3, S4 — inline — places data model + accessible SVG mini-map with no-JS list fallback, tests — 986fcd5
-- [ ] T3 — S1, S2, S3, S5, S6 — inline — 1962 text, places and sources
-- [ ] T4 — S1, S2, S3, S5, S6 — inline — 1988–89 text, places and sources
-- [ ] T5 — S1, S2, S3, S5, S6 — inline — 2016 text, places and sources
+- [x] T3 — S1, S2, S3, S5, S6 — inline — 1962 text, places and sources — efee6b5
+- [x] T4 — S1, S2, S3, S5, S6 — inline — 1988–89 text, places and sources — efee6b5
+- [x] T5 — S1, S2, S3, S5, S6 — inline — 2016 text, places and sources — efee6b5
 
 ## Log
 
@@ -25,3 +25,4 @@ Real content for 1962, 1988–89 and 2016: one to two paragraphs per cycle (full
 - L2 (user answers): spoilers "Todo a la vista"; text "Medio: 1–2 párrafos"; places "Mini-mapa por época"; scope "Los tres estrenados".
 - L3 (assumption, reported to user): trade press (Variety, Deadline, LA Times) stays accepted while HBO/WBD press pages return 403.
 - L4 (T1 evidence, explorer 2026-11-17): 1962 sources — Sky episode explainers (ep 1, 2), Nerdist (Operation Precept), CBR (retcons), Variety (finale credits scene), Collider (ep 7 recap), IGN ME (finale review), Polygon (ending explained). Films — Collider timeline (Alyse Wax, 2019-09-06), Collider IT ending (2017-09-07), TIME Chapter Two ending (2019-09-07), Variety IT review (2017-09-06), Collider Jade scene (2019-09-15). Gaps: epilogue year 1986 vs 1988 conflicting (do not state); Eddie's weapon (fence post vs poker) conflicting (do not state); no source gives map positions, so the mini-maps are illustrative, not to scale, positions approximate (say so on the map).
+- L5 (evidence): npm test 22/22; visual check es/en with headless Chrome (maps for 1962, 1988–89, 2016; side-by-side layout). Not tested: map click/focus script in a real browser, astro check.
