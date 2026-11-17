@@ -24,11 +24,14 @@ const legs = 'M137 64L134 96M146 64V96M154 64V96M163 64L166 96M135 76H165M134 88
     <circle cx="40" cy="40" r="0.8" /><circle cx="96" cy="30" r="0.6" /><circle cx="196" cy="42" r="0.7" />
     <circle cx="330" cy="36" r="0.8" /><circle cx="372" cy="50" r="0.6" /><circle cx="224" cy="20" r="0.5" />
   </g>
+  <!-- Raised above the rooftops so it floats in open sky instead of resting on a roof. -->
+  <g transform="translate(0 -16)">
   <g class="balloon" data-balloon>
-    <path d="M232 64C229 72 236 78 231 86C228 91 232 94 230 96" fill="none" stroke="#c9d3df" stroke-opacity="0.55" stroke-width="0.7" />
+    <path d="M232 64C229 74 236 84 231 96C228 104 232 108 230 112" fill="none" stroke="#c9d3df" stroke-opacity="0.55" stroke-width="0.7" />
     <path d="M229.6 63.5H234.4L232 60.5Z" fill="#d94a66" />
     <ellipse cx="232" cy="50" rx="9" ry="11" fill="#ff5c7a" />
     <ellipse cx="228.5" cy="45.5" rx="2.4" ry="3.6" fill="#fff" opacity="0.35" />
+  </g>
   </g>
   <g fill="#04070b">
     <path d={skyline} />
