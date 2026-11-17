@@ -1,0 +1,69 @@
+---
+// Base layout for every page: language, hreflang, header with the language switch, and the visible fan-site disclaimer.
+import '../styles/global.css';
+import { otherLocale, routes, ui, type Locale, type RouteKey } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  route: RouteKey;
+  title: string;
+  description: string;
+}
+const { locale, route, title, description } = Astro.props;
+const t = ui[locale];
+const other = otherLocale(locale);
+// Absolute once `site` is configured; root-relative until then.
+const href = (path: string) => (Astro.site ? new URL(path, Astro.site).href : path);
+const pageTitle = route === 'home' ? `${t.siteName} — ${title}` : `${title} · ${t.siteName}`;
+---
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#070b10" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={href(routes[route][locale])} />
+    <link rel="alternate" hreflang="es" href={href(routes[route].es)} />
+    <link rel="alternate" hreflang="en" href={href(routes[route].en)} />
+    <link rel="alternate" hreflang="x-default" href={href(routes[route].es)} />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">{t.skipLink}</a>
+    <header class="site-header">
+      <div class="wrap header-row">
+        <a class="brand" href={routes.home[locale]}>{t.siteName}</a>
+        <nav aria-label={locale === 'es' ? 'Principal' : 'Main'}>
+          <ul>
+            <li><a href={routes.home[locale]} aria-current={route === 'home' ? 'page' : undefined}>{t.nav.home}</a></li>
+            <li><a href={routes.sources[locale]} aria-current={route === 'sources' ? 'page' : undefined}>{t.nav.sources}</a></li>
+            <li><a href={routes[route][other]} hreflang={other} lang={other} title={t.langSwitch.title}>{t.langSwitch.label}</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="content">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <p class="disclaimer" data-disclaimer>{t.disclaimer}</p>
+        <p class="credits">{t.credits}</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header { border-bottom: 1px solid var(--color-overlay); }
+  .header-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-block: 0.875rem; }
+  .brand { font: 700 1rem/1 var(--font-mono); color: var(--color-text); text-decoration: none; letter-spacing: 0.04em; }
+  nav ul { display: flex; gap: 1.25rem; margin: 0; padding: 0; list-style: none; font: 0.875rem/1 var(--font-mono); }
+  nav a { color: var(--color-subtext); text-decoration: none; }
+  nav a:hover, nav a[aria-current='page'] { color: var(--color-text); text-decoration: underline; }
+  .site-footer { border-top: 1px solid var(--color-overlay); padding-block: 1.5rem; font-size: 0.875rem; }
+  .disclaimer { margin: 0 0 0.25rem; color: var(--color-subtext); }
+  .credits { margin: 0; color: var(--color-comment); }
+</style>
