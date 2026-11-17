@@ -1,0 +1,63 @@
+---
+// Original decorative scene (no official art), adapted from the portfolio card: Derry rooftops, a steeple and the
+// water tower over a still lake that mirrors them, with a red balloon floating slowly. Purely decorative.
+// Without JS or with reduced motion it is a still picture.
+const skyline = 'M0 96V78H18V70L28 62L38 70V78H52V66H70V74H84V60L92 52L100 60V74H112V80H124V72H176V72L188 64L200 72V82H216V68H232V76H246V84H262V70L272 60L282 70V80H300V60H305L311 44L317 60H322V78H340V68L352 60L364 68V82H380V74H400V96Z';
+const tower = 'M132 48H168V64H132ZM128 48L150 36L172 48Z';
+const legs = 'M137 64L134 96M146 64V96M154 64V96M163 64L166 96M135 76H165M134 88H166';
+---
+<svg class="scene" data-scene viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="scene-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#070b10" />
+      <stop offset="0.45" stop-color="#0f1724" />
+      <stop offset="1" stop-color="#3a1b2a" />
+    </linearGradient>
+    <linearGradient id="scene-lake" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#141e2c" />
+      <stop offset="0.6" stop-color="#0b121b" />
+      <stop offset="1" stop-color="#070b10" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="96" fill="url(#scene-sky)" />
+  <g fill="#8b9bb0" opacity="0.35">
+    <circle cx="40" cy="40" r="0.8" /><circle cx="96" cy="30" r="0.6" /><circle cx="196" cy="42" r="0.7" />
+    <circle cx="330" cy="36" r="0.8" /><circle cx="372" cy="50" r="0.6" /><circle cx="224" cy="20" r="0.5" />
+  </g>
+  <g class="balloon" data-balloon>
+    <path d="M232 64C229 72 236 78 231 86C228 91 232 94 230 96" fill="none" stroke="#c9d3df" stroke-opacity="0.55" stroke-width="0.7" />
+    <path d="M229.6 63.5H234.4L232 60.5Z" fill="#d94a66" />
+    <ellipse cx="232" cy="50" rx="9" ry="11" fill="#ff5c7a" />
+    <ellipse cx="228.5" cy="45.5" rx="2.4" ry="3.6" fill="#fff" opacity="0.35" />
+  </g>
+  <g fill="#04070b">
+    <path d={skyline} />
+    <path d={tower} />
+    <path d={legs} fill="none" stroke="#04070b" stroke-width="2" />
+  </g>
+  <rect y="96" width="400" height="84" fill="url(#scene-lake)" />
+  <g transform="translate(0 192) scale(1 -1)" fill="#0a1018" opacity="0.7">
+    <path d={skyline} />
+    <path d={tower} />
+  </g>
+  <g class="reflection" opacity="0.16">
+    <ellipse cx="232" cy="105" rx="2.5" ry="6" fill="#ff5c7a" />
+  </g>
+  <ellipse class="ripple" cx="232" cy="102" rx="16" ry="1.6" fill="none" stroke="#ff5c7a" stroke-opacity="0.35" stroke-width="0.6" />
+  <g stroke="#22303f" stroke-opacity="0.6" stroke-width="0.6">
+    <path d="M20 106H90M130 114H210M290 110H380M60 126H140M230 130H300" />
+  </g>
+</svg>
+
+<style>
+  .scene { width: 100%; height: 100%; }
+  .balloon, .reflection, .ripple { transform-box: fill-box; }
+  @media (prefers-reduced-motion: no-preference) {
+    .balloon { transform-origin: 50% 100%; animation: float 6s ease-in-out infinite alternate; }
+    .reflection { transform-origin: 50% 0%; animation: float-reflect 6s ease-in-out infinite alternate; }
+    .ripple { transform-origin: 50% 50%; animation: ripple 6s ease-in-out infinite alternate; }
+  }
+  @keyframes float { from { transform: translateY(3px) rotate(-3deg); } to { transform: translateY(-6px) rotate(3deg); } }
+  @keyframes float-reflect { from { transform: translateY(-3px) rotate(3deg); } to { transform: translateY(6px) rotate(-3deg); } }
+  @keyframes ripple { from { transform: scaleX(0.8); opacity: 0.6; } to { transform: scaleX(1.15); opacity: 0.3; } }
+</style>

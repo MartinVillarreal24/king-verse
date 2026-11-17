@@ -1,0 +1,54 @@
+---
+// Home in either locale: the Derry scene as the opening, then the five cycles as the scroll spine.
+import Base from '../layouts/Base.astro';
+import DerryScene from './DerryScene.astro';
+import CycleSection from './CycleSection.astro';
+import { ui, type Locale } from '../i18n/ui';
+import { cycles } from '../data/cycles';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = ui[locale].home;
+---
+<Base locale={locale} route="home" title={t.title} description={t.description}>
+  <div class="hero">
+    <div class="hero-scene"><DerryScene /></div>
+    <div class="wrap hero-text">
+      <h1>{t.title}</h1>
+      <p class="lead">{t.lead}</p>
+    </div>
+  </div>
+  <div class="wrap cycles" role="list" aria-label={t.cyclesLabel}>
+    {cycles.map((cycle, i) => <div role="listitem"><CycleSection locale={locale} cycle={cycle} first={i === 0} /></div>)}
+  </div>
+</Base>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  // Content is fully visible in the static HTML; animations only arm here, and only when motion is allowed.
+  if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.utils.toArray<HTMLElement>('[data-cycle]').forEach((section) => {
+      gsap.from(section.querySelector('.cycle-head'), {
+        autoAlpha: 0,
+        y: 24,
+        duration: 0.8,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: section, start: 'top 80%', once: true },
+      });
+    });
+  }
+</script>
+
+<style>
+  .hero { position: relative; isolation: isolate; min-height: min(80vh, 40rem); display: flex; align-items: flex-end; overflow: hidden; }
+  .hero-scene { position: absolute; inset: 0; z-index: -1; }
+  /* Scrim so the title and lead stay AA over the lake. */
+  .hero-scene::after { content: ''; position: absolute; inset: auto 0 0; height: 55%; background: linear-gradient(to bottom, transparent, var(--color-ink) 75%); }
+  .hero-text { padding-block: 3rem; }
+  h1 { margin: 0; font: 800 clamp(2.5rem, 9vw, 5.5rem)/1 var(--font-mono); letter-spacing: -0.03em; }
+  .lead { max-width: 36rem; margin: 1rem 0 0; font-size: 1.125rem; color: var(--color-subtext); }
+  .cycles { padding-block: 2rem 4rem; padding-left: 1rem; }
+</style>

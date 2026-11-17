@@ -1,0 +1,15 @@
+---
+// Numbered inline note: a superscript link to its entry on the sources page of the same locale.
+import { routes, type Locale } from '../i18n/ui';
+import { noteNumber } from '../data/sources';
+
+interface Props { locale: Locale; source: string }
+const { locale, source } = Astro.props;
+const n = noteNumber(source);
+---
+<sup class="note"><a data-note href={`${routes.sources[locale]}#source-${source}`} aria-label={`${locale === 'es' ? 'Nota' : 'Note'} ${n}`}>[{n}]</a></sup>
+
+<style>
+  .note { font: 0.7em/1 var(--font-mono); }
+  .note a { text-decoration: none; }
+</style>

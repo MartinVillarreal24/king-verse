@@ -1,0 +1,40 @@
+---
+// Sources page in either locale: the numbered bibliography that inline notes point to.
+import Base from '../layouts/Base.astro';
+import { ui, type Locale } from '../i18n/ui';
+import { sources } from '../data/sources';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = ui[locale].sources;
+const formatDate = (iso: string) =>
+  new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
+---
+<Base locale={locale} route="sources" title={t.title} description={t.description}>
+  <div class="wrap page">
+    <h1>{t.title}</h1>
+    <p class="lead">{t.lead}</p>
+    <h2>{t.listLabel}</h2>
+    {sources.length === 0 && <p class="empty">{t.empty}</p>}
+    <ol class="sources" data-sources>
+      {sources.map((s) => (
+        <li id={`source-${s.id}`}>
+          {s.author}. {s.url ? <a href={s.url} rel="noopener">{s.title}</a> : <cite>{s.title}</cite>}. {s.publisher},{' '}
+          <time datetime={s.date}>{formatDate(s.date)}</time>.
+          {s.accessed && <> {t.accessed} <time datetime={s.accessed}>{formatDate(s.accessed)}</time>.</>}
+        </li>
+      ))}
+    </ol>
+  </div>
+</Base>
+
+<style>
+  .page { padding-block: 3rem 4rem; max-width: 48rem; }
+  h1 { margin: 0; font: 800 clamp(2rem, 6vw, 3rem)/1.1 var(--font-mono); }
+  h2 { margin: 2.5rem 0 0.75rem; font: 600 1.125rem/1.3 var(--font-mono); }
+  .lead { color: var(--color-subtext); }
+  .empty { color: var(--color-comment); }
+  .sources { padding-left: 1.5rem; }
+  .sources li { margin-bottom: 0.75rem; color: var(--color-subtext); }
+  .sources li:target { color: var(--color-text); outline: 1px solid var(--color-err); outline-offset: 4px; }
+</style>

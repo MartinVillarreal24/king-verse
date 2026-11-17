@@ -16,7 +16,7 @@ First runnable skeleton of the site: Astro + GSAP, es/en from day one, visible d
 ## Tasks
 
 - [x] T1 — S1 — inline — initial docs commit on `main`, branch `feat/scaffold` — 6ea3679
-- [ ] T2 — S2, S3, S7, S8 — inline — Astro project, i18n, base layout + disclaimer, Vercel config, build checks
+- [x] T2 — S2, S3, S7, S8 — inline — Astro project, i18n, base layout + disclaimer, Vercel config, build checks — 976c1b0
 - [ ] T3 — S4, S5, S6, S8 — inline — home scene, cycle sections, sources page (es/en), GSAP reveal
 
 ## Log
