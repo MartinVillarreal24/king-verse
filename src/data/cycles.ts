@@ -13,6 +13,8 @@ export interface Cycle {
   status: Record<Locale, string>;
   /** Ids of entries in src/data/sources.ts backing the facts of this cycle (numbered inline notes). */
   sourceIds: string[];
+  /** Ids of sources cited in the cycle's body text, if it has one; numbered after the status notes. */
+  bodySourceIds?: string[];
 }
 
 export const cycles: Cycle[] = [

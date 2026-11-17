@@ -15,7 +15,7 @@ export interface Source {
   accessed?: string;
 }
 
-// Ordered by first appearance on the home, so note numbers read 1, 2, 3... down the page.
+// Any order: src/data/citations.ts numbers them by first appearance on the home.
 // Verified 2026-11-17: each claim was checked on the fetched page itself.
 export const sources: Source[] = [
   {
@@ -80,11 +80,57 @@ export const sources: Source[] = [
     url: 'https://www.laweekly.com/review-can-it-chapter-2-creep-into-our-contemporary-consciousness/',
     accessed: '2026-11-17',
   },
+  {
+    id: 'sky-derry-e1',
+    author: 'Sky',
+    title: "IT: Welcome to Derry - Season 1 Episode 1 'The Pilot' explained",
+    publisher: 'Sky',
+    url: 'https://www.sky.com/watch/it-welcome-to-derry/episode-1',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'nerdist-operation-precept',
+    author: 'Tai Gooden',
+    title: 'The Military and Operation Precept in WELCOME TO DERRY, Explained',
+    publisher: 'Nerdist',
+    date: '2025-10-31',
+    url: 'https://nerdist.com/article/the-military-and-operation-precept-in-welcome-to-derry-explained/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'cbr-derry-retcons',
+    author: 'Amy Watkins',
+    title: "6 Welcome to Derry Season 1 Retcons That Broke Stephen King's IT Lore",
+    publisher: 'CBR',
+    date: '2025-12-15',
+    url: 'https://www.cbr.com/welcome-to-derry-retcons-broke-stephen-king-it-lore/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'variety-derry-credits-scene',
+    author: 'Andrew McGowan',
+    title: "'It: Welcome to Derry' Finale Credits Scene: Sophia Lillis as Beverly",
+    publisher: 'Variety',
+    date: '2025-12-15',
+    url: 'https://variety.com/2025/tv/news/it-welcome-to-derry-finale-credits-scene-sophia-lillis-beverly-1236607044/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'collider-derry-e7',
+    author: 'Shawn Van Horn',
+    title: "'IT: Welcome to Derry' Episode 7 Recap: Prepare To Have Your Heart Ripped Out by the Season's Scariest, Saddest Hour",
+    publisher: 'Collider',
+    date: '2025-12-08',
+    url: 'https://collider.com/it-welcome-to-derry-episode-7-recap-hbo-pennywise/',
+    accessed: '2026-11-17',
+  },
+  {
+    id: 'ign-derry-finale',
+    author: 'Tom Jorgensen',
+    title: 'It: Welcome to Derry Season Finale Review',
+    publisher: 'IGN Middle East',
+    date: '2025-12-15',
+    url: 'https://me.ign.com/en/it-welcome-to-derry-season-finale/239104/review/it-welcome-to-derry-season-finale-review',
+    accessed: '2026-11-17',
+  },
 ];
-
-/** Note number (1-based) of a source, in bibliography order, so inline notes and the sources page agree. */
-export const noteNumber = (id: string): number => {
-  const index = sources.findIndex((s) => s.id === id);
-  if (index === -1) throw new Error(`Unknown source "${id}" — add it to src/data/sources.ts first.`);
-  return index + 1;
-};
