@@ -1,0 +1,252 @@
+---
+// Characters page in either locale (design/characters/01-what-they-left.html): no faces, each character is the
+// object the screen ties to them. Every sentence carries its numbered notes; full arcs sit behind a spoiler toggle.
+import Base from '../layouts/Base.astro';
+import Sentences from './Sentences.astro';
+import { ui, type Locale } from '../i18n/ui';
+import { characters, groupIntro, ties, type Group } from '../data/characters';
+import { objectArt } from './characters/objects';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = ui[locale].characters;
+const groups: Group[] = ['losers', 'derry-1962'];
+const byId = Object.fromEntries(characters.map((c) => [c.id, c]));
+---
+<Base locale={locale} route="characters" title={t.title} description={t.description}>
+  <div class="characters-page">
+    <section class="cp-hero">
+      <svg class="cp-balloon" viewBox="0 0 100 200" aria-hidden="true" focusable="false">
+        <ellipse cx="50" cy="48" rx="34" ry="42" fill="var(--color-err)" /><ellipse cx="38" cy="32" rx="8" ry="12" fill="#fff" opacity=".35" />
+        <path d="M46 90 h8 l-4 7 Z" fill="#d94a66" /><path d="M50 97 q-8 30 4 60 t-6 42" fill="none" stroke="#c9d3df" stroke-opacity=".55" stroke-width="1.2" />
+      </svg>
+      <div class="wrap">
+        <h1>{t.title}</h1>
+        <p class="cp-lead">{t.lead}</p>
+        <nav aria-label={t.tocLabel}>
+          <ul class="cp-toc">
+            {groups.map((g) => <li><a href={`#${g === 'losers' ? 'losers' : 'derry-1962'}`}>{t.groups[g].toc}</a></li>)}
+            <li><a href="#ties">{t.ties.toc}</a></li>
+          </ul>
+        </nav>
+      </div>
+    </section>
+
+    {groups.map((g) => (
+      <section class="cp-group" id={g} aria-labelledby={`${g}-title`}>
+        <div class="wrap">
+          <div class="cp-head">
+            <p class="cp-kicker">{t.groups[g].kicker}</p>
+            <h2 id={`${g}-title`}>{t.groups[g].title}</h2>
+            <p><Sentences locale={locale} list={[groupIntro[g]]} /></p>
+          </div>
+          <ul class="cp-cards">
+            {characters.filter((c) => c.group === g).map((c) => (
+              <li class="cp-card" id={c.id} data-character={c.id}>
+                <article aria-labelledby={`${c.id}-name`}>
+                  <figure class="cp-plate">
+                    <svg class={`cp-art cp-art-${c.art}`} data-object={c.art} viewBox="0 0 200 160" aria-hidden="true" focusable="false" set:html={objectArt[c.art]} />
+                    <figcaption>{c.object[locale]}</figcaption>
+                  </figure>
+                  <div class="cp-body">
+                    <p class="cp-eras"><span class="cp-sr">{t.erasLabel}: </span>{c.eras.map((e) => <span>{e}</span>)}</p>
+                    <h3 id={`${c.id}-name`}>{c.name}</h3>
+                    <p class="cp-tag">{c.tag[locale]}</p>
+                    <p class="cp-why"><Sentences locale={locale} list={[c.why]} /></p>
+                    {c.provisional && <p class="cp-provisional" data-provisional>{t.provisional}</p>}
+                    {c.fear && <p class="cp-fact" data-fear><span class="cp-label">{t.fear}</span> <Sentences locale={locale} list={[c.fear]} /></p>}
+                    {c.link && <p class="cp-fact"><span class="cp-label">{t.link}</span> <Sentences locale={locale} list={[c.link]} /></p>}
+                    {c.contentNote && <p class="cp-warn" data-content-note>{c.contentNote[locale]}</p>}
+                    <details>
+                      <summary>{t.story} <span>{t.spoilers}</span></summary>
+                      <p><Sentences locale={locale} list={c.story} /></p>
+                    </details>
+                    <p class="cp-actors"><Sentences locale={locale} list={[c.actors]} /></p>
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    ))}
+
+    <section class="cp-group" id="ties" aria-labelledby="ties-title">
+      <div class="wrap">
+        <div class="cp-head">
+          <p class="cp-kicker">{t.ties.kicker}</p>
+          <h2 id="ties-title">{t.ties.title}</h2>
+          <p>{t.ties.lead}</p>
+        </div>
+        <ul class="cp-ties">
+          {ties.map((tie) => (
+            <li class="cp-tie">
+              <h3>{tie.title[locale]}</h3>
+              <ol class="cp-chain">
+                {tie.members.map((m) => (
+                  <li><span class="cp-year">{m.year}</span><span><a href={`#${m.id}`}>{byId[m.id].name}</a>{m.partner && <> {locale === 'es' ? 'y' : 'and'} <a href={`#${m.partner}`}>{byId[m.partner].name}</a></>}</span><span class="cp-role">{m.role[locale]}</span></li>
+                ))}
+              </ol>
+              <p><Sentences locale={locale} list={[tie.note]} /></p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<script>
+  // Cards rise in and the family strings draw as they enter the viewport; only with JS and without reduced motion.
+  const motion = window.matchMedia('(prefers-reduced-motion: no-preference)');
+  if (motion.matches && 'IntersectionObserver' in window) {
+    document.documentElement.classList.add('cp-reveal');
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.add('cp-in');
+          io.unobserve(entry.target);
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px' },
+    );
+    document.querySelectorAll('.cp-card, .cp-tie').forEach((el) => io.observe(el));
+  }
+</script>
+
+<style is:global>
+  .characters-page {
+    --obj-paper: #e8dcc0; --obj-paper-light: #f3ead4; --obj-paper-shade: #b9ab8c; --obj-paper-ink: #5a4a32;
+    --obj-brass: #c9a24a; --obj-brass-dark: #7d6224; --obj-metal: #9aa8b8; --obj-metal-dark: #5d6b7c;
+    --obj-plastic: #4f6f8f; --obj-plastic-dark: #33506c; --obj-stone: #4a505a; --obj-stone-light: #7a828e;
+    --obj-stone-mid: #5f6672; --obj-stone-dark: #353a42; --obj-cap: #d8a6b4; --obj-cap-dark: #a87484;
+    --obj-wood: #7a5236; --obj-wood-dark: #4a3020; --obj-ice: #5d7389; --obj-lamp: #e9b872; --obj-ember: #f0a86a;
+    --blood: #9e1028; --blood-dark: #4a0812;
+  }
+  .cp-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  .cp-hero { position: relative; overflow: hidden; padding-block: 5rem 3rem; }
+  .cp-hero h1 { position: relative; display: inline-block; margin: 0 0 1.75rem; font: 800 clamp(2.5rem, 9vw, 5.5rem)/1 var(--font-mono); letter-spacing: -0.03em; }
+  .cp-hero h1::after { content: ''; position: absolute; left: 62%; top: 92%; width: 6px; height: 0.22em; border-radius: 0 0 6px 6px; background: linear-gradient(var(--blood), var(--blood-dark)); }
+  .cp-lead { max-width: 38rem; margin: 0 0 1.75rem; font-size: 1.125rem; color: var(--color-subtext); }
+  .cp-toc { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0; padding: 0; list-style: none; font: 0.875rem/1.4 var(--font-mono); }
+  .cp-toc a { display: inline-block; padding: 0.45rem 0.8rem; border: 1px solid var(--color-overlay); border-radius: 9999px; background: var(--color-ink); color: var(--color-subtext); text-decoration: none; }
+  .cp-toc a:hover { border-color: var(--color-err); color: var(--color-text); }
+  .cp-balloon { position: absolute; right: 8%; top: 2.5rem; width: clamp(5rem, 12vw, 9rem); pointer-events: none; }
+
+  .cp-group { padding-block: 3.5rem; border-top: 1px solid var(--color-overlay); }
+  .cp-head { display: grid; gap: 0.5rem; margin-bottom: 2rem; }
+  .cp-head p { max-width: 40rem; margin: 0; color: var(--color-subtext); }
+  .cp-head .cp-kicker { font: 0.8125rem/1.4 var(--font-mono); color: var(--color-err); letter-spacing: 0.08em; text-transform: uppercase; }
+  .cp-head h2 { margin: 0; font: 700 clamp(1.75rem, 5vw, 2.75rem)/1.1 var(--font-mono); letter-spacing: -0.02em; }
+
+  .cp-cards { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); margin: 0; padding: 0; list-style: none; }
+  .cp-card article { display: flex; flex-direction: column; height: 100%; overflow: hidden; background: var(--color-night); border: 1px solid var(--color-overlay); border-radius: 0.5rem; transition: border-color 0.2s ease; }
+  .cp-card:is(:hover, :focus-within) article { border-color: color-mix(in srgb, var(--color-err) 55%, transparent); }
+  .cp-plate { position: relative; display: grid; place-items: center; aspect-ratio: 5 / 4; margin: 0; border-bottom: 1px solid var(--color-overlay); background: radial-gradient(ellipse at 50% 40%, #1d1626, var(--color-night) 70%); }
+  #derry-1962 .cp-plate { background: radial-gradient(ellipse at 50% 40%, #13202e, var(--color-night) 70%); }
+  .cp-plate figcaption { position: absolute; left: 0.75rem; bottom: 0.6rem; padding: 0.1rem 0.4rem; border-radius: 0.25rem; background: rgba(7, 11, 16, 0.85); font: 0.75rem/1.4 var(--font-mono); color: var(--color-comment); }
+  .cp-art { width: 82%; height: auto; overflow: visible; }
+  .cp-body { display: flex; flex: 1; flex-direction: column; gap: 0.6rem; padding: 1rem 1.25rem 1.25rem; }
+  .cp-body > p { margin: 0; }
+  .cp-eras { display: flex; gap: 0.4rem; }
+  .cp-eras span:not(.cp-sr) { padding: 0 0.4rem; border: 1px solid color-mix(in srgb, var(--color-err) 45%, transparent); border-radius: 0.25rem; font: 0.75rem/1.6 var(--font-mono); color: var(--color-err); }
+  .cp-card h3 { margin: 0; font: 700 1.25rem/1.2 var(--font-mono); }
+  .cp-tag { margin-top: -0.4rem !important; font: 0.8125rem/1.4 var(--font-mono); color: var(--color-comment); }
+  .cp-why { color: var(--color-subtext); }
+  .cp-fact { font-size: 0.9375rem; color: var(--color-subtext); }
+  .cp-label { margin-right: 0.35rem; font: 0.75rem/1 var(--font-mono); color: var(--color-text); text-transform: uppercase; letter-spacing: 0.06em; }
+  .cp-warn { padding-left: 0.6rem; border-left: 2px solid var(--color-err); font-size: 0.8125rem; color: var(--color-text); }
+  .cp-provisional { font-size: 0.8125rem; font-style: italic; color: var(--color-comment); }
+  .cp-body details { margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--color-overlay); }
+  .cp-body summary { cursor: pointer; font: 0.875rem/1.6 var(--font-mono); color: var(--color-text); }
+  .cp-body summary span { color: var(--color-comment); }
+  .cp-body details p { margin: 0.6rem 0 0; font-size: 0.9375rem; color: var(--color-subtext); }
+  .cp-actors { font-size: 0.8125rem; color: var(--color-comment); }
+
+  .cp-ties { display: grid; gap: 1.5rem; margin: 0; padding: 0; list-style: none; }
+  .cp-tie { padding: 1.25rem; background: var(--color-night); border: 1px solid var(--color-overlay); border-radius: 0.5rem; }
+  .cp-tie h3 { margin: 0 0 1rem; font: 700 1rem/1.3 var(--font-mono); }
+  .cp-tie > p { margin: 1rem 0 0; font-size: 0.875rem; color: var(--color-comment); }
+  .cp-chain { display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; gap: 2.5rem; margin: 0; padding: 0; list-style: none; }
+  .cp-chain li { position: relative; display: grid; gap: 0.15rem; }
+  .cp-chain li + li::before { content: ''; position: absolute; right: calc(100% + 0.4rem); top: 0.75rem; width: 1.7rem; height: 2px; background: var(--color-err); transform-origin: left; }
+  .cp-year { font: 0.75rem/1.4 var(--font-mono); color: var(--color-err); }
+  .cp-chain a { font-weight: 600; color: var(--color-text); text-decoration: none; }
+  .cp-chain a:hover { text-decoration: underline; text-decoration-color: var(--color-err); }
+  .cp-role { font-size: 0.875rem; color: var(--color-comment); }
+
+  @media (max-width: 40rem) {
+    .cp-chain { grid-auto-flow: row; gap: 1rem; }
+    .cp-chain li + li::before { right: auto; left: 0.2rem; top: -0.8rem; width: 2px; height: 0.6rem; transform-origin: top; }
+    .cp-balloon { opacity: 0.5; }
+  }
+
+  /* Object art: rest pose. */
+  .cp-art .water path { fill: none; stroke: var(--obj-ice); stroke-width: 1.5; opacity: 0.5; }
+  .cp-art .clouds path { fill: var(--color-overlay); opacity: 0.8; }
+  .cp-art .embers circle { fill: var(--obj-ember); opacity: 0; }
+  .cp-art .puff circle { fill: var(--color-text); opacity: 0; }
+  .cp-art .stars circle { fill: var(--color-subtext); }
+  .cp-art .shadow { fill: #000; opacity: 0.35; }
+  .cp-art .beat { opacity: 0; }
+  .cp-art .glint { opacity: 0.3; }
+  .cp-art :is(.obj, .spin, .spin2, .swing, .glint, .fly, .stick-a, .stick-b) { transform-box: fill-box; transform-origin: center; }
+  .cp-art .swing { transform-origin: left center; }
+
+  /* Object art: motion, only for people who have not asked for reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .cp-art .obj, .cp-balloon { animation: obj-float 6s ease-in-out infinite alternate; }
+    .cp-card:nth-child(2n) .cp-art .obj { animation-delay: -2s; }
+    .cp-card:nth-child(3n) .cp-art .obj { animation-delay: -4s; }
+    .cp-hero h1::after { transform-origin: top; animation: obj-drip 4s ease-in 1s infinite; }
+    .cp-card:is(:hover, :focus-within) .cp-art-boat .obj { animation: obj-rock 1.6s ease-in-out infinite alternate; }
+    .cp-art .ink { stroke-dasharray: 120; }
+    .cp-card:is(:hover, :focus-within) .cp-art .ink { animation: obj-write 1.4s ease forwards; }
+    .cp-card:is(:hover, :focus-within) .cp-art .embers circle { animation: obj-ember 2.4s ease-out infinite; }
+    .cp-card:is(:hover, :focus-within) .cp-art .embers circle:nth-child(2) { animation-delay: 0.6s; }
+    .cp-card:is(:hover, :focus-within) .cp-art .embers circle:nth-child(3) { animation-delay: 1.2s; }
+    .cp-card:is(:hover, :focus-within) .cp-art .embers circle:nth-child(4) { animation-delay: 1.8s; }
+    .cp-card:is(:hover, :focus-within) .cp-art .spin { animation: obj-flip 1.2s ease-in-out infinite; }
+    .cp-card:is(:hover, :focus-within) .cp-art .puff circle { animation: obj-puff 1.8s ease-out infinite; }
+    .cp-card:is(:hover, :focus-within) .cp-art .puff circle:nth-child(2) { animation-delay: 0.15s; }
+    .cp-card:is(:hover, :focus-within) .cp-art .puff circle:nth-child(3) { animation-delay: 0.3s; }
+    .cp-art .spider .drop { transform: translateY(-40px); transition: transform 1.4s cubic-bezier(0.3, 1.4, 0.5, 1); }
+    .cp-art .spider > path { transform: scaleY(0.1); transform-box: fill-box; transform-origin: top; transition: transform 1.4s cubic-bezier(0.3, 1.4, 0.5, 1); }
+    .cp-card:is(:hover, :focus-within) .cp-art .spider .drop { transform: none; }
+    .cp-card:is(:hover, :focus-within) .cp-art .spider > path { transform: none; }
+    .cp-art .stars .red { transition: fill 0.6s ease, r 0.6s ease; }
+    .cp-card:is(:hover, :focus-within) .cp-art .stars .red { fill: var(--color-err); r: 3.5px; }
+    .cp-art .swing { transition: transform 1.2s ease; }
+    .cp-card:is(:hover, :focus-within) .cp-art .swing { transform: perspective(300px) rotateY(-38deg); }
+    .cp-card:is(:hover, :focus-within) .cp-art .lamp { animation: obj-flicker 1.6s steps(1) infinite; }
+    .cp-card:is(:hover, :focus-within) .cp-art .glint { animation: obj-glint 1.6s ease-in-out infinite; }
+    .cp-card:is(:hover, :focus-within) .cp-art .spin2 { animation: obj-turn 3s linear infinite; }
+    .cp-card:is(:hover, :focus-within) .cp-art .stick-a { animation: obj-hit 0.5s ease-in-out infinite alternate; }
+    .cp-card:is(:hover, :focus-within) .cp-art .stick-b { animation: obj-hit 0.5s ease-in-out 0.25s infinite alternate-reverse; }
+    .cp-card:is(:hover, :focus-within) .cp-art .beat { animation: obj-beat 0.5s steps(1) infinite; }
+    .cp-art .shine ellipse { transition: opacity 0.8s ease; }
+    .cp-card:is(:hover, :focus-within) .cp-art .shine ellipse { opacity: 0.55; }
+    .cp-card:is(:hover, :focus-within) .cp-art .fly { animation: obj-fly 2.4s ease-in-out infinite alternate; }
+
+    .cp-reveal .cp-card { opacity: 0; transform: translateY(24px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
+    .cp-reveal .cp-card.cp-in { opacity: 1; transform: none; }
+    .cp-reveal .cp-chain li + li::before { transform: scaleX(0); transition: transform 0.9s ease 0.3s; }
+    .cp-reveal .cp-tie.cp-in .cp-chain li + li::before { transform: none; }
+
+    @keyframes obj-float { from { transform: translateY(3px) rotate(-1.5deg); } to { transform: translateY(-6px) rotate(1.5deg); } }
+    @keyframes obj-drip { 0% { transform: scaleY(0); } 40%, 80% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+    @keyframes obj-rock { from { transform: rotate(-6deg) translateY(2px); } to { transform: rotate(6deg) translateY(-3px); } }
+    @keyframes obj-write { from { stroke-dashoffset: 120; } to { stroke-dashoffset: 0; } }
+    @keyframes obj-ember { 0% { opacity: 0; transform: translateY(30px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
+    @keyframes obj-flip { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.08); } }
+    @keyframes obj-puff { 0% { opacity: 0.5; transform: translateX(10px) scale(0.4); } 100% { opacity: 0; transform: translateX(-10px) scale(1.4); } }
+    @keyframes obj-flicker { 0%, 100% { opacity: 1; } 40% { opacity: 0.2; } 48% { opacity: 1; } 70% { opacity: 0.4; } }
+    @keyframes obj-glint { 0%, 100% { opacity: 0; transform: scale(0.4); } 50% { opacity: 1; transform: scale(1.2) rotate(45deg); } }
+    @keyframes obj-turn { to { transform: rotate(360deg); } }
+    @keyframes obj-hit { from { transform: rotate(0); } to { transform: rotate(-8deg); } }
+    @keyframes obj-beat { 50% { opacity: 1; } }
+    @keyframes obj-fly { from { transform: translate(-10px, 3px); } to { transform: translate(14px, -5px); } }
+  }
+</style>

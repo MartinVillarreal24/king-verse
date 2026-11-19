@@ -13,9 +13,9 @@ New bilingual characters page (es `/personajes/`, en `/en/characters/`). Branch 
 
 ## Tasks
 
-- [x] T1 — S2, S4 — delegated (broad web research, context compression) — odd/research/characters.md: roster, verified facts, emblematic object per character, sources
-- [ ] T2 — S1–S3, S5, S6 — artboard design/characters/01-…html, awaiting approval
-- [ ] T3 — S1–S5 — implement in src/ after approval
+- [x] T1 — S2, S4 — delegated (broad web research, context compression) — odd/research/characters.md — 3f5cd4a
+- [x] T2 — S1–S3, S5, S6 — inline — artboard design/characters/01-what-they-left.html — 3f5cd4a
+- [x] T3 — S1–S5 — inline (no writer trigger: one unit) — /personajes/ and /en/characters/
 
 ## Log
 
@@ -25,3 +25,6 @@ New bilingual characters page (es `/personajes/`, en `/en/characters/`). Branch 
 - L4 (worker, T1): odd/research/characters.md — 26 characters (7 Losers, 9 main 1962, 10 optional incl. Pennywise as the red balloon), 12 reused + 10 new sources, Losers' fears verified. Weak objects: Charlotte, Leroy, Pauly, Taniel, Ingrid. Conflicts parked in "Do NOT state" (Rich hides Marge in fridge vs footlocker, name spellings, Bill's adult job). Gaps: no official kid-actor pairing, no on-screen "2016" caption source, Ben architect single-source. Parent spot check: file present, no "1986".
 - L5 (user answer, 2026-11-19): roster "7 Perdedores + 9 de 1962" — 16 cards; optional characters and Pennywise card left out.
 - L6 (parent, T2, inline): artboard design/characters/01-what-they-left.html ("What they left behind") + design/characters/design.json. 16 cards (7 Losers, 9 of 1962), original SVG objects that float and wake on hover/focus, full arcs in <details> with spoilers, Stan content note, provisional objects marked (Leroy gate, Charlotte packed car, Pauly transport plane), ties strip (Hanlon, Tozier), 20 numbered sources by first appearance. Evidence: headless Chrome 1440×900, 390×844 (no horizontal overflow), reduced motion and no JS, no console errors; axe wcag2a/aa/21aa 0 violations (color-contrast incomplete over gradients, as on the home). Awaiting user approval before T3.
+- L7 (user, 2026-11-19): "si, implementalo" (artboard approved).
+- L8 (T3): RED observed (test/characters.test.mjs failed: missing /personajes). Implemented src/data/characters.ts (16 cards, es/en, cited), 9 new sources in src/data/sources.ts, src/components/{CharactersPage,Sentences}.astro, src/components/characters/objects.ts, routes + nav link on every page, notes numbered after the home's (citations.ts). Ties: Leroy and Charlotte share one link of the Hanlon line. GREEN: npm test 50/50. Headless Chrome es/en at 1440×900, 390×844, reduced motion, no JS: no console errors, no horizontal overflow; axe 0 violations.
+- L9 (T3, differential vs 3f5cd4a): homes identical except the new nav link (and the Note style moving into the shared CSS bundle); sources pages keep the 25 home-cited sources in the same order, the 9 new character sources follow, the 2 uncited ones stay last. npm run check:a11y 48/48 clean (6 pages). Risk: item 3 (shared note numbering in citations.ts and the nav in Base.astro used by every page).

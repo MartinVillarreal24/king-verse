@@ -1,0 +1,13 @@
+---
+// Cited sentences: each one in a data-sentence span followed by its numbered notes in ascending order.
+import Note from './Note.astro';
+import { inNoteOrder } from '../data/citations';
+import type { Sentence } from '../data/cycles';
+import type { Locale } from '../i18n/ui';
+
+interface Props { list: Sentence[]; locale: Locale }
+const { list, locale } = Astro.props;
+---
+{list.map((sentence) => (
+  <Fragment><span data-sentence>{sentence.text[locale]}{inNoteOrder(sentence.cite).map((id) => <Note locale={locale} source={id} />)}</span>{' '}</Fragment>
+))}
