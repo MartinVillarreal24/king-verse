@@ -7,6 +7,7 @@ export const defaultLocale: Locale = 'es';
 export const routes = {
   home: { es: '/', en: '/en/' },
   characters: { es: '/personajes/', en: '/en/characters/' },
+  map: { es: '/mapa/', en: '/en/map/' },
   sources: { es: '/fuentes/', en: '/en/sources/' },
 } as const;
 export type RouteKey = keyof typeof routes;
@@ -18,7 +19,7 @@ export const ui = {
   es: {
     siteName: 'King Verse',
     skipLink: 'Saltar al contenido',
-    nav: { home: 'Inicio', characters: 'Personajes', sources: 'Fuentes' },
+    nav: { home: 'Inicio', characters: 'Personajes', map: 'Mapa', sources: 'Fuentes' },
     langSwitch: { label: 'English', title: 'Read in English' },
     disclaimer:
       'Sitio de fans no oficial y sin fines de lucro. No está afiliado a Stephen King, Warner Bros. ni HBO.',
@@ -70,6 +71,27 @@ export const ui = {
       spoilers: '(con spoilers)',
       provisional: 'Objeto provisional: sin un objeto propio claro en pantalla.',
     },
+    map: {
+      title: 'Mapa de Derry',
+      description: 'Un mapa interactivo de Derry en 1962, 1988–89 y 2016: dónde pasó cada cosa y quién estuvo allí.',
+      lead: 'Las mismas calles, tres épocas. Elige un año y Derry cambia: los lugares donde pasó todo, quién estuvo allí y cuáles vuelven en otra época.',
+      eraLegend: 'Época',
+      eras: {
+        '1962': { label: '1962', work: 'IT: Welcome to Derry' },
+        '1988': { label: '1988–89', work: 'It' },
+        '2016': { label: '2016', work: 'It Chapter Two' },
+      },
+      places: (n: number) => `${n} lugares`,
+      mapLabel: 'Mapa ilustrativo de Derry',
+      caption: 'Mapa ilustrativo: no a escala, posiciones aproximadas.',
+      recurringKey: 'Vuelve en otra época',
+      panelTitle: 'Lugares',
+      panelHint: 'Toca un punto o una ficha',
+      listLabel: (era: string) => `Lugares de ${era}`,
+      people: 'Pasan por aquí',
+      alsoIn: 'También en',
+      labels: { woods: 'Bosque', farms: 'Granjas' },
+    },
     sources: {
       title: 'Fuentes',
       description: 'Fuentes primarias y citas de King Verse.',
@@ -82,7 +104,7 @@ export const ui = {
   en: {
     siteName: 'King Verse',
     skipLink: 'Skip to content',
-    nav: { home: 'Home', characters: 'Characters', sources: 'Sources' },
+    nav: { home: 'Home', characters: 'Characters', map: 'Map', sources: 'Sources' },
     langSwitch: { label: 'Español', title: 'Leer en español' },
     disclaimer: 'Unofficial, non-profit fan site. Not affiliated with Stephen King, Warner Bros. or HBO.',
     credits: 'Original art and text by Martín Herrera.',
@@ -131,6 +153,27 @@ export const ui = {
       story: 'Full story',
       spoilers: '(spoilers)',
       provisional: 'Provisional object: no clear object of their own on screen.',
+    },
+    map: {
+      title: 'Map of Derry',
+      description: 'An interactive map of Derry in 1962, 1988–89 and 2016: where everything happened and who was there.',
+      lead: 'The same streets, three eras. Pick a year and Derry changes: the places where it all happened, who was there and which ones come back in another era.',
+      eraLegend: 'Era',
+      eras: {
+        '1962': { label: '1962', work: 'IT: Welcome to Derry' },
+        '1988': { label: '1988–89', work: 'It' },
+        '2016': { label: '2016', work: 'It Chapter Two' },
+      },
+      places: (n: number) => `${n} places`,
+      mapLabel: 'Illustrative map of Derry',
+      caption: 'Illustrative map: not to scale, approximate positions.',
+      recurringKey: 'Returns in another era',
+      panelTitle: 'Places',
+      panelHint: 'Tap a point or an entry',
+      listLabel: (era: string) => `Places in ${era}`,
+      people: 'Who passes through',
+      alsoIn: 'Also in',
+      labels: { woods: 'Woods', farms: 'Farms' },
     },
     sources: {
       title: 'Sources',

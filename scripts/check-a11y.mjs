@@ -20,7 +20,7 @@ if (!existsSync(join(DIST, 'index.html'))) {
   process.exit(1);
 }
 
-const PAGES = ['/', '/en/', '/personajes/', '/en/characters/', '/fuentes/', '/en/sources/'];
+const PAGES = ['/', '/en/', '/personajes/', '/en/characters/', '/mapa/', '/en/map/', '/fuentes/', '/en/sources/'];
 const HOMES = new Set(['/', '/en/']);
 const CHAPTERS = ['cycle-1962', 'cycle-1988', 'cycle-2016'];
 const VIEWPORTS = { desktop: { width: 1440, height: 900 }, mobile: { width: 390, height: 844 } };

@@ -1,0 +1,392 @@
+<!doctype html>
+<!--
+01 — Three Derrys (design/derry-map). Interactive map page for odd/tasks/derry-map.md (T2; S1, S2, S4, S5).
+Concept: one original map of Derry, three eras laid over the same streets. An era switch (1962 / 1988–89 / 2016) repaints the
+town (frozen river and the thirteen pillars, a summer dusk over the Barrens, the carnival lights of Canal Days) and swaps its
+numbered places. Places that come back in another era keep their exact spot and wear a dashed halo; their entry offers
+"También en …" to jump to the same spot in the other era. Every entry is cited and lists the characters who pass through it,
+linked to their card on the characters page.
+
+Content: 37 places (12 in 1962, 13 in 1988–89, 12 in 2016): the 20 of src/data/places.ts plus new ones from
+odd/research/derry-map.md. The 1962 "Well House" becomes 29 Neibolt Street (Sky e5 puts the raid in the tunnels under the house), so
+Neibolt is on the map in all three eras. Positions are illustrative: the map is not to scale and claims no real geography.
+"Nuevo" marks the places this page adds (for review only; not shipped).
+
+Behaviour without JS: the era switch is three native radio buttons (CSS :has), points are links to their entry (:target highlights
+it), everything readable. With JS: a point selects its entry in place (no page jump), hovering an entry lights its point, "También en"
+switches era and selects the same spot, arrow keys move between points. Keyboard: radios, points and entries are all reachable.
+Motion (no-preference only): overlays crossfade between eras, the pins of a new era pop in staggered, a red balloon drifts over the
+town, snow / fireflies / bulbs animate per era. Reduced motion: instant switch, everything still.
+
+System colors used: #070b10 #0f1724 #141e2c #22303f #e6edf3 #b3c0cf #8b9bb0 #ff5c7a; map literals from DerryMap.astro: land #0b121b,
+Penobscot #16263a, Kenduskeag/canal #2b4562, woods #15241f/#1f3329, quarry/runway #33404f; era tokens from 01/04: --era-1962-ice #5d7389,
+--era-1962-crack #a9bccf, --era-1962-window #e9b872, --era-1988-sun #f0a86a, --era-1988-firefly #f3d27a, --era-1988-dusk #2b1f3a,
+--era-2016-bulb #ffcf7a. Fonts: --font-sans, --font-mono only.
+Proposed tokens: --map-farm #1d2a1c (fields), --map-road #1a2533 (roads), --map-1988-tint rgba(240,168,106,0.08),
+--map-1962-tint rgba(169,188,207,0.07), --map-2016-tint rgba(255,207,122,0.05).
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>King Verse — Mapa de Derry</title>
+<script>document.documentElement.classList.add('js');</script>
+<style>
+:root {
+  --color-ink: #070b10; --color-night: #0f1724; --color-surface: #141e2c; --color-overlay: #22303f;
+  --color-text: #e6edf3; --color-subtext: #b3c0cf; --color-comment: #8b9bb0; --color-err: #ff5c7a;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --land: #0b121b; --river: #16263a; --stream: #2b4562; --woods: #15241f; --woods-edge: #1f3329; --stone: #33404f;
+  --farm: #1d2a1c; --road: #1a2533; --ice: #5d7389; --crack: #a9bccf; --window: #e9b872; --sun: #f0a86a; --firefly: #f3d27a;
+  --dusk: #2b1f3a; --bulb: #ffcf7a; --blood: #9e1028; --blood-dark: #4a0812;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--color-ink); color: var(--color-text); font-family: var(--font-sans); line-height: 1.6; }
+body { margin: 0; }
+a { color: var(--color-err); text-underline-offset: 0.2em; }
+a:hover { color: var(--color-text); }
+:focus-visible { outline: 2px solid var(--color-err); outline-offset: 3px; }
+.wrap { width: min(100% - 2rem, 64rem); margin-inline: auto; }
+.wide { width: min(100% - 2rem, 80rem); margin-inline: auto; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.site-header { border-bottom: 1px solid var(--color-overlay); }
+.site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 0.875rem; flex-wrap: wrap; }
+.brand { font: 700 1rem/1 var(--font-mono); letter-spacing: 0.04em; color: var(--color-text); text-decoration: none; }
+.site-header ul { display: flex; gap: 1.25rem; list-style: none; margin: 0; padding: 0; font: 0.875rem/1 var(--font-mono); }
+.site-header nav a { color: var(--color-subtext); text-decoration: none; }
+.site-header nav a[aria-current] { color: var(--color-text); text-decoration: underline; }
+.site-footer { border-top: 1px solid var(--color-overlay); padding-block: 1.5rem; font-size: 0.875rem; color: var(--color-subtext); }
+.site-footer .credits { color: var(--color-comment); margin: 0; }
+
+.hero { padding-block: 3.5rem 1.5rem; }
+.hero h1 { position: relative; display: inline-block; margin: 0 0 1.25rem; font: 800 clamp(2.5rem, 8vw, 4.75rem)/1 var(--font-mono); letter-spacing: -0.03em; }
+.hero h1::after { content: ''; position: absolute; left: 30%; top: 92%; width: 6px; height: 0.22em; border-radius: 0 0 6px 6px; background: linear-gradient(var(--blood), var(--blood-dark)); }
+.hero p { max-width: 40rem; margin: 0; color: var(--color-subtext); font-size: 1.125rem; }
+
+/* era switch: native radios */
+.switch { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.75rem 0 0; padding: 0; border: 0; }
+.switch legend { width: 100%; margin-bottom: 0.5rem; font: 0.8125rem/1.4 var(--font-mono); color: var(--color-comment); letter-spacing: 0.08em; text-transform: uppercase; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch label { flex: 1 1 0; display: grid; gap: 0.1rem; min-width: 0; max-width: 13rem; padding: 0.6rem 1rem; border: 1px solid var(--color-overlay); border-radius: 0.5rem; background: var(--color-night); cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+.switch label b { font: 700 1.375rem/1.1 var(--font-mono); }
+.switch label span { font-size: 0.8125rem; color: var(--color-comment); }
+.switch input:checked + label { border-color: var(--color-err); background: color-mix(in srgb, var(--color-err) 10%, var(--color-night)); }
+.switch input:checked + label b { color: var(--color-err); }
+.switch input:focus-visible + label { outline: 2px solid var(--color-err); outline-offset: 3px; }
+
+/* stage */
+.stage { display: grid; gap: 1.25rem; padding-block: 1.5rem 3.5rem; }
+@media (min-width: 60rem) { .stage { grid-template-columns: minmax(0, 1.7fr) minmax(19rem, 1fr); align-items: start; } }
+.map { position: relative; margin: 0; border: 1px solid var(--color-overlay); border-radius: 0.5rem; overflow: hidden; background: var(--land); }
+@media (min-width: 60rem) { .map { position: sticky; top: 1rem; } }
+.map svg { display: block; width: 100%; height: auto; }
+.map figcaption { padding: 0.5rem 0.75rem; border-top: 1px solid var(--color-overlay); background: var(--color-night); font: 0.8125rem/1.4 var(--font-mono); color: var(--color-comment); display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
+.map figcaption .key-rec::before { content: ''; display: inline-block; width: 0.8rem; height: 0.8rem; margin-right: 0.4rem; vertical-align: -0.1rem; border: 1.5px dashed var(--color-text); border-radius: 50%; }
+
+.land { fill: var(--land); }
+.river { fill: var(--river); }
+.stream { fill: none; stroke: var(--stream); stroke-width: 5; stroke-linecap: round; }
+.canal { fill: none; stroke: var(--stream); stroke-width: 4; }
+.road { fill: none; stroke: var(--road); stroke-width: 2.2; stroke-linecap: round; }
+.blocks rect { fill: #141e2c; stroke: #1b2838; stroke-width: 0.5; }
+.woods circle { fill: var(--woods); stroke: var(--woods-edge); stroke-width: 0.8; }
+.fields path { fill: var(--farm); stroke: #263724; stroke-width: 0.6; }
+.hill ellipse { fill: none; stroke: #263445; stroke-width: 0.8; }
+.quarry path { fill: #121a24; stroke: var(--stone); stroke-width: 1; }
+.runway rect { fill: #121a24; stroke: var(--stone); stroke-width: 0.8; }
+.label { font: italic 6.5px var(--font-mono); letter-spacing: 0.1em; fill: #5a6b80; text-transform: uppercase; }
+
+/* era overlays */
+.ov { opacity: 0; transition: opacity 0.9s ease; }
+.ov-1962 .ice { fill: var(--ice); opacity: 0.55; }
+.ov-1962 .crack { fill: none; stroke: var(--crack); stroke-width: 0.8; opacity: 0.7; }
+.ov-1962 .pillar { fill: #c9d3df; opacity: 0.7; }
+.ov-1962 .tint { fill: rgba(169, 188, 207, 0.07); }
+.ov-1962 .snow circle { fill: #e6edf3; opacity: 0.7; }
+.ov-1988 .tint { fill: url(#dusk); }
+.ov-1988 .leaves circle { fill: #2f4a2a; opacity: 0.6; }
+.ov-1988 .fly circle { fill: var(--firefly); }
+.ov-1988 .pool { fill: #1e3346; }
+.ov-2016 .tint { fill: rgba(7, 11, 16, 0.25); }
+.ov-2016 .bulbs circle { fill: var(--bulb); }
+.ov-2016 .wheel { fill: none; stroke: var(--bulb); stroke-width: 0.8; opacity: 0.6; }
+.ov-2016 .wheel line { stroke: var(--bulb); stroke-width: 0.5; }
+.era-pts { display: none; }
+.places { display: none; }
+
+body:has(#era-1962:checked) .ov-1962, body:has(#era-1988:checked) .ov-1988, body:has(#era-2016:checked) .ov-2016 { opacity: 1; }
+body:has(#era-1962:checked) .era-pts[data-era="1962"], body:has(#era-1988:checked) .era-pts[data-era="1988"], body:has(#era-2016:checked) .era-pts[data-era="2016"] { display: inline; }
+body:has(#era-1962:checked) .places[data-era="1962"], body:has(#era-1988:checked) .places[data-era="1988"], body:has(#era-2016:checked) .places[data-era="2016"] { display: grid; }
+
+/* points */
+.pt { cursor: pointer; }
+.pt .pin { fill: var(--color-err); stroke: var(--color-ink); stroke-width: 1.4; }
+.pt .ring { fill: none; stroke: var(--color-text); stroke-width: 1.4; opacity: 0; transition: opacity 0.2s ease; }
+.pt .halo { fill: none; stroke: var(--color-text); stroke-width: 0.9; stroke-dasharray: 2.2 1.8; opacity: 0.85; }
+.pt text { font: 700 6.5px var(--font-mono); fill: var(--color-ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.pt:is(:hover, :focus-visible, .on) .ring { opacity: 1; }
+.pt:focus-visible { outline: none; }
+.pt.on .pin { fill: var(--color-text); }
+@media (max-width: 40rem) {
+  .pt .pin { r: 7.5px; } .pt .ring { r: 11px; } .pt .halo { r: 11px; } .pt text { font-size: 8px; }
+  .switch label { padding: 0.5rem 0.6rem; } .switch label b { font-size: 1.125rem; }
+}
+
+/* places panel */
+.panel h2 { margin: 0 0 0.75rem; font: 700 1.125rem/1.3 var(--font-mono); display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.panel h2 span { font-weight: 400; font-size: 0.8125rem; color: var(--color-comment); }
+@media (min-width: 60rem) { .panel { max-height: calc(100vh - 2rem); overflow: auto; position: sticky; top: 1rem; padding-right: 0.25rem; } }
+.places { gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.place { padding: 0.75rem 0.9rem; border: 1px solid var(--color-overlay); border-radius: 0.375rem; background: var(--color-night); scroll-margin: 1rem; transition: border-color 0.2s ease, background 0.2s ease; }
+.place:target, .place.on { border-color: var(--color-err); background: var(--color-surface); }
+.place h3 { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.35rem; font: 600 0.9375rem/1.35 var(--font-sans); }
+.place .n { flex: none; display: grid; place-items: center; width: 1.4rem; height: 1.4rem; border-radius: 9999px; background: var(--color-err); color: var(--color-ink); font: 700 0.75rem/1 var(--font-mono); }
+.place .new { margin-left: auto; padding: 0 0.35rem; border: 1px dashed var(--color-comment); border-radius: 0.25rem; font: 0.6875rem/1.5 var(--font-mono); color: var(--color-comment); }
+.place p { margin: 0; font-size: 0.9375rem; color: var(--color-subtext); }
+.who, .also { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.5rem; margin-top: 0.6rem; font-size: 0.8125rem; }
+.who-label, .also > span { font: 0.75rem/1.4 var(--font-mono); color: var(--color-comment); text-transform: uppercase; letter-spacing: 0.06em; }
+.who ul, .also ul { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
+.who ul a { display: inline-block; padding: 0 0.5rem; border: 1px solid var(--color-overlay); border-radius: 9999px; color: var(--color-text); text-decoration: none; font-size: 0.8125rem; line-height: 1.6; }
+.who ul a:hover { border-color: var(--color-err); }
+.also a { font: 0.8125rem/1.4 var(--font-mono); }
+.note { font: 0.7em/1 var(--font-mono); text-decoration: none; margin-left: 0.1em; }
+
+.sources { padding-block: 2.5rem; border-top: 1px solid var(--color-overlay); }
+.sources h2 { font: 700 1.25rem/1.3 var(--font-mono); margin: 0 0 0.5rem; }
+.sources ol { color: var(--color-subtext); font-size: 0.875rem; padding-left: 1.5rem; columns: 2 26rem; column-gap: 2.5rem; }
+.sources li { margin-bottom: 0.4rem; break-inside: avoid; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero h1::after { transform-origin: top; animation: drip 4s ease-in 1s infinite; }
+  @keyframes drip { 0% { transform: scaleY(0); } 40%, 80% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+  .era-pts .pt { animation: pop 0.5s cubic-bezier(.3,1.6,.5,1) both; transform-box: fill-box; transform-origin: center; }
+  .era-pts .pt:nth-child(2) { animation-delay: 0.04s; } .era-pts .pt:nth-child(3) { animation-delay: 0.08s; } .era-pts .pt:nth-child(4) { animation-delay: 0.12s; }
+  .era-pts .pt:nth-child(5) { animation-delay: 0.16s; } .era-pts .pt:nth-child(6) { animation-delay: 0.2s; } .era-pts .pt:nth-child(7) { animation-delay: 0.24s; }
+  .era-pts .pt:nth-child(8) { animation-delay: 0.28s; } .era-pts .pt:nth-child(9) { animation-delay: 0.32s; } .era-pts .pt:nth-child(10) { animation-delay: 0.36s; }
+  .era-pts .pt:nth-child(11) { animation-delay: 0.4s; } .era-pts .pt:nth-child(12) { animation-delay: 0.44s; } .era-pts .pt:nth-child(13) { animation-delay: 0.48s; }
+  @keyframes pop { from { opacity: 0; transform: scale(0.2); } to { opacity: 1; transform: none; } }
+  .pt .halo { animation: spin 14s linear infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .snow circle { animation: snow 9s linear infinite; }
+  .snow circle:nth-child(2n) { animation-duration: 12s; animation-delay: -4s; } .snow circle:nth-child(3n) { animation-duration: 15s; animation-delay: -8s; }
+  @keyframes snow { from { transform: translateY(-30px); } to { transform: translateY(250px); } }
+  .fly circle { animation: firefly 3s ease-in-out infinite alternate; }
+  .fly circle:nth-child(2n) { animation-delay: -1.2s; } .fly circle:nth-child(3n) { animation-delay: -2.1s; }
+  @keyframes firefly { from { opacity: 0.1; transform: translate(0, 0); } to { opacity: 1; transform: translate(3px, -4px); } }
+  .bulbs circle { animation: bulb 1.6s steps(1) infinite; }
+  .bulbs circle:nth-child(2n) { animation-delay: -0.8s; }
+  @keyframes bulb { 50% { opacity: 0.35; } }
+  .wheel { animation: spin 30s linear infinite; transform-box: fill-box; transform-origin: center; }
+  .drift { animation: drift 46s linear infinite; }
+  @keyframes drift { from { transform: translate(-40px, 190px); } to { transform: translate(360px, -60px); } }
+  .drift .bob { animation: bob 3s ease-in-out infinite alternate; }
+  @keyframes bob { from { transform: translateY(2px) rotate(-4deg); } to { transform: translateY(-3px) rotate(4deg); } }
+}
+@media (prefers-reduced-motion: reduce) { .drift { display: none; } .ov { transition: none; } }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#">KING VERSE</a>
+    <nav aria-label="Principal"><ul><li><a href="#">Inicio</a></li><li><a href="#">Personajes</a></li><li><a href="#" aria-current="page">Mapa</a></li><li><a href="#fuentes">Fuentes</a></li><li><a href="#" lang="en">English</a></li></ul></nav>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <div class="wide">
+      <h1>Mapa de Derry</h1>
+      <p>Las mismas calles, tres épocas. Elige un año y Derry cambia: los lugares donde pasó todo, quién estuvo allí y cuáles vuelven 27 años después.</p>
+      <fieldset class="switch">
+        <legend>Época</legend>
+        <input type="radio" name="era" id="era-1962" value="1962" checked><label for="era-1962"><b>1962</b><span>Welcome to Derry · 12 lugares</span></label>
+        <input type="radio" name="era" id="era-1988" value="1988"><label for="era-1988"><b>1988–89</b><span>It · 13 lugares</span></label>
+        <input type="radio" name="era" id="era-2016" value="2016"><label for="era-2016"><b>2016</b><span>It Chapter Two · 12 lugares</span></label>
+      </fieldset>
+    </div>
+  </section>
+
+  <div class="wide stage">
+    <figure class="map">
+      <svg viewBox="0 0 320 220" role="group" aria-label="Mapa ilustrativo de Derry">
+        <defs>
+          <linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b3a46" stop-opacity=".22"/><stop offset="1" stop-color="#f0a86a" stop-opacity=".06"/></linearGradient>
+        </defs>
+        <g aria-hidden="true">
+          <rect width="320" height="220" class="land"/>
+          <g class="fields"><path d="M8 8h44v18H8z"/><path d="M56 8h30v18H56z"/><path d="M8 30h36v20H8z"/><path d="M48 30h38v20H48z"/></g>
+          <path class="river" d="M296 0C288 50 304 96 292 142C284 176 300 200 294 220H320V0Z"/>
+          <g class="hill"><ellipse cx="232" cy="38" rx="44" ry="22"/><ellipse cx="232" cy="38" rx="30" ry="14"/><ellipse cx="232" cy="38" rx="16" ry="7"/></g>
+          <g class="woods">
+            <circle cx="22" cy="84" r="7"/><circle cx="34" cy="76" r="6"/><circle cx="30" cy="94" r="8"/><circle cx="46" cy="88" r="6"/><circle cx="18" cy="108" r="6"/><circle cx="36" cy="116" r="7"/>
+            <circle cx="60" cy="98" r="5"/><circle cx="62" cy="124" r="6"/><circle cx="26" cy="132" r="7"/><circle cx="46" cy="138" r="6"/><circle cx="74" cy="112" r="5"/><circle cx="52" cy="70" r="5"/>
+            <circle cx="250" cy="176" r="5"/><circle cx="262" cy="168" r="6"/><circle cx="234" cy="170" r="4"/><circle cx="272" cy="180" r="5"/>
+          </g>
+          <g class="quarry"><path d="M44 178C52 164 82 162 94 174C104 186 92 204 70 204C50 204 38 192 44 178Z"/><path d="M56 180C62 172 80 172 86 180C90 188 82 196 70 196C60 196 52 190 56 180Z"/></g>
+          <g class="runway"><rect x="176" y="196" width="88" height="6" rx="1" transform="rotate(-8 220 199)"/></g>
+          <path class="road" d="M0 60H140M140 60L170 40L320 40M140 60V150M140 150H290M100 150V220M210 60V200M86 26L140 60"/>
+          <g class="blocks">
+            <rect x="140" y="82" width="12" height="10" rx="1"/><rect x="156" y="82" width="12" height="10" rx="1"/><rect x="180" y="82" width="12" height="10" rx="1"/><rect x="196" y="82" width="12" height="10" rx="1"/>
+            <rect x="134" y="98" width="12" height="10" rx="1"/><rect x="184" y="98" width="12" height="10" rx="1"/><rect x="200" y="98" width="12" height="10" rx="1"/>
+            <rect x="162" y="128" width="12" height="10" rx="1"/><rect x="178" y="128" width="12" height="10" rx="1"/><rect x="194" y="128" width="12" height="10" rx="1"/>
+            <rect x="162" y="142" width="12" height="10" rx="1"/><rect x="178" y="142" width="12" height="10" rx="1"/><rect x="194" y="142" width="12" height="10" rx="1"/>
+            <rect x="112" y="104" width="10" height="8" rx="1"/><rect x="92" y="128" width="10" height="8" rx="1"/><rect x="148" y="160" width="10" height="8" rx="1"/><rect x="236" y="66" width="12" height="9" rx="1"/>
+          </g>
+          <path class="stream" d="M92 0C104 28 82 50 112 68C136 82 128 104 146 116L150 120"/>
+          <path class="canal" d="M150 120H206"/>
+          <path class="stream" d="M206 120C232 120 246 148 296 140"/>
+
+          <g class="ov ov-1962">
+            <rect width="320" height="220" class="tint"/>
+            <path class="ice" d="M296 0C288 50 304 96 292 142C284 176 300 200 294 220H320V0Z"/>
+            <path class="crack" d="M300 30L310 44L304 60M298 96L312 104M296 160L308 176"/>
+            <g><rect class="pillar" x="82.5" y="101.0" width="3" height="6"/><rect class="pillar" x="78.0" y="119.6" width="3" height="6"/><rect class="pillar" x="65.4" y="133.9" width="3" height="6"/><rect class="pillar" x="47.8" y="140.7" width="3" height="6"/><rect class="pillar" x="29.0" y="138.4" width="3" height="6"/><rect class="pillar" x="13.4" y="127.5" width="3" height="6"/><rect class="pillar" x="4.6" y="110.6" width="3" height="6"/><rect class="pillar" x="4.6" y="91.4" width="3" height="6"/><rect class="pillar" x="13.4" y="74.5" width="3" height="6"/><rect class="pillar" x="29.0" y="63.6" width="3" height="6"/><rect class="pillar" x="47.8" y="61.3" width="3" height="6"/><rect class="pillar" x="65.4" y="68.1" width="3" height="6"/><rect class="pillar" x="78.0" y="82.4" width="3" height="6"/></g>
+            <g class="snow"><circle cx="20" cy="10" r="0.9"/><circle cx="60" cy="40" r="0.8"/><circle cx="120" cy="20" r="0.9"/><circle cx="180" cy="0" r="0.8"/><circle cx="230" cy="30" r="0.9"/><circle cx="270" cy="10" r="0.8"/><circle cx="150" cy="60" r="0.7"/><circle cx="90" cy="5" r="0.8"/><circle cx="210" cy="15" r="0.7"/><circle cx="300" cy="25" r="0.8"/></g>
+          </g>
+          <g class="ov ov-1988">
+            <rect width="320" height="220" class="tint"/>
+            <g class="leaves"><circle cx="22" cy="84" r="5"/><circle cx="30" cy="94" r="5.5"/><circle cx="36" cy="116" r="5"/><circle cx="26" cy="132" r="5"/><circle cx="262" cy="168" r="4"/></g>
+            <path class="pool" d="M56 180C62 172 80 172 86 180C90 188 82 196 70 196C60 196 52 190 56 180Z"/>
+            <g class="fly"><circle cx="232" cy="146" r="0.9"/><circle cx="248" cy="158" r="0.8"/><circle cx="226" cy="160" r="0.9"/><circle cx="60" cy="110" r="0.8"/><circle cx="44" cy="96" r="0.9"/><circle cx="256" cy="144" r="0.7"/><circle cx="70" cy="170" r="0.8"/></g>
+          </g>
+          <g class="ov ov-2016">
+            <rect width="320" height="220" class="tint"/>
+            <g class="bulbs"><circle cx="150" cy="117" r="1.1"/><circle cx="155" cy="117" r="1.1"/><circle cx="160" cy="117" r="1.1"/><circle cx="165" cy="117" r="1.1"/><circle cx="170" cy="117" r="1.1"/><circle cx="175" cy="117" r="1.1"/><circle cx="180" cy="117" r="1.1"/><circle cx="185" cy="117" r="1.1"/><circle cx="190" cy="117" r="1.1"/><circle cx="195" cy="117" r="1.1"/><circle cx="200" cy="117" r="1.1"/><circle cx="205" cy="117" r="1.1"/><circle cx="250.0" cy="104.0" r="1.1"/><circle cx="247.3" cy="112.2" r="1.1"/><circle cx="240.3" cy="117.3" r="1.1"/><circle cx="231.7" cy="117.3" r="1.1"/><circle cx="224.7" cy="112.2" r="1.1"/><circle cx="222.0" cy="104.0" r="1.1"/><circle cx="224.7" cy="95.8" r="1.1"/><circle cx="231.7" cy="90.7" r="1.1"/><circle cx="240.3" cy="90.7" r="1.1"/><circle cx="247.3" cy="95.8" r="1.1"/></g>
+            <g class="wheel"><circle cx="236" cy="104" r="14"/><line x1="222" y1="104" x2="250" y2="104"/><line x1="236" y1="90" x2="236" y2="118"/><line x1="226" y1="94" x2="246" y2="114"/><line x1="246" y1="94" x2="226" y2="114"/></g>
+          </g>
+
+          <text x="70" y="40" class="label" transform="rotate(-62 70 40)">Kenduskeag</text>
+          <text x="308" y="64" class="label" transform="rotate(90 308 64)">Penobscot</text>
+          <text x="232" y="12" class="label" text-anchor="middle">Juniper Hill</text>
+          <text x="246" y="138" class="label" text-anchor="middle">Barrens</text>
+          <text x="36" y="148" class="label" text-anchor="middle">Bosque</text>
+          <text x="46" y="24" class="label" text-anchor="middle">Granjas</text>
+
+          <g class="drift"><g class="bob"><path d="M0 12 q-1 10 3 18" fill="none" stroke="#c9d3df" stroke-opacity=".55" stroke-width=".5"/><ellipse cx="0" cy="0" rx="5" ry="6.2" fill="var(--color-err)"/><ellipse cx="-1.8" cy="-2.2" rx="1.2" ry="1.8" fill="#fff" opacity=".35"/><path d="M-.8 6 h1.6 l-.8 1.4z" fill="#d94a66"/></g></g>
+        </g>
+<g class="era-pts" data-era="1962"><a class="pt" href="#p-1962-capitol" data-target="p-1962-capitol" aria-label="1. Cine Capitol"><circle class="ring" cx="170" cy="104" r="10"/><circle class="pin" cx="170" cy="104" r="6"/><text x="170" y="104">1</text></a><a class="pt" href="#p-1962-air-base" data-target="p-1962-air-base" aria-label="2. Base de la Fuerza Aérea de Derry"><circle class="ring" cx="214" cy="186" r="10"/><circle class="pin" cx="214" cy="186" r="6"/><text x="214" y="186">2</text></a><a class="pt" href="#p-1962-juniper-hill" data-target="p-1962-juniper-hill" aria-label="3. Hospital Juniper Hill"><circle class="ring" cx="232" cy="36" r="10"/><circle class="pin" cx="232" cy="36" r="6"/><text x="232" y="36">3</text></a><a class="pt rec" href="#p-1962-neibolt" data-target="p-1962-neibolt" aria-label="4. Calle Neibolt 29"><circle class="halo" cx="126" cy="178" r="9.5"/><circle class="ring" cx="126" cy="178" r="10"/><circle class="pin" cx="126" cy="178" r="6"/><text x="126" y="178">4</text></a><a class="pt" href="#p-1962-black-spot" data-target="p-1962-black-spot" aria-label="5. The Black Spot"><circle class="ring" cx="252" cy="160" r="10"/><circle class="pin" cx="252" cy="160" r="6"/><text x="252" y="160">5</text></a><a class="pt" href="#p-1962-western-woods" data-target="p-1962-western-woods" aria-label="6. Bosques del Oeste"><circle class="ring" cx="48" cy="108" r="10"/><circle class="pin" cx="48" cy="108" r="6"/><text x="48" y="108">6</text></a><a class="pt" href="#p-1962-penobscot" data-target="p-1962-penobscot" aria-label="7. Río Penobscot"><circle class="ring" cx="286" cy="84" r="10"/><circle class="pin" cx="286" cy="84" r="6"/><text x="286" y="84">7</text></a><a class="pt" href="#p-1962-lookout" data-target="p-1962-lookout" aria-label="8. El mirador de los chicos"><circle class="ring" cx="100" cy="40" r="10"/><circle class="pin" cx="100" cy="40" r="6"/><text x="100" y="40">8</text></a><a class="pt rec" href="#p-1962-school" data-target="p-1962-school" aria-label="9. Escuela secundaria de Derry"><circle class="halo" cx="196" cy="64" r="9.5"/><circle class="ring" cx="196" cy="64" r="10"/><circle class="pin" cx="196" cy="64" r="6"/><text x="196" y="64">9</text></a><a class="pt" href="#p-1962-hanlon-house" data-target="p-1962-hanlon-house" aria-label="10. Casa de los Hanlon"><circle class="ring" cx="150" cy="50" r="10"/><circle class="pin" cx="150" cy="50" r="6"/><text x="150" y="50">10</text></a><a class="pt rec" href="#p-1962-farm" data-target="p-1962-farm" aria-label="11. La granja de Rose"><circle class="halo" cx="40" cy="30" r="9.5"/><circle class="ring" cx="40" cy="30" r="10"/><circle class="pin" cx="40" cy="30" r="6"/><text x="40" y="30">11</text></a><a class="pt" href="#p-1962-kersh-house" data-target="p-1962-kersh-house" aria-label="12. Casa de Ingrid Kersh"><circle class="ring" cx="196" cy="156" r="10"/><circle class="pin" cx="196" cy="156" r="6"/><text x="196" y="156">12</text></a></g>
+<g class="era-pts" data-era="1988"><a class="pt" href="#p-1988-storm-drain" data-target="p-1988-storm-drain" aria-label="1. La alcantarilla de Georgie"><circle class="ring" cx="122" cy="134" r="10"/><circle class="pin" cx="122" cy="134" r="6"/><text x="122" y="134">1</text></a><a class="pt rec" href="#p-1988-kissing-bridge" data-target="p-1988-kissing-bridge" aria-label="2. Puente de los Besos"><circle class="halo" cx="186" cy="120" r="9.5"/><circle class="ring" cx="186" cy="120" r="10"/><circle class="pin" cx="186" cy="120" r="6"/><text x="186" y="120">2</text></a><a class="pt" href="#p-1988-barrens" data-target="p-1988-barrens" aria-label="3. Los Barrens"><circle class="ring" cx="240" cy="152" r="10"/><circle class="pin" cx="240" cy="152" r="6"/><text x="240" y="152">3</text></a><a class="pt rec" href="#p-1988-quarry" data-target="p-1988-quarry" aria-label="4. La cantera"><circle class="halo" cx="70" cy="186" r="9.5"/><circle class="ring" cx="70" cy="186" r="10"/><circle class="pin" cx="70" cy="186" r="6"/><text x="70" y="186">4</text></a><a class="pt rec" href="#p-1988-neibolt" data-target="p-1988-neibolt" aria-label="5. Calle Neibolt 29"><circle class="halo" cx="126" cy="178" r="9.5"/><circle class="ring" cx="126" cy="178" r="10"/><circle class="pin" cx="126" cy="178" r="6"/><text x="126" y="178">5</text></a><a class="pt rec" href="#p-1988-library" data-target="p-1988-library" aria-label="6. La biblioteca"><circle class="halo" cx="160" cy="106" r="9.5"/><circle class="ring" cx="160" cy="106" r="10"/><circle class="pin" cx="160" cy="106" r="6"/><text x="160" y="106">6</text></a><a class="pt" href="#p-1988-cistern" data-target="p-1988-cistern" aria-label="7. La cisterna"><circle class="ring" cx="150" cy="202" r="10"/><circle class="pin" cx="150" cy="202" r="6"/><text x="150" y="202">7</text></a><a class="pt rec" href="#p-1988-school" data-target="p-1988-school" aria-label="8. La escuela"><circle class="halo" cx="196" cy="64" r="9.5"/><circle class="ring" cx="196" cy="64" r="10"/><circle class="pin" cx="196" cy="64" r="6"/><text x="196" y="64">8</text></a><a class="pt rec" href="#p-1988-clubhouse" data-target="p-1988-clubhouse" aria-label="9. La guarida"><circle class="halo" cx="220" cy="140" r="9.5"/><circle class="ring" cx="220" cy="140" r="10"/><circle class="pin" cx="220" cy="140" r="6"/><text x="220" y="140">9</text></a><a class="pt rec" href="#p-1988-denbrough-house" data-target="p-1988-denbrough-house" aria-label="10. La casa Denbrough"><circle class="halo" cx="104" cy="120" r="9.5"/><circle class="ring" cx="104" cy="120" r="10"/><circle class="pin" cx="104" cy="120" r="6"/><text x="104" y="120">10</text></a><a class="pt rec" href="#p-1988-marsh-home" data-target="p-1988-marsh-home" aria-label="11. La casa de Beverly"><circle class="halo" cx="140" cy="152" r="9.5"/><circle class="ring" cx="140" cy="152" r="10"/><circle class="pin" cx="140" cy="152" r="6"/><text x="140" y="152">11</text></a><a class="pt rec" href="#p-1988-park" data-target="p-1988-park" aria-label="12. El parque y la estatua de Paul Bunyan"><circle class="halo" cx="176" cy="76" r="9.5"/><circle class="ring" cx="176" cy="76" r="10"/><circle class="pin" cx="176" cy="76" r="6"/><text x="176" y="76">12</text></a><a class="pt rec" href="#p-1988-farm" data-target="p-1988-farm" aria-label="13. La granja Hanlon"><circle class="halo" cx="40" cy="30" r="9.5"/><circle class="ring" cx="40" cy="30" r="10"/><circle class="pin" cx="40" cy="30" r="6"/><text x="40" y="30">13</text></a></g>
+<g class="era-pts" data-era="2016"><a class="pt rec" href="#p-2016-kissing-bridge" data-target="p-2016-kissing-bridge" aria-label="1. Puente de los Besos y Canal Days"><circle class="halo" cx="186" cy="120" r="9.5"/><circle class="ring" cx="186" cy="120" r="10"/><circle class="pin" cx="186" cy="120" r="6"/><text x="186" y="120">1</text></a><a class="pt" href="#p-2016-jade" data-target="p-2016-jade" aria-label="2. Jade of the Orient"><circle class="ring" cx="206" cy="98" r="10"/><circle class="pin" cx="206" cy="98" r="6"/><text x="206" y="98">2</text></a><a class="pt rec" href="#p-2016-library" data-target="p-2016-library" aria-label="3. La biblioteca"><circle class="halo" cx="160" cy="106" r="9.5"/><circle class="ring" cx="160" cy="106" r="10"/><circle class="pin" cx="160" cy="106" r="6"/><text x="160" y="106">3</text></a><a class="pt" href="#p-2016-fun-house" data-target="p-2016-fun-house" aria-label="4. Casa de la risa de la feria"><circle class="ring" cx="236" cy="104" r="10"/><circle class="pin" cx="236" cy="104" r="6"/><text x="236" y="104">4</text></a><a class="pt rec" href="#p-2016-neibolt" data-target="p-2016-neibolt" aria-label="5. Casa Neibolt y el cráter de It"><circle class="halo" cx="126" cy="178" r="9.5"/><circle class="ring" cx="126" cy="178" r="10"/><circle class="pin" cx="126" cy="178" r="6"/><text x="126" y="178">5</text></a><a class="pt rec" href="#p-2016-quarry" data-target="p-2016-quarry" aria-label="6. La cantera"><circle class="halo" cx="70" cy="186" r="9.5"/><circle class="ring" cx="70" cy="186" r="10"/><circle class="pin" cx="70" cy="186" r="6"/><text x="70" y="186">6</text></a><a class="pt" href="#p-2016-inn" data-target="p-2016-inn" aria-label="7. La posada"><circle class="ring" cx="262" cy="122" r="10"/><circle class="pin" cx="262" cy="122" r="6"/><text x="262" y="122">7</text></a><a class="pt" href="#p-2016-pharmacy" data-target="p-2016-pharmacy" aria-label="8. La farmacia del señor Keene"><circle class="ring" cx="226" cy="78" r="10"/><circle class="pin" cx="226" cy="78" r="6"/><text x="226" y="78">8</text></a><a class="pt rec" href="#p-2016-clubhouse" data-target="p-2016-clubhouse" aria-label="9. La guarida"><circle class="halo" cx="220" cy="140" r="9.5"/><circle class="ring" cx="220" cy="140" r="10"/><circle class="pin" cx="220" cy="140" r="6"/><text x="220" y="140">9</text></a><a class="pt rec" href="#p-2016-denbrough-house" data-target="p-2016-denbrough-house" aria-label="10. La casa Denbrough y la alcantarilla"><circle class="halo" cx="104" cy="120" r="9.5"/><circle class="ring" cx="104" cy="120" r="10"/><circle class="pin" cx="104" cy="120" r="6"/><text x="104" y="120">10</text></a><a class="pt rec" href="#p-2016-marsh-home" data-target="p-2016-marsh-home" aria-label="11. La antigua casa de Beverly"><circle class="halo" cx="140" cy="152" r="9.5"/><circle class="ring" cx="140" cy="152" r="10"/><circle class="pin" cx="140" cy="152" r="6"/><text x="140" y="152">11</text></a><a class="pt rec" href="#p-2016-park" data-target="p-2016-park" aria-label="12. El salón de juegos y el parque"><circle class="halo" cx="176" cy="76" r="9.5"/><circle class="ring" cx="176" cy="76" r="10"/><circle class="pin" cx="176" cy="76" r="6"/><text x="176" y="76">12</text></a></g>
+      </svg>
+      <figcaption><span>Mapa ilustrativo: no a escala, posiciones aproximadas.</span><span class="key-rec">Vuelve en otra época</span></figcaption>
+    </figure>
+
+    <section class="panel" aria-labelledby="places-title">
+      <h2 id="places-title">Lugares <span>Toca un punto o una ficha</span></h2>
+<ol class="places" data-era="1962" aria-label="Lugares de 1962"><li class="place" id="p-1962-capitol" data-point="p-1962-capitol"><h3><span class="n">1</span>Cine Capitol</h3><p><span data-sentence>Durante una función de The Music Man, Matty aparece en la pantalla y una criatura mata a tres chicos; Lilly y Ronnie sobreviven.<sup><a class="note" href="#source-sky-derry-e1" aria-label="Nota 1">[1]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-sky-derry-e1" aria-label="Nota 1">[1]</a></sup></span><ul><li><a href="#" data-character="ronnie">Ronnie</a></li><li><a href="#" data-character="lilly">Lilly</a></li></ul></div></li>
+<li class="place" id="p-1962-air-base" data-point="p-1962-air-base"><h3><span class="n">2</span>Base de la Fuerza Aérea de Derry</h3><p><span data-sentence>La base se prepara para una posible guerra nuclear y guarda un búnker de «Proyectos Especiales»; allí el general Shaw quema un pilar desenterrado.<sup><a class="note" href="#source-sky-derry-e1" aria-label="Nota 1">[1]</a><a class="note" href="#source-collider-derry-e7" aria-label="Nota 2">[2]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-sky-derry-e1" aria-label="Nota 1">[1]</a><a class="note" href="#source-sky-derry-e2" aria-label="Nota 3">[3]</a><a class="note" href="#source-sky-derry-e5" aria-label="Nota 4">[4]</a></sup></span><ul><li><a href="#" data-character="leroy">Leroy</a></li><li><a href="#" data-character="pauly">Pauly</a></li><li><a href="#" data-character="hallorann">Hallorann</a></li><li><a href="#" data-character="will">Will</a></li><li><a href="#" data-character="charlotte">Charlotte</a></li></ul></div></li>
+<li class="place" id="p-1962-juniper-hill" data-point="p-1962-juniper-hill"><h3><span class="n">3</span>Hospital Juniper Hill</h3><p><span data-sentence>Hospital psiquiátrico donde estuvo internada Lilly; al final, una Ingrid anciana conoce allí a la joven Beverly Marsh.<sup><a class="note" href="#source-sky-derry-e1" aria-label="Nota 1">[1]</a><a class="note" href="#source-variety-derry-credits-scene" aria-label="Nota 5">[5]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-sky-derry-e2" aria-label="Nota 3">[3]</a><a class="note" href="#source-variety-derry-credits-scene" aria-label="Nota 5">[5]</a></sup></span><ul><li><a href="#" data-character="lilly">Lilly</a></li><li><a href="#" data-character="beverly">Beverly</a></li></ul></div></li>
+<li class="place" id="p-1962-neibolt" data-point="p-1962-neibolt"><h3><span class="n">4</span>Calle Neibolt 29<span class="new">Nuevo</span></h3><p><span data-sentence>Soldados y chicos bajan a los túneles bajo la casa Neibolt; Pauly Russo muere en la redada y Lilly encuentra la daga.<sup><a class="note" href="#source-sky-derry-e5" aria-label="Nota 4">[4]</a><a class="note" href="#source-nerdist-operation-precept" aria-label="Nota 6">[6]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-sky-derry-e5" aria-label="Nota 4">[4]</a></sup></span><ul><li><a href="#" data-character="leroy">Leroy</a></li><li><a href="#" data-character="pauly">Pauly</a></li><li><a href="#" data-character="hallorann">Hallorann</a></li><li><a href="#" data-character="lilly">Lilly</a></li><li><a href="#" data-character="ronnie">Ronnie</a></li><li><a href="#" data-character="will">Will</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1988-neibolt" data-goto-era="1988">1988–89</a></li><li><a href="#p-2016-neibolt" data-goto-era="2016">2016</a></li></ul></div></li>
+<li class="place" id="p-1962-black-spot" data-point="p-1962-black-spot"><h3><span class="n">5</span>The Black Spot</h3><p><span data-sentence>El club de los aviadores negros: una turba lo cierra con cadenas y le prende fuego, y Pennywise aparece entre las llamas.<sup><a class="note" href="#source-collider-derry-e7" aria-label="Nota 2">[2]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-sky-derry-e6" aria-label="Nota 7">[7]</a><a class="note" href="#source-sky-derry-e7" aria-label="Nota 8">[8]</a><a class="note" href="#source-collider-derry-e7" aria-label="Nota 2">[2]</a></sup></span><ul><li><a href="#" data-character="hallorann">Hallorann</a></li><li><a href="#" data-character="ronnie">Ronnie</a></li><li><a href="#" data-character="will">Will</a></li><li><a href="#" data-character="rich">Rich</a></li><li><a href="#" data-character="marge">Marge</a></li><li><a href="#" data-character="charlotte">Charlotte</a></li><li><a href="#" data-character="leroy">Leroy</a></li></ul></div></li>
+<li class="place" id="p-1962-western-woods" data-point="p-1962-western-woods"><h3><span class="n">6</span>Bosques del Oeste</h3><p><span data-sentence>Los shokopiwah rodearon el bosque con trece pilares hechos de la estrella caída de It: una jaula que lo retiene en Derry.<sup><a class="note" href="#source-cbr-derry-retcons" aria-label="Nota 9">[9]</a></sup></span></p></li>
+<li class="place" id="p-1962-penobscot" data-point="p-1962-penobscot"><h3><span class="n">7</span>Río Penobscot</h3><p><span data-sentence>En el final, Pennywise guía a los niños sobre el río congelado; Lilly, Ronnie y Marge deben llevar una daga ceremonial a un árbol retorcido de la orilla para encerrarlo.<sup><a class="note" href="#source-ign-derry-finale" aria-label="Nota 10">[10]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-sky-derry-e8" aria-label="Nota 11">[11]</a><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 12">[12]</a></sup></span><ul><li><a href="#" data-character="lilly">Lilly</a></li><li><a href="#" data-character="ronnie">Ronnie</a></li><li><a href="#" data-character="marge">Marge</a></li><li><a href="#" data-character="will">Will</a></li><li><a href="#" data-character="leroy">Leroy</a></li><li><a href="#" data-character="charlotte">Charlotte</a></li><li><a href="#" data-character="hallorann">Hallorann</a></li><li><a href="#" data-character="rich">Rich</a></li></ul></div></li>
+<li class="place" id="p-1962-lookout" data-point="p-1962-lookout"><h3><span class="n">8</span>El mirador de los chicos<span class="new">Nuevo</span></h3><p><span data-sentence>El escondite de Matty se vuelve el punto de reunión de Lilly, Ronnie, Will y Rich.<sup><a class="note" href="#source-sky-derry-e1" aria-label="Nota 1">[1]</a><a class="note" href="#source-sky-derry-e4" aria-label="Nota 13">[13]</a></sup></span> <span data-sentence>Allí Rich cura la herida de Marge y lanza sus planeadores.<sup><a class="note" href="#source-sky-derry-e6" aria-label="Nota 7">[7]</a><a class="note" href="#source-sky-derry-e8" aria-label="Nota 11">[11]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-sky-derry-e4" aria-label="Nota 13">[13]</a><a class="note" href="#source-sky-derry-e6" aria-label="Nota 7">[7]</a><a class="note" href="#source-collider-derry-e7" aria-label="Nota 2">[2]</a></sup></span><ul><li><a href="#" data-character="lilly">Lilly</a></li><li><a href="#" data-character="ronnie">Ronnie</a></li><li><a href="#" data-character="will">Will</a></li><li><a href="#" data-character="rich">Rich</a></li><li><a href="#" data-character="marge">Marge</a></li></ul></div></li>
+<li class="place" id="p-1962-school" data-point="p-1962-school"><h3><span class="n">9</span>Escuela secundaria de Derry<span class="new">Nuevo</span></h3><p><span data-sentence>Lilly encuentra su casillero lleno de pepinillos, y Will conoce a Rich y a Ronnie en su primer día.<sup><a class="note" href="#source-sky-derry-e1" aria-label="Nota 1">[1]</a><a class="note" href="#source-sky-derry-e2" aria-label="Nota 3">[3]</a></sup></span> <span data-sentence>En el final, Pennywise toma una asamblea e hipnotiza a los alumnos.<sup><a class="note" href="#source-sky-derry-e8" aria-label="Nota 11">[11]</a><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 12">[12]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-sky-derry-e1" aria-label="Nota 1">[1]</a><a class="note" href="#source-sky-derry-e2" aria-label="Nota 3">[3]</a></sup></span><ul><li><a href="#" data-character="lilly">Lilly</a></li><li><a href="#" data-character="marge">Marge</a></li><li><a href="#" data-character="will">Will</a></li><li><a href="#" data-character="rich">Rich</a></li><li><a href="#" data-character="ronnie">Ronnie</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1988-school" data-goto-era="1988">1988–89</a></li></ul></div></li>
+<li class="place" id="p-1962-hanlon-house" data-point="p-1962-hanlon-house"><h3><span class="n">10</span>Casa de los Hanlon<span class="new">Nuevo</span></h3><p><span data-sentence>La familia se instala en el pueblo y Leroy le regala a Will un telescopio.<sup><a class="note" href="#source-sky-derry-e2" aria-label="Nota 3">[3]</a></sup></span> <span data-sentence>Solo en casa, Will atiende el teléfono y Pennywise se lo lleva.<sup><a class="note" href="#source-sky-derry-e7" aria-label="Nota 8">[8]</a><a class="note" href="#source-collider-derry-e7" aria-label="Nota 2">[2]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-sky-derry-e2" aria-label="Nota 3">[3]</a><a class="note" href="#source-sky-derry-e3" aria-label="Nota 14">[14]</a></sup></span><ul><li><a href="#" data-character="leroy">Leroy</a></li><li><a href="#" data-character="charlotte">Charlotte</a></li><li><a href="#" data-character="will">Will</a></li><li><a href="#" data-character="hallorann">Hallorann</a></li></ul></div></li>
+<li class="place" id="p-1962-farm" data-point="p-1962-farm"><h3><span class="n">11</span>La granja de Rose<span class="new">Nuevo</span></h3><p><span data-sentence>Rose les pide a los Hanlon que compren su granja y vigilen a Pennywise; casi se van, pero se quedan.<sup><a class="note" href="#source-sky-derry-e8" aria-label="Nota 11">[11]</a><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 12">[12]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-sky-derry-e8" aria-label="Nota 11">[11]</a><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 15">[15]</a></sup></span><ul><li><a href="#" data-character="leroy">Leroy</a></li><li><a href="#" data-character="charlotte">Charlotte</a></li><li><a href="#" data-character="will">Will</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1988-farm" data-goto-era="1988">1988–89</a></li></ul></div></li>
+<li class="place" id="p-1962-kersh-house" data-point="p-1962-kersh-house"><h3><span class="n">12</span>Casa de Ingrid Kersh<span class="new">Nuevo</span></h3><p><span data-sentence>Lilly le confía sus secretos a Ingrid aquí.<sup><a class="note" href="#source-sky-derry-e5" aria-label="Nota 4">[4]</a></sup></span> <span data-sentence>En el desván encuentra fotos del padre de Ingrid vestido de payaso y escapa hiriéndola con la daga.<sup><a class="note" href="#source-sky-derry-e6" aria-label="Nota 7">[7]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-sky-derry-e5" aria-label="Nota 4">[4]</a></sup></span><ul><li><a href="#" data-character="lilly">Lilly</a></li></ul></div></li></ol>
+<ol class="places" data-era="1988" aria-label="Lugares de 1988–89"><li class="place" id="p-1988-storm-drain" data-point="p-1988-storm-drain"><h3><span class="n">1</span>La alcantarilla de Georgie</h3><p><span data-sentence>Bajo la lluvia, Georgie pierde aquí el barco de papel que le hizo Bill y se encuentra con Pennywise.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-variety-it-review" aria-label="Nota 17">[17]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="bill">Bill</a></li></ul></div></li>
+<li class="place" id="p-1988-kissing-bridge" data-point="p-1988-kissing-bridge"><h3><span class="n">2</span>Puente de los Besos</h3><p><span data-sentence>Henry Bowers empieza a grabar su nombre en el cuerpo de Ben, que escapa hacia los Barrens.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="ben">Ben</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-2016-kissing-bridge" data-goto-era="2016">2016</a></li></ul></div></li>
+<li class="place" id="p-1988-barrens" data-point="p-1988-barrens"><h3><span class="n">3</span>Los Barrens</h3><p><span data-sentence>Los Perdedores salvan a Mike de la pandilla de Bowers con una guerra de piedras y, al final, sellan aquí su pacto de sangre.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-collider-it-ending" aria-label="Nota 18">[18]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="ben">Ben</a></li><li><a href="#" data-character="bill">Bill</a></li><li><a href="#" data-character="richie">Richie</a></li><li><a href="#" data-character="eddie">Eddie</a></li><li><a href="#" data-character="stan">Stan</a></li><li><a href="#" data-character="mike">Mike</a></li><li><a href="#" data-character="beverly">Beverly</a></li></ul></div></li>
+<li class="place" id="p-1988-quarry" data-point="p-1988-quarry"><h3><span class="n">4</span>La cantera</h3><p><span data-sentence>Los chicos nadan aquí y Ben les cuenta la historia oscura de Derry.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="bill">Bill</a></li><li><a href="#" data-character="ben">Ben</a></li><li><a href="#" data-character="beverly">Beverly</a></li><li><a href="#" data-character="richie">Richie</a></li><li><a href="#" data-character="eddie">Eddie</a></li><li><a href="#" data-character="stan">Stan</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-2016-quarry" data-goto-era="2016">2016</a></li></ul></div></li>
+<li class="place" id="p-1988-neibolt" data-point="p-1988-neibolt"><h3><span class="n">5</span>Calle Neibolt 29</h3><p><span data-sentence>Eddie ve aquí al leproso; en la primera visita se rompe el brazo y Bev le clava un atizador a Pennywise, y en agosto bajan por su pozo.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-collider-it-ending" aria-label="Nota 18">[18]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="eddie">Eddie</a></li><li><a href="#" data-character="bill">Bill</a></li><li><a href="#" data-character="richie">Richie</a></li><li><a href="#" data-character="beverly">Beverly</a></li><li><a href="#" data-character="ben">Ben</a></li><li><a href="#" data-character="mike">Mike</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1962-neibolt" data-goto-era="1962">1962</a></li><li><a href="#p-2016-neibolt" data-goto-era="2016">2016</a></li></ul></div></li>
+<li class="place" id="p-1988-library" data-point="p-1988-library"><h3><span class="n">6</span>La biblioteca</h3><p><span data-sentence>Ben investiga aquí el pasado oscuro de Derry.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="ben">Ben</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-2016-library" data-goto-era="2016">2016</a></li></ul></div></li>
+<li class="place" id="p-1988-cistern" data-point="p-1988-cistern"><h3><span class="n">7</span>La cisterna</h3><p><span data-sentence>Bajo las cloacas, Ben despierta a Bev de las luces muertas con un beso y los Perdedores vencen a Pennywise.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-collider-it-ending" aria-label="Nota 18">[18]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-collider-it-ending" aria-label="Nota 18">[18]</a></sup></span><ul><li><a href="#" data-character="ben">Ben</a></li><li><a href="#" data-character="beverly">Beverly</a></li><li><a href="#" data-character="bill">Bill</a></li><li><a href="#" data-character="stan">Stan</a></li><li><a href="#" data-character="mike">Mike</a></li></ul></div></li>
+<li class="place" id="p-1988-school" data-point="p-1988-school"><h3><span class="n">8</span>La escuela<span class="new">Nuevo</span></h3><p><span data-sentence>El último día de clases la pandilla de Bowers acorrala a los chicos, y Beverly le firma el anuario a Ben en la escalera.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="bill">Bill</a></li><li><a href="#" data-character="richie">Richie</a></li><li><a href="#" data-character="eddie">Eddie</a></li><li><a href="#" data-character="stan">Stan</a></li><li><a href="#" data-character="ben">Ben</a></li><li><a href="#" data-character="beverly">Beverly</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1962-school" data-goto-era="1962">1962</a></li></ul></div></li>
+<li class="place" id="p-1988-clubhouse" data-point="p-1988-clubhouse"><h3><span class="n">9</span>La guarida<span class="new">Nuevo</span></h3><p><span data-sentence>Ben construye para los Perdedores una guarida subterránea, y Stan reparte gorros de baño contra las arañas.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="ben">Ben</a></li><li><a href="#" data-character="stan">Stan</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-2016-clubhouse" data-goto-era="2016">2016</a></li></ul></div></li>
+<li class="place" id="p-1988-denbrough-house" data-point="p-1988-denbrough-house"><h3><span class="n">10</span>La casa Denbrough<span class="new">Nuevo</span></h3><p><span data-sentence>Bill le hace aquí a Georgie el barquito de papel, y en el sótano lo enfrenta un Georgie zombi.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-variety-it-review" aria-label="Nota 17">[17]</a></sup></span> <span data-sentence>En el garaje, Ben muestra que todo apunta a Neibolt y Pennywise sale de las diapositivas.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="bill">Bill</a></li><li><a href="#" data-character="ben">Ben</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-2016-denbrough-house" data-goto-era="2016">2016</a></li></ul></div></li>
+<li class="place" id="p-1988-marsh-home" data-point="p-1988-marsh-home"><h3><span class="n">11</span>La casa de Beverly<span class="new">Nuevo</span></h3><p><span data-sentence>Pelo y sangre brotan del lavabo de su baño.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="beverly">Beverly</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-2016-marsh-home" data-goto-era="2016">2016</a></li></ul></div></li>
+<li class="place" id="p-1988-park" data-point="p-1988-park"><h3><span class="n">12</span>El parque y la estatua de Paul Bunyan<span class="new">Nuevo</span></h3><p><span data-sentence>Al salir del salón de juegos, Richie va al parque y la estatua gigante de Paul Bunyan cobra vida y lo ataca.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="richie">Richie</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-2016-park" data-goto-era="2016">2016</a></li></ul></div></li>
+<li class="place" id="p-1988-farm" data-point="p-1988-farm"><h3><span class="n">13</span>La granja Hanlon<span class="new">Nuevo</span></h3><p><span data-sentence>Mike vive aquí con su abuelo Leroy, ahora un hombre más frío que lo obliga a sacrificar ovejas.<sup><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 15">[15]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 15">[15]</a></sup></span><ul><li><a href="#" data-character="mike">Mike</a></li><li><a href="#" data-character="leroy">Leroy</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1962-farm" data-goto-era="1962">1962</a></li></ul></div></li></ol>
+<ol class="places" data-era="2016" aria-label="Lugares de 2016"><li class="place" id="p-2016-kissing-bridge" data-point="p-2016-kissing-bridge"><h3><span class="n">1</span>Puente de los Besos y Canal Days</h3><p><span data-sentence>Tras el festival, arrojan a Adrian Mellon desde el puente; al final, Richie graba otra vez «R + E» en él.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 19">[19]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 19">[19]</a></sup></span><ul><li><a href="#" data-character="mike">Mike</a></li><li><a href="#" data-character="richie">Richie</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1988-kissing-bridge" data-goto-era="1988">1988–89</a></li></ul></div></li>
+<li class="place" id="p-2016-jade" data-point="p-2016-jade"><h3><span class="n">2</span>Jade of the Orient</h3><p><span data-sentence>En la cena de reencuentro vuelven los recuerdos y salen criaturas de las galletas de la fortuna.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-collider-jade-scene" aria-label="Nota 20">[20]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="bill">Bill</a></li><li><a href="#" data-character="ben">Ben</a></li><li><a href="#" data-character="beverly">Beverly</a></li><li><a href="#" data-character="richie">Richie</a></li><li><a href="#" data-character="eddie">Eddie</a></li><li><a href="#" data-character="mike">Mike</a></li></ul></div></li>
+<li class="place" id="p-2016-library" data-point="p-2016-library"><h3><span class="n">3</span>La biblioteca</h3><p><span data-sentence>Henry ataca a Mike, y Richie llega a tiempo para matar a Henry.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-dailybeast-it2-review" aria-label="Nota 21">[21]</a></sup></span><ul><li><a href="#" data-character="mike">Mike</a></li><li><a href="#" data-character="richie">Richie</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1988-library" data-goto-era="1988">1988–89</a></li></ul></div></li>
+<li class="place" id="p-2016-fun-house" data-point="p-2016-fun-house"><h3><span class="n">4</span>Casa de la risa de la feria</h3><p><span data-sentence>Pennywise mata aquí a un niño, Dean.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 19">[19]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-dailybeast-it2-review" aria-label="Nota 21">[21]</a></sup></span><ul><li><a href="#" data-character="bill">Bill</a></li></ul></div></li>
+<li class="place" id="p-2016-neibolt" data-point="p-2016-neibolt"><h3><span class="n">5</span>Casa Neibolt y el cráter de It</h3><p><span data-sentence>Bajo la casa, donde cayó It, el Ritual de Chüd fracasa, los Perdedores lo vencen y la cueva se derrumba con el cuerpo de Eddie.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 19">[19]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="bill">Bill</a></li><li><a href="#" data-character="ben">Ben</a></li><li><a href="#" data-character="beverly">Beverly</a></li><li><a href="#" data-character="richie">Richie</a></li><li><a href="#" data-character="eddie">Eddie</a></li><li><a href="#" data-character="mike">Mike</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1962-neibolt" data-goto-era="1962">1962</a></li><li><a href="#p-1988-neibolt" data-goto-era="1988">1988–89</a></li></ul></div></li>
+<li class="place" id="p-2016-quarry" data-point="p-2016-quarry"><h3><span class="n">6</span>La cantera</h3><p><span data-sentence>Tras vencer a It, los Perdedores saltan a la cantera.<sup><a class="note" href="#source-time-it2-ending" aria-label="Nota 19">[19]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="bill">Bill</a></li><li><a href="#" data-character="ben">Ben</a></li><li><a href="#" data-character="beverly">Beverly</a></li><li><a href="#" data-character="richie">Richie</a></li><li><a href="#" data-character="mike">Mike</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1988-quarry" data-goto-era="1988">1988–89</a></li></ul></div></li>
+<li class="place" id="p-2016-inn" data-point="p-2016-inn"><h3><span class="n">7</span>La posada<span class="new">Nuevo</span></h3><p><span data-sentence>Todos los Perdedores menos Mike se alojan aquí.<sup><a class="note" href="#source-screenrant-it2-questions" aria-label="Nota 22">[22]</a></sup></span> <span data-sentence>Bill y Beverly se besan, y Henry apuñala a Eddie en la cara antes de escapar por una ventana.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-screenrant-it2-questions" aria-label="Nota 22">[22]</a><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="bill">Bill</a></li><li><a href="#" data-character="ben">Ben</a></li><li><a href="#" data-character="beverly">Beverly</a></li><li><a href="#" data-character="richie">Richie</a></li><li><a href="#" data-character="eddie">Eddie</a></li></ul></div></li>
+<li class="place" id="p-2016-pharmacy" data-point="p-2016-pharmacy"><h3><span class="n">8</span>La farmacia del señor Keene<span class="new">Nuevo</span></h3><p><span data-sentence>Eddie vuelve por su inhalador y se reencuentra con el leproso.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="eddie">Eddie</a></li></ul></div></li>
+<li class="place" id="p-2016-clubhouse" data-point="p-2016-clubhouse"><h3><span class="n">9</span>La guarida<span class="new">Nuevo</span></h3><p><span data-sentence>Los Perdedores vuelven a la guarida, recuerdan el verano del 89 y encuentran el gorro de baño de Stan.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="bill">Bill</a></li><li><a href="#" data-character="ben">Ben</a></li><li><a href="#" data-character="beverly">Beverly</a></li><li><a href="#" data-character="richie">Richie</a></li><li><a href="#" data-character="eddie">Eddie</a></li><li><a href="#" data-character="mike">Mike</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1988-clubhouse" data-goto-era="1988">1988–89</a></li></ul></div></li>
+<li class="place" id="p-2016-denbrough-house" data-point="p-2016-denbrough-house"><h3><span class="n">10</span>La casa Denbrough y la alcantarilla<span class="new">Nuevo</span></h3><p><span data-sentence>Bill pasa por su vieja casa y, en la alcantarilla donde murió Georgie, recupera el barquito.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span> <span data-sentence>Ahora vive allí un chico, Dean, que oye susurros desde el desagüe de la bañera.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="bill">Bill</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1988-denbrough-house" data-goto-era="1988">1988–89</a></li></ul></div></li>
+<li class="place" id="p-2016-marsh-home" data-point="p-2016-marsh-home"><h3><span class="n">11</span>La antigua casa de Beverly<span class="new">Nuevo</span></h3><p><span data-sentence>Beverly visita la casa de su infancia y conoce a la anciana «señora Kersh», que resulta ser Pennywise.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-dailybeast-it2-review" aria-label="Nota 21">[21]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a><a class="note" href="#source-dailybeast-it2-review" aria-label="Nota 21">[21]</a></sup></span><ul><li><a href="#" data-character="beverly">Beverly</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1988-marsh-home" data-goto-era="1988">1988–89</a></li></ul></div></li>
+<li class="place" id="p-2016-park" data-point="p-2016-park"><h3><span class="n">12</span>El salón de juegos y el parque<span class="new">Nuevo</span></h3><p><span data-sentence>Richie vuelve al salón de juegos por una ficha y luego al parque, donde Pennywise lo atormenta.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span></p><div class="who"><span class="who-label">Pasan por aquí<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 16">[16]</a></sup></span><ul><li><a href="#" data-character="richie">Richie</a></li></ul></div><div class="also"><span>También en</span><ul><li><a href="#p-1988-park" data-goto-era="1988">1988–89</a></li></ul></div></li></ol>
+    </section>
+  </div>
+
+  <section class="sources" id="fuentes">
+    <div class="wide">
+      <h2>Notas</h2>
+      <p style="color:var(--color-comment);margin:0">En el sitio, cada número enlaza a la página de fuentes.</p>
+      <ol>
+<li id="source-sky-derry-e1">Sky. «IT: Welcome to Derry - Season 1 Episode 1 &#x27;The Pilot&#x27; explained». <i>Sky</i>.</li>
+<li id="source-collider-derry-e7">Shawn Van Horn. «&#x27;IT: Welcome to Derry&#x27; Episode 7 Recap: Prepare To Have Your Heart Ripped Out by the Season&#x27;s Scariest, Saddest Hour». <i>Collider</i>.</li>
+<li id="source-sky-derry-e2">Sky. «IT: Welcome to Derry - Season 1 Episode 2 &#x27;The Thing In The Dark&#x27; explained». <i>Sky</i>.</li>
+<li id="source-sky-derry-e5">Sky. «IT: Welcome to Derry - Season 1 Episode 5 &#x27;29 Neibolt Street&#x27; explained». <i>Sky</i>.</li>
+<li id="source-variety-derry-credits-scene">Andrew McGowan. «&#x27;It: Welcome to Derry&#x27; Finale Credits Scene: Sophia Lillis as Beverly». <i>Variety</i>.</li>
+<li id="source-nerdist-operation-precept">Tai Gooden. «The Military and Operation Precept in WELCOME TO DERRY, Explained». <i>Nerdist</i>.</li>
+<li id="source-sky-derry-e6">Sky. «IT: Welcome to Derry - Season 1 Episode 6 &#x27;In The Name of The Father&#x27; explained». <i>Sky</i>.</li>
+<li id="source-sky-derry-e7">Sky. «IT: Welcome to Derry - Season 1 Episode 7 &#x27;The Black Spot&#x27; explained». <i>Sky</i>.</li>
+<li id="source-cbr-derry-retcons">Amy Watkins. «6 Welcome to Derry Season 1 Retcons That Broke Stephen King&#x27;s IT Lore». <i>CBR</i>.</li>
+<li id="source-ign-derry-finale">Tom Jorgensen. «It: Welcome to Derry Season Finale Review». <i>IGN Middle East</i>.</li>
+<li id="source-sky-derry-e8">Sky. «IT: Welcome to Derry - Season 1 Episode 8 &#x27;Winter Fire&#x27; explained». <i>Sky</i>.</li>
+<li id="source-radiotimes-derry-ending">Megan Bull. «It: Welcome to Derry ending explained – who died and who survived?». <i>Radio Times</i>.</li>
+<li id="source-sky-derry-e4">Sky. «IT: Welcome to Derry - Season 1 Episode 4 &#x27;The Great Swirling Apparatus of Our Planet&#x27;s Function&#x27; explained». <i>Sky</i>.</li>
+<li id="source-sky-derry-e3">Sky. «IT: Welcome to Derry - Season 1 Episode 3 &#x27;Now You See It&#x27; explained». <i>Sky</i>.</li>
+<li id="source-polygon-derry-ending">Chris Hayner. «It: Welcome to Derry ending and post-credits scene explained: How it changes Pennywise canon». <i>Polygon</i>.</li>
+<li id="source-collider-it-timeline">Alyse Wax. «It Movie Timeline Explained: A Complete Guide to the History of Pennywise». <i>Collider</i>.</li>
+<li id="source-variety-it-review">Andrew Barker. «&#x27;It&#x27; Review: Fresh Adaptation of Stephen King&#x27;s Horror Tome». <i>Variety</i>.</li>
+<li id="source-collider-it-ending">Haleigh Foutch. «IT Movie Ending Explained: What&#x27;s Next for Pennywise?». <i>Collider</i>.</li>
+<li id="source-time-it2-ending">Megan McCluskey. «How to Make Sense of the Ending of IT Chapter Two». <i>TIME</i>.</li>
+<li id="source-collider-jade-scene">Matt Donato. «How IT Chapter 2&#x27;s Jade of the Orient Scene Reinvents an Iconic Moment». <i>Collider</i>.</li>
+<li id="source-dailybeast-it2-review">Nick Schager. «&#x27;It Chapter 2&#x27; Review: One of the Finest Stephen King Adaptations Ever Goes Out With a Bang». <i>The Daily Beast</i>.</li>
+<li id="source-screenrant-it2-questions">John Orquiola. «IT Chapter 2&#x27;s Biggest Unanswered Questions». <i>Screen Rant</i>.</li>
+      </ol>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Sitio de fans no oficial y sin fines de lucro. No está afiliado a Stephen King, Warner Bros. ni HBO.</p>
+    <p class="credits">Arte y textos originales de Martín Herrera.</p>
+  </div>
+</footer>
+<script>
+// Enhancement only: everything above works without it.
+const radios = [...document.querySelectorAll('input[name="era"]')];
+const select = (id, scroll) => {
+  document.querySelectorAll('.pt.on, .place.on').forEach((el) => el.classList.remove('on'));
+  if (!id) return;
+  document.querySelector(`.pt[data-target="${id}"]`)?.classList.add('on');
+  const item = document.getElementById(id);
+  item?.classList.add('on');
+  if (scroll && item) item.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+};
+document.querySelectorAll('.pt').forEach((pt) => {
+  pt.addEventListener('click', (e) => { e.preventDefault(); select(pt.dataset.target, true); history.replaceState(null, '', `#${pt.dataset.target}`); });
+});
+document.querySelectorAll('.place').forEach((item) => {
+  const pt = () => document.querySelector(`.pt[data-target="${item.id}"]`);
+  item.addEventListener('mouseenter', () => pt()?.classList.add('on'));
+  item.addEventListener('mouseleave', () => { if (!item.classList.contains('on')) pt()?.classList.remove('on'); });
+});
+document.querySelectorAll('[data-goto-era]').forEach((a) => {
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const radio = document.getElementById(`era-${a.dataset.gotoEra}`);
+    radio.checked = true;
+    const id = a.getAttribute('href').slice(1);
+    requestAnimationFrame(() => select(id, true));
+    history.replaceState(null, '', `#${id}`);
+  });
+});
+radios.forEach((r) => r.addEventListener('change', () => select(null)));
+// Deep link: open the era of a targeted place.
+const hash = location.hash.slice(1);
+const m = hash.match(/^p-(\d{4})-/);
+if (m) { document.getElementById(`era-${m[1]}`).checked = true; requestAnimationFrame(() => select(hash, true)); }
+</script>
+</body>
+</html>

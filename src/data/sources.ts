@@ -331,4 +331,13 @@ export const sources: Source[] = [
     url: 'https://www.thedailybeast.com/it-chapter-2-review-one-of-the-finest-stephen-king-adaptations-ever-goes-out-with-a-bang',
     accessed: '2026-11-19',
   },
+  {
+    id: 'screenrant-it2-questions',
+    author: 'John Orquiola',
+    title: "IT Chapter 2's Biggest Unanswered Questions",
+    publisher: 'Screen Rant',
+    date: '2019-09-09',
+    url: 'https://screenrant.com/it-2-movie-unanswered-questions/',
+    accessed: '2026-11-19',
+  },
 ];

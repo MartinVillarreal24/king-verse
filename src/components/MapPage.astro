@@ -1,0 +1,370 @@
+---
+// Interactive map of Derry in either locale (design/derry-map/01-three-derrys.html, "Three Derrys"): one original map, three
+// eras laid over the same streets. Positions are illustrative: the map is not to scale and claims no real geography.
+// Without JS: the era switch is three native radios (CSS :has), each point links to its cited entry (:target), and a
+// link to the same place in another era shows that era. With JS: points select in place, entries light their point,
+// "Also in" switches era. Motion only for no-preference.
+import Base from '../layouts/Base.astro';
+import Sentences from './Sentences.astro';
+import Note from './Note.astro';
+import { routes, ui, type Locale } from '../i18n/ui';
+import { mapEras, mapPlacesOf, type Place } from '../data/places';
+import { characters } from '../data/characters';
+import { inNoteOrder } from '../data/citations';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = ui[locale].map;
+const anchor = (p: Place) => `map-${p.cycleId}-${p.id}`;
+const eras = mapEras.map((id) => ({ id, ...t.eras[id], places: mapPlacesOf(id) }));
+/** Other eras where the same place (same id) appears. */
+const elsewhere = (p: Place) => eras.flatMap((e) => (e.id === p.cycleId ? [] : e.places.filter((o) => o.id === p.id)));
+const shortName = (id: string) => {
+  const c = characters.find((x) => x.id === id);
+  if (!c) throw new Error(`Unknown character "${id}" on the map — use an id of src/data/characters.ts.`);
+  return id === 'hallorann' ? 'Hallorann' : c.name.split(' ')[0];
+};
+const bodyOf = (p: Place) => p.body ?? [{ text: p.description, cite: p.sourceIds }];
+const eraLabel = (id: string) => eras.find((e) => e.id === id)!.label;
+
+// Decorative geography, shared with the home mini-maps (src/components/DerryMap.astro).
+const penobscot = 'M296 0C288 50 304 96 292 142C284 176 300 200 294 220H320V0Z';
+const quarryInner = 'M56 180C62 172 80 172 86 180C90 188 82 196 70 196C60 196 52 190 56 180Z';
+const trees = [
+  [22, 84, 7], [34, 76, 6], [30, 94, 8], [46, 88, 6], [18, 108, 6], [36, 116, 7],
+  [60, 98, 5], [62, 124, 6], [26, 132, 7], [46, 138, 6], [74, 112, 5], [52, 70, 5],
+  [250, 176, 5], [262, 168, 6], [234, 170, 4], [272, 180, 5],
+];
+const blocks = [
+  [140, 82, 12, 10], [156, 82, 12, 10], [180, 82, 12, 10], [196, 82, 12, 10],
+  [134, 98, 12, 10], [184, 98, 12, 10], [200, 98, 12, 10],
+  [162, 128, 12, 10], [178, 128, 12, 10], [194, 128, 12, 10], [210, 128, 12, 10],
+  [162, 142, 12, 10], [178, 142, 12, 10], [194, 142, 12, 10],
+  [112, 104, 10, 8], [92, 128, 10, 8], [148, 160, 10, 8], [236, 66, 12, 9],
+];
+const ring = (n: number, cx: number, cy: number, rx: number, ry: number) =>
+  Array.from({ length: n }, (_, i) => {
+    const a = (i / n) * Math.PI * 2;
+    return { x: +(cx + Math.cos(a) * rx).toFixed(1), y: +(cy + Math.sin(a) * ry).toFixed(1) };
+  });
+const pillars = ring(13, 44.5, 104, 39.5, 40);
+const bulbs = [...Array.from({ length: 12 }, (_, i) => ({ x: 150 + i * 5, y: 117 })), ...ring(10, 236, 104, 14, 14)];
+const snow = [[20, 10], [60, 40], [120, 20], [180, 0], [230, 30], [270, 10], [150, 60], [90, 5], [210, 15], [300, 25]];
+const flies = [[232, 146], [248, 158], [226, 160], [60, 110], [44, 96], [256, 144], [70, 170]];
+---
+<Base locale={locale} route="map" title={t.title} description={t.description}>
+  <div class="mp">
+    <section class="mp-hero">
+      <div class="wrap">
+        <h1>{t.title}</h1>
+        <p class="mp-lead">{t.lead}</p>
+        <fieldset class="mp-switch">
+          <legend>{t.eraLegend}</legend>
+          {eras.map((e, i) => (
+            <Fragment>
+              <input type="radio" name="era" id={`era-${e.id}`} value={e.id} checked={i === 0} />
+              <label for={`era-${e.id}`}><b>{e.label}</b><span>{e.work} · {t.places(e.places.length)}</span></label>
+            </Fragment>
+          ))}
+        </fieldset>
+      </div>
+    </section>
+
+    <div class="wrap mp-stage">
+      <figure class="mp-map">
+        <svg viewBox="0 0 320 220" role="group" aria-label={t.mapLabel}>
+          <defs>
+            <linearGradient id="mp-dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b3a46" stop-opacity=".22" /><stop offset="1" stop-color="#f0a86a" stop-opacity=".06" /></linearGradient>
+          </defs>
+          <g aria-hidden="true">
+            <rect width="320" height="220" class="land" />
+            <g class="fields"><path d="M8 8h44v18H8z" /><path d="M56 8h30v18H56z" /><path d="M8 30h36v20H8z" /><path d="M48 30h38v20H48z" /></g>
+            <path class="river" d={penobscot} />
+            <g class="hill"><ellipse cx="232" cy="38" rx="44" ry="22" /><ellipse cx="232" cy="38" rx="30" ry="14" /><ellipse cx="232" cy="38" rx="16" ry="7" /></g>
+            <g class="woods">{trees.map(([cx, cy, r]) => <circle cx={cx} cy={cy} r={r} />)}</g>
+            <g class="quarry"><path d="M44 178C52 164 82 162 94 174C104 186 92 204 70 204C50 204 38 192 44 178Z" /><path d={quarryInner} /></g>
+            <g class="runway"><rect x="176" y="196" width="88" height="6" rx="1" transform="rotate(-8 220 199)" /></g>
+            <path class="road" d="M0 60H140M140 60L170 40L320 40M140 60V150M140 150H290M100 150V220M210 60V200M86 26L140 60" />
+            <g class="blocks">{blocks.map(([x, y, w, h]) => <rect x={x} y={y} width={w} height={h} rx="1" />)}</g>
+            <path class="stream" d="M92 0C104 28 82 50 112 68C136 82 128 104 146 116L150 120" />
+            <path class="canal" d="M150 120H206" />
+            <path class="stream" d="M206 120C232 120 246 148 296 140" />
+
+            <g class="ov ov-1962">
+              <rect width="320" height="220" class="tint" />
+              <path class="ice" d={penobscot} />
+              <path class="crack" d="M300 30L310 44L304 60M298 96L312 104M296 160L308 176" />
+              <g>{pillars.map((p) => <rect class="pillar" x={p.x - 1.5} y={p.y - 3} width="3" height="6" />)}</g>
+              <g class="snow">{snow.map(([cx, cy]) => <circle cx={cx} cy={cy} r="0.8" />)}</g>
+            </g>
+            <g class="ov ov-1988">
+              <rect width="320" height="220" class="tint" />
+              <g class="leaves"><circle cx="22" cy="84" r="5" /><circle cx="30" cy="94" r="5.5" /><circle cx="36" cy="116" r="5" /><circle cx="26" cy="132" r="5" /><circle cx="262" cy="168" r="4" /></g>
+              <path class="pool" d={quarryInner} />
+              <g class="fly">{flies.map(([cx, cy]) => <circle cx={cx} cy={cy} r="0.85" />)}</g>
+            </g>
+            <g class="ov ov-2016">
+              <rect width="320" height="220" class="tint" />
+              <g class="bulbs">{bulbs.map((b) => <circle cx={b.x} cy={b.y} r="1.1" />)}</g>
+              <g class="wheel"><circle cx="236" cy="104" r="14" /><line x1="222" y1="104" x2="250" y2="104" /><line x1="236" y1="90" x2="236" y2="118" /><line x1="226" y1="94" x2="246" y2="114" /><line x1="246" y1="94" x2="226" y2="114" /></g>
+            </g>
+
+            <text x="70" y="40" class="label" transform="rotate(-62 70 40)">Kenduskeag</text>
+            <text x="308" y="64" class="label" transform="rotate(90 308 64)">Penobscot</text>
+            <text x="232" y="12" class="label" text-anchor="middle">Juniper Hill</text>
+            <text x="246" y="138" class="label" text-anchor="middle">Barrens</text>
+            <text x="36" y="148" class="label" text-anchor="middle">{t.labels.woods}</text>
+            <text x="26" y="57" class="label" text-anchor="middle">{t.labels.farms}</text>
+
+            <g class="drift"><g class="bob">
+              <path d="M0 12 q-1 10 3 18" fill="none" stroke="#c9d3df" stroke-opacity=".55" stroke-width=".5" />
+              <ellipse cx="0" cy="0" rx="5" ry="6.2" fill="var(--color-err)" /><ellipse cx="-1.8" cy="-2.2" rx="1.2" ry="1.8" fill="#fff" opacity=".35" />
+              <path d="M-.8 6 h1.6 l-.8 1.4z" fill="#d94a66" />
+            </g></g>
+          </g>
+          {eras.map((e) => (
+            <g class="mp-pts" data-points={e.id}>
+              {e.places.map((p, i) => (
+                <a class="pt" href={`#${anchor(p)}`} data-target={anchor(p)} data-recurring={elsewhere(p).length > 0 ? '' : undefined} aria-label={`${i + 1}. ${p.name[locale]}`} style={`--i: ${i}`}>
+                  {elsewhere(p).length > 0 && <circle class="halo" cx={p.x} cy={p.y} r="9.5" />}
+                  <circle class="ring" cx={p.x} cy={p.y} r="10" />
+                  <circle class="pin" cx={p.x} cy={p.y} r="6" />
+                  <text x={p.x} y={p.y} aria-hidden="true">{i + 1}</text>
+                </a>
+              ))}
+            </g>
+          ))}
+        </svg>
+        <figcaption><span>{t.caption}</span> <span class="key-rec">{t.recurringKey}</span></figcaption>
+      </figure>
+
+      <section class="mp-panel" aria-labelledby="mp-places-title">
+        <h2 id="mp-places-title">{t.panelTitle} <span>{t.panelHint}</span></h2>
+        {eras.map((e) => (
+          <ol class="mp-places" data-era={e.id} aria-label={t.listLabel(e.label)}>
+            {e.places.map((p, i) => (
+              <li class="place" id={anchor(p)} tabindex="-1">
+                <h3><span class="n" aria-hidden="true">{i + 1}</span>{p.name[locale]}</h3>
+                <p><Sentences locale={locale} list={bodyOf(p)} /></p>
+                {p.people && (
+                  <div class="mp-who" data-who>
+                    <span class="mp-tag">{t.people}{inNoteOrder(p.people.cite).map((id) => <Note locale={locale} source={id} />)}</span>
+                    <ul>{p.people.ids.map((id) => <li><a href={`${routes.characters[locale]}#${id}`} data-character={id}>{shortName(id)}</a></li>)}</ul>
+                  </div>
+                )}
+                {elsewhere(p).length > 0 && (
+                  <div class="mp-also">
+                    <span class="mp-tag">{t.alsoIn}</span>
+                    <ul>{elsewhere(p).map((o) => <li><a href={`#${anchor(o)}`} data-goto-era={o.cycleId}>{eraLabel(o.cycleId)}</a></li>)}</ul>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ol>
+        ))}
+      </section>
+    </div>
+  </div>
+</Base>
+
+<script>
+  // Enhancement only: the radios, links and :target already work without it.
+  document.documentElement.classList.add('mp-js');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const select = (id: string | null, scroll: boolean) => {
+    document.querySelectorAll('.mp [data-active]').forEach((el) => el.removeAttribute('data-active'));
+    if (!id) return;
+    document.querySelector(`.pt[data-target="${id}"]`)?.setAttribute('data-active', '');
+    const item = document.getElementById(id);
+    if (!item) return;
+    item.setAttribute('data-active', '');
+    if (scroll) item.scrollIntoView({ block: 'nearest', behavior: reduced.matches ? 'auto' : 'smooth' });
+    item.focus({ preventScroll: true });
+  };
+  const showEra = (era: string) => {
+    const radio = document.getElementById(`era-${era}`) as HTMLInputElement | null;
+    if (radio) radio.checked = true;
+  };
+
+  document.querySelectorAll<SVGAElement>('.pt').forEach((pt) => {
+    // Enter on a focused SVG link fires click too, so one handler covers mouse and keyboard.
+    pt.addEventListener('click', (event) => {
+      event.preventDefault();
+      const id = pt.dataset.target ?? null;
+      select(id, true);
+      if (id) history.replaceState(null, '', `#${id}`);
+    });
+  });
+  document.querySelectorAll<HTMLElement>('.mp-places .place').forEach((item) => {
+    const pt = () => document.querySelector(`.pt[data-target="${item.id}"]`);
+    const on = () => pt()?.setAttribute('data-highlight', '');
+    const off = () => pt()?.removeAttribute('data-highlight');
+    item.addEventListener('mouseenter', on);
+    item.addEventListener('mouseleave', off);
+    item.addEventListener('focusin', on);
+    item.addEventListener('focusout', off);
+  });
+  document.querySelectorAll<HTMLAnchorElement>('[data-goto-era]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      const id = (link.getAttribute('href') ?? '').slice(1);
+      showEra(link.dataset.gotoEra ?? '');
+      requestAnimationFrame(() => select(id, true));
+      history.replaceState(null, '', `#${id}`);
+    });
+  });
+  document.querySelectorAll<HTMLInputElement>('.mp-switch input').forEach((radio) => radio.addEventListener('change', () => select(null, false)));
+
+  // Deep link: open the era of a targeted place.
+  const hash = location.hash.slice(1);
+  const era = hash.match(/^map-(\d{4})-/)?.[1];
+  if (era) {
+    showEra(era);
+    requestAnimationFrame(() => select(hash, true));
+  }
+</script>
+
+<style>
+  .mp {
+    --map-land: #0b121b; --map-river: #16263a; --map-stream: #2b4562; --map-woods: #15241f; --map-woods-edge: #1f3329;
+    --map-stone: #33404f; --map-farm: #1d2a1c; --map-road: #1a2533;
+    --blood: #9e1028; --blood-dark: #4a0812;
+  }
+
+  .mp-hero { padding-block: 3.5rem 1.5rem; }
+  .mp-hero h1 { position: relative; display: inline-block; margin: 0 0 1.25rem; font: 800 clamp(2.5rem, 8vw, 4.75rem)/1 var(--font-mono); letter-spacing: -0.03em; }
+  .mp-hero h1::after { content: ''; position: absolute; left: 30%; top: 92%; width: 6px; height: 0.22em; border-radius: 0 0 6px 6px; background: linear-gradient(var(--blood), var(--blood-dark)); }
+  .mp-lead { max-width: 40rem; margin: 0; color: var(--color-subtext); font-size: 1.125rem; }
+
+  /* Era switch: native radios. */
+  .mp-switch { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.75rem 0 0; padding: 0; border: 0; min-width: 0; }
+  .mp-switch legend { width: 100%; margin-bottom: 0.5rem; padding: 0; font: 0.8125rem/1.4 var(--font-mono); color: var(--color-comment); letter-spacing: 0.08em; text-transform: uppercase; }
+  .mp-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+  .mp-switch label { flex: 1 1 0; display: grid; gap: 0.1rem; min-width: 0; max-width: 13rem; padding: 0.6rem 1rem; border: 1px solid var(--color-overlay); border-radius: 0.5rem; background: var(--color-night); cursor: pointer; }
+  .mp-switch label b { font: 700 1.375rem/1.1 var(--font-mono); }
+  .mp-switch label span { font-size: 0.8125rem; color: var(--color-comment); }
+  .mp-switch input:checked + label { border-color: var(--color-err); background: color-mix(in srgb, var(--color-err) 10%, var(--color-night)); }
+  .mp-switch input:checked + label b { color: var(--color-err); }
+  .mp-switch input:focus-visible + label { outline: 2px solid var(--color-err); outline-offset: 3px; }
+
+  .mp-stage { display: grid; gap: 1.25rem; padding-block: 1.5rem 3.5rem; }
+  @media (min-width: 60rem) { .mp-stage { grid-template-columns: minmax(0, 1.7fr) minmax(19rem, 1fr); align-items: start; } }
+  .mp-map { margin: 0; border: 1px solid var(--color-overlay); border-radius: 0.5rem; overflow: hidden; background: var(--map-land); }
+  @media (min-width: 60rem) { .mp-map { position: sticky; top: 1rem; } }
+  .mp-map svg { display: block; width: 100%; height: auto; }
+  .mp-map figcaption { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; padding: 0.5rem 0.75rem; border-top: 1px solid var(--color-overlay); background: var(--color-night); font: 0.8125rem/1.4 var(--font-mono); color: var(--color-comment); }
+  .key-rec::before { content: ''; display: inline-block; width: 0.8rem; height: 0.8rem; margin-right: 0.4rem; vertical-align: -0.1rem; border: 1.5px dashed var(--color-text); border-radius: 50%; }
+
+  .land { fill: var(--map-land); }
+  .river { fill: var(--map-river); }
+  .stream { fill: none; stroke: var(--map-stream); stroke-width: 5; stroke-linecap: round; }
+  .canal { fill: none; stroke: var(--map-stream); stroke-width: 4; }
+  .road { fill: none; stroke: var(--map-road); stroke-width: 2.2; stroke-linecap: round; }
+  .blocks rect { fill: var(--color-surface); stroke: #1b2838; stroke-width: 0.5; }
+  .woods circle { fill: var(--map-woods); stroke: var(--map-woods-edge); stroke-width: 0.8; }
+  .fields path { fill: var(--map-farm); stroke: #263724; stroke-width: 0.6; }
+  .hill ellipse { fill: none; stroke: #263445; stroke-width: 0.8; }
+  .quarry path { fill: #121a24; stroke: var(--map-stone); stroke-width: 1; }
+  .runway rect { fill: #121a24; stroke: var(--map-stone); stroke-width: 0.8; }
+  /* A land-colored halo keeps the labels readable (AA) over rivers, woods and fields. */
+  .label { font: italic 6.5px var(--font-mono); letter-spacing: 0.1em; fill: var(--color-text); text-transform: uppercase; paint-order: stroke; stroke: var(--map-land); stroke-width: 2.6px; stroke-linejoin: round; }
+
+  /* Era overlays, points and lists follow the checked radio. */
+  .ov { opacity: 0; }
+  .ov-1962 .ice { fill: var(--era-1962-ice); opacity: 0.55; }
+  .ov-1962 .crack { fill: none; stroke: var(--era-1962-crack); stroke-width: 0.8; opacity: 0.7; }
+  .ov-1962 .pillar { fill: #c9d3df; opacity: 0.7; }
+  .ov-1962 .tint { fill: rgba(169, 188, 207, 0.07); }
+  .ov-1962 .snow circle { fill: var(--color-text); opacity: 0.7; }
+  .ov-1988 .tint { fill: url(#mp-dusk); }
+  .ov-1988 .leaves circle { fill: var(--map-1988-woods); opacity: 0.6; }
+  .ov-1988 .fly circle { fill: var(--era-1988-firefly); }
+  .ov-1988 .pool { fill: var(--era-1988-quarry-water); }
+  .ov-2016 .tint { fill: rgba(7, 11, 16, 0.25); }
+  .ov-2016 .bulbs circle { fill: var(--era-2016-bulb); }
+  .ov-2016 .wheel { fill: none; stroke: var(--era-2016-bulb); stroke-width: 0.8; opacity: 0.6; }
+  .ov-2016 .wheel line { stroke: var(--era-2016-bulb); stroke-width: 0.5; }
+  .mp-pts, .mp-places { display: none; }
+  .mp:has([id='era-1962']:checked) .ov-1962,
+  .mp:has([id='era-1988']:checked) .ov-1988,
+  .mp:has([id='era-2016']:checked) .ov-2016 { opacity: 1; }
+  .mp:has([id='era-1962']:checked) [data-points='1962'],
+  .mp:has([id='era-1988']:checked) [data-points='1988'],
+  .mp:has([id='era-2016']:checked) [data-points='2016'] { display: inline; }
+  .mp:has([id='era-1962']:checked) .mp-places[data-era='1962'],
+  .mp:has([id='era-1988']:checked) .mp-places[data-era='1988'],
+  .mp:has([id='era-2016']:checked) .mp-places[data-era='2016'] { display: grid; }
+  /* Without JS, following a link to a place shows that place's era. */
+  :global(html:not(.mp-js)) .mp:has(.mp-places :target) :is(.mp-places, .mp-pts) { display: none; }
+  :global(html:not(.mp-js)) .mp:has(.mp-places :target) .mp-places:has(> :target) { display: grid; }
+  :global(html:not(.mp-js)) .mp:has([data-era='1962'] > :target) .mp-pts[data-points='1962'],
+  :global(html:not(.mp-js)) .mp:has([data-era='1988'] > :target) .mp-pts[data-points='1988'],
+  :global(html:not(.mp-js)) .mp:has([data-era='2016'] > :target) .mp-pts[data-points='2016'] { display: inline; }
+
+  /* Points. */
+  .pt { cursor: pointer; outline: none; }
+  .pt .pin { fill: var(--color-err); stroke: var(--color-ink); stroke-width: 1.4; }
+  .pt .ring { fill: none; stroke: var(--color-text); stroke-width: 1.4; opacity: 0; }
+  .pt .halo { fill: none; stroke: var(--color-text); stroke-width: 0.9; stroke-dasharray: 2.2 1.8; opacity: 0.85; }
+  .pt text { font: 700 6.5px var(--font-mono); fill: var(--color-ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .pt:hover .ring, .pt[data-highlight] .ring, .pt[data-active] .ring { opacity: 1; }
+  .pt[data-active] .pin { fill: var(--color-text); }
+  /* Keyboard focus ring always wins and stays visible on every background. */
+  .pt:focus-visible .ring { opacity: 1; stroke: var(--color-text); stroke-width: 2; }
+  @media (max-width: 40rem) {
+    .pt .pin { r: 7.5px; }
+    .pt .ring, .pt .halo { r: 11px; }
+    .pt text { font-size: 8px; }
+    .mp-switch label { padding: 0.5rem 0.6rem; }
+    .mp-switch label b { font-size: 1.125rem; }
+  }
+
+  /* Places panel. */
+  .mp-panel h2 { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin: 0 0 0.75rem; font: 700 1.125rem/1.3 var(--font-mono); }
+  .mp-panel h2 span { font-weight: 400; font-size: 0.8125rem; color: var(--color-comment); }
+  @media (min-width: 60rem) { .mp-panel { position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow: auto; padding-right: 0.25rem; } }
+  .mp-places { gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+  .place { padding: 0.75rem 0.9rem; border: 1px solid var(--color-overlay); border-radius: 0.375rem; background: var(--color-night); scroll-margin: 1rem; }
+  .place:target, .place[data-active] { border-color: var(--color-err); background: var(--color-surface); }
+  .place:focus-visible { outline: 2px solid var(--color-err); outline-offset: 2px; }
+  .place h3 { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.35rem; font: 600 0.9375rem/1.35 var(--font-sans); }
+  .place .n { flex: none; display: grid; place-items: center; width: 1.4rem; height: 1.4rem; border-radius: 9999px; background: var(--color-err); color: var(--color-ink); font: 700 0.75rem/1 var(--font-mono); }
+  .place p { margin: 0; font-size: 0.9375rem; color: var(--color-subtext); }
+  .mp-who, .mp-also { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.5rem; margin-top: 0.6rem; font-size: 0.8125rem; }
+  .mp-tag { font: 0.75rem/1.4 var(--font-mono); color: var(--color-comment); text-transform: uppercase; letter-spacing: 0.06em; }
+  .mp-who ul, .mp-also ul { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
+  .mp-who ul a { display: inline-block; padding: 0 0.5rem; border: 1px solid var(--color-overlay); border-radius: 9999px; color: var(--color-text); text-decoration: none; font-size: 0.8125rem; line-height: 1.6; }
+  .mp-who ul a:hover { border-color: var(--color-err); }
+  .mp-also a { font: 0.8125rem/1.4 var(--font-mono); }
+
+  .drift { display: none; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mp-hero h1::after { transform-origin: top; animation: mp-drip 4s ease-in 1s infinite; }
+    @keyframes mp-drip { 0% { transform: scaleY(0); } 40%, 80% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+    .ov { transition: opacity 0.9s ease; }
+    .mp-switch label { transition: border-color 0.2s ease, background 0.2s ease; }
+    .place { transition: border-color 0.2s ease, background 0.2s ease; }
+    .pt .ring { transition: opacity 0.2s ease; }
+    .mp-pts .pt { transform-box: fill-box; transform-origin: center; animation: mp-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) calc(var(--i) * 40ms) both; }
+    @keyframes mp-pop { from { opacity: 0; transform: scale(0.2); } to { opacity: 1; transform: none; } }
+    .pt .halo { transform-box: fill-box; transform-origin: center; animation: mp-spin 14s linear infinite; }
+    @keyframes mp-spin { to { transform: rotate(360deg); } }
+    .snow circle { animation: mp-snow 9s linear infinite; }
+    .snow circle:nth-child(2n) { animation-duration: 12s; animation-delay: -4s; }
+    .snow circle:nth-child(3n) { animation-duration: 15s; animation-delay: -8s; }
+    @keyframes mp-snow { from { transform: translateY(-30px); } to { transform: translateY(250px); } }
+    .fly circle { animation: mp-firefly 3s ease-in-out infinite alternate; }
+    .fly circle:nth-child(2n) { animation-delay: -1.2s; }
+    .fly circle:nth-child(3n) { animation-delay: -2.1s; }
+    @keyframes mp-firefly { from { opacity: 0.1; transform: translate(0, 0); } to { opacity: 1; transform: translate(3px, -4px); } }
+    .bulbs circle { animation: mp-bulb 1.6s steps(1) infinite; }
+    .bulbs circle:nth-child(2n) { animation-delay: -0.8s; }
+    @keyframes mp-bulb { 50% { opacity: 0.35; } }
+    .wheel { transform-box: fill-box; transform-origin: center; animation: mp-spin 30s linear infinite; }
+    .drift { display: inline; animation: mp-drift 46s linear infinite; }
+    @keyframes mp-drift { from { transform: translate(-40px, 190px); } to { transform: translate(360px, -60px); } }
+    .drift .bob { animation: mp-bob 3s ease-in-out infinite alternate; }
+    @keyframes mp-bob { from { transform: translateY(2px) rotate(-4deg); } to { transform: translateY(-3px) rotate(4deg); } }
+  }
+</style>
