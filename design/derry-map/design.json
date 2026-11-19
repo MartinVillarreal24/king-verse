@@ -1,0 +1,14 @@
+{
+  "title": "Derry map — three Derrys",
+  "brief": "Bilingual interactive map page: one original map of Derry with an era switch (1962, 1988–89, 2016) that repaints the town and swaps its cited places (37: the 20 existing plus 17 new). Recurring places keep their spot and link to the same spot in other eras; each place lists the characters who pass through it, linked to their cards. Works without JS (radios, :target); reduced motion keeps it still; disclaimer visible.",
+  "feature": "odd/tasks/derry-map.md",
+  "artboards": [
+    {
+      "file": "01-three-derrys.html",
+      "title": "Three Derrys",
+      "tradeoff": "Clear map + list layout that works with keyboard, without JS and on phones, and shows continuity across eras; on phones the pins are small, so the list below is the main way in, and the map is schematic (no illustrated buildings) to keep 12–13 pins per era legible",
+      "width": 1440,
+      "height": 900
+    }
+  ]
+}
