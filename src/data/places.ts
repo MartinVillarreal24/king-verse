@@ -222,8 +222,8 @@ export const places: Place[] = [
     cycleId: '2016',
     name: { es: 'La biblioteca', en: 'The library' },
     description: {
-      es: 'Henry apuñala a Eddie, y Richie mata a Henry.',
-      en: 'Henry stabs Eddie, and Richie kills Henry.',
+      es: 'Henry ataca a Mike, y Richie llega a tiempo para matar a Henry.',
+      en: 'Henry attacks Mike, and Richie arrives in time to kill Henry.',
     },
     ...spot.library,
     sourceIds: ['collider-it-timeline'],

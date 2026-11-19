@@ -271,8 +271,8 @@ export const cycles: Cycle[] = [
         },
         {
           text: {
-            es: 'Henry apuñala a Eddie, y Richie mata a Henry en la biblioteca.',
-            en: 'Henry stabs Eddie, and Richie kills Henry in the library.',
+            es: 'Henry apuñala a Eddie en la posada, y en la biblioteca Richie mata a Henry para salvar a Mike.',
+            en: 'Henry stabs Eddie at the inn, and in the library Richie kills Henry to save Mike.',
           },
           cite: ['collider-it-timeline'],
         },
