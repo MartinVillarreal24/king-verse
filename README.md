@@ -21,8 +21,9 @@ Astro (static output) + GSAP (ScrollTrigger). Spanish is the default locale at `
 - `src/i18n/ui.ts`: locales, routes per locale and UI strings.
 - `src/data/cycles.ts`: the five screen-chronology cycles (no novel years, nothing after 2016).
 - `src/data/sources.ts`: verified bibliography; `src/components/Note.astro` renders numbered inline notes that link to it.
-- `src/components/`: Derry scene, cycle sections, home, characters and sources pages shared by both locales; `src/components/characters/` holds the original object illustrations.
+- `src/components/`: Derry scene, cycle sections, home, characters, map and sources pages shared by both locales; `src/components/characters/` holds the original object illustrations.
 - `src/data/characters.ts`: the characters page content (Losers and Derry 1962), every sentence cited.
+- `src/data/places.ts`: Derry places per era, with the characters seen there. The home's mini-maps draw the ones not marked `home: false`; the map page (`/mapa/`, `/en/map/`) draws all of them, and a place that keeps its id across eras keeps its spot.
 - `src/layouts/Base.astro`: page shell, hreflang, language switch and the visible disclaimer.
 - `src/pages/`: Spanish pages; `src/pages/en/`: English pages.
 - `odd/tasks/`: feature task documents.
