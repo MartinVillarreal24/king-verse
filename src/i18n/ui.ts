@@ -6,6 +6,7 @@ export const defaultLocale: Locale = 'es';
 // Every page exists in both locales; the layout uses this map for the language switch and hreflang.
 export const routes = {
   home: { es: '/', en: '/en/' },
+  characters: { es: '/personajes/', en: '/en/characters/' },
   sources: { es: '/fuentes/', en: '/en/sources/' },
 } as const;
 export type RouteKey = keyof typeof routes;
@@ -17,7 +18,7 @@ export const ui = {
   es: {
     siteName: 'King Verse',
     skipLink: 'Saltar al contenido',
-    nav: { home: 'Inicio', sources: 'Fuentes' },
+    nav: { home: 'Inicio', characters: 'Personajes', sources: 'Fuentes' },
     langSwitch: { label: 'English', title: 'Read in English' },
     disclaimer:
       'Sitio de fans no oficial y sin fines de lucro. No está afiliado a Stephen King, Warner Bros. ni HBO.',
@@ -52,6 +53,23 @@ export const ui = {
         '1988': { text: '«Aquí abajo todos flotan.»', speaker: 'Pennywise', work: 'IT', year: '2017' },
       } as Record<string, Quote>,
     },
+    characters: {
+      title: 'Personajes',
+      description: 'Los Perdedores y la gente de Derry en 1962, dibujados como los objetos que los identifican en pantalla.',
+      lead: 'Aquí no hay caras. Cada personaje aparece como el objeto que lo identifica en pantalla, dibujado desde cero. Pasa el cursor o el foco por una ficha y el objeto despierta.',
+      tocLabel: 'Secciones',
+      groups: {
+        losers: { kicker: 'It (2017) · It Chapter Two (2019)', title: 'El Club de los Perdedores', toc: 'Los Perdedores · 1988–89 y 2016' },
+        'derry-1962': { kicker: 'IT: Welcome to Derry · temporada 1', title: 'Derry, 1962', toc: 'Derry · 1962' },
+      },
+      ties: { kicker: 'De 1962 a 2016', title: 'Lazos entre épocas', lead: 'Dos linajes cruzan los ciclos.', toc: 'Lazos entre épocas' },
+      erasLabel: 'Épocas',
+      fear: 'Su miedo',
+      link: 'Lazo',
+      story: 'Toda su historia',
+      spoilers: '(con spoilers)',
+      provisional: 'Objeto provisional: sin un objeto propio claro en pantalla.',
+    },
     sources: {
       title: 'Fuentes',
       description: 'Fuentes primarias y citas de King Verse.',
@@ -64,7 +82,7 @@ export const ui = {
   en: {
     siteName: 'King Verse',
     skipLink: 'Skip to content',
-    nav: { home: 'Home', sources: 'Sources' },
+    nav: { home: 'Home', characters: 'Characters', sources: 'Sources' },
     langSwitch: { label: 'Español', title: 'Leer en español' },
     disclaimer: 'Unofficial, non-profit fan site. Not affiliated with Stephen King, Warner Bros. or HBO.',
     credits: 'Original art and text by Martín Herrera.',
@@ -96,6 +114,23 @@ export const ui = {
       quotes: {
         '1988': { text: '“We all float down here.”', speaker: 'Pennywise', work: 'IT', year: '2017' },
       } as Record<string, Quote>,
+    },
+    characters: {
+      title: 'Characters',
+      description: 'The Losers and the people of Derry in 1962, drawn as the objects the screen ties to them.',
+      lead: 'There are no faces here. Each character appears as the object the screen ties to them, drawn from scratch. Hover or focus a card and the object wakes up.',
+      tocLabel: 'Sections',
+      groups: {
+        losers: { kicker: 'It (2017) · It Chapter Two (2019)', title: "The Losers' Club", toc: 'The Losers · 1988–89 and 2016' },
+        'derry-1962': { kicker: 'IT: Welcome to Derry · season 1', title: 'Derry, 1962', toc: 'Derry · 1962' },
+      },
+      ties: { kicker: 'From 1962 to 2016', title: 'Ties across eras', lead: 'Two bloodlines cross the cycles.', toc: 'Ties across eras' },
+      erasLabel: 'Eras',
+      fear: 'Their fear',
+      link: 'Tie',
+      story: 'Full story',
+      spoilers: '(spoilers)',
+      provisional: 'Provisional object: no clear object of their own on screen.',
     },
     sources: {
       title: 'Sources',

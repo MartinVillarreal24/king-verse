@@ -38,6 +38,7 @@ const pageTitle = route === 'home' ? `${t.siteName} — ${title}` : `${title} ·
         <nav aria-label={locale === 'es' ? 'Principal' : 'Main'}>
           <ul>
             <li><a href={routes.home[locale]} aria-current={route === 'home' ? 'page' : undefined}>{t.nav.home}</a></li>
+            <li><a href={routes.characters[locale]} aria-current={route === 'characters' ? 'page' : undefined}>{t.nav.characters}</a></li>
             <li><a href={routes.sources[locale]} aria-current={route === 'sources' ? 'page' : undefined}>{t.nav.sources}</a></li>
             <li><a href={routes[route][other]} hreflang={other} lang={other} title={t.langSwitch.title}>{t.langSwitch.label}</a></li>
           </ul>

@@ -1,0 +1,14 @@
+{
+  "title": "Characters — what they left behind",
+  "brief": "Bilingual characters page for the 7 Losers (1988–89, 2016) and 9 people of Derry in 1962. No faces: each character is an original illustration of the object the screen ties to them, floating on its plate and waking on hover or focus. Cited facts, full arcs behind spoiler details, ties across eras (Hanlon, Tozier). Reduced-motion and no-JS fallbacks; disclaimer visible.",
+  "feature": "odd/tasks/characters.md",
+  "artboards": [
+    {
+      "file": "01-what-they-left.html",
+      "title": "What they left behind",
+      "tradeoff": "Clear, scannable grid that shows 16 original illustrations and small object animations without ever drawing a face; less cinematic than the home (no pinned scenes), and three objects (Leroy, Charlotte, Pauly) are provisional because nothing stronger is backed on screen",
+      "width": 1440,
+      "height": 900
+    }
+  ]
+}
