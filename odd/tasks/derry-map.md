@@ -13,8 +13,8 @@ New bilingual page (es `/mapa/`, en `/en/map/`): one large original map of Derry
 ## Tasks
 
 - [x] T1 — S2, S3 — delegated (broad web research) — odd/research/derry-map.md
-- [x] T2 — S1, S2, S4, S5 — inline — artboard design/derry-map/01-three-derrys.html, awaiting approval
-- [ ] T3 — S1–S4 — implement in src/ after approval
+- [x] T2 — S1, S2, S4, S5 — inline — artboard design/derry-map/01-three-derrys.html (ca6bd66), approved
+- [x] T3 — S1–S4 — inline (no writer trigger: one unit, parent context) — 7f914b0 (data), d6e0e87 (page)
 
 ## Log
 
@@ -24,3 +24,6 @@ New bilingual page (es `/mapa/`, en `/en/map/`): one large original map of Derry
 - L4 (parent): library error confirmed on the fetched Collider timeline ("Back at the Inn… stabs Eddie"; "Henry attacks Mike in the library"); fixed in src/data/places.ts and src/data/cycles.ts. npm test 50/50. Well House → Neibolt left for T3.
 - L5 (user answer, 2026-11-19): "Selección de ~36" → 37 places.
 - L6 (parent, T2): artboard design/derry-map/01-three-derrys.html ("Three Derrys") + design.json. Era switch = native radios (CSS :has), points link to cited entries (:target), recurring places keep their spot with a dashed halo and "También en" links, character chips per place, era overlays (ice and pillars / dusk and fireflies / carnival bulbs), drifting balloon. 1962 Well House shown as 29 Neibolt Street (sky-derry-e5). Evidence: headless Chrome 1440×900, 390×844, no JS; no console errors, no overflow; "También en" switches era and selects the place; axe 0 violations.
+- L7 (user, 2026-11-19): "dale, avisame cuando termine" — artboard approved, implement T3.
+- L8 (parent, T3): RED first (test/map.test.mjs, 10 tests, failed on the missing page). Data: Place gains body/people/home:false; placesOf keeps the home's 20 (Well House → 29 Neibolt), mapPlacesOf draws 37; mapCitations numbered after the characters page; screenrant-it2-questions added. Page: src/components/MapPage.astro, /mapa/ and /en/map/, nav link, check:a11y PAGES. Deviation from the artboard: the 1962 school is its own place ("high-school", own spot, not recurring) because the research says sources never tie it to the 1988–89 school; map labels got a land-colored halo for AA; "Granjas" label moved off the farm pin. Evidence: npm test 60/60; check:a11y 56/56 clean; headless Chrome desktop/mobile/no-JS: no console errors, no overflow, radios swap points and lists, "También en" switches era and selects the place (also without JS via :target), deep link #map-1988-farm opens 1988. Differential vs base build: home changes only in the nav link, the requested Neibolt entry (1988 Neibolt now "keep" in the era transition) and the note renumbering it causes; characters page only nav + renumbering; sources page gains screenrant. Next: push/PR are the user's decision.
+
