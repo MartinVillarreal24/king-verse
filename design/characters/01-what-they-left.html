@@ -1,0 +1,573 @@
+<!doctype html>
+<!--
+01 — What they left behind (design/characters). Characters page for odd/tasks/characters.md (T2; S1–S3, S5, S6).
+Concept: there are no faces. Each of the 16 characters is the object the screen ties to them, floating on its own dark plate the way
+everything floats in Derry. Seven Losers (1988–89 and 2016) and nine people of Derry in 1962 (IT: Welcome to Derry, season 1), then a
+"Ties across eras" strip that joins the Hanlons and the Toziers with the red balloon string.
+
+Content: every sentence comes from odd/research/characters.md and carries its numbered note; text in our own words, neutral Spanish.
+Nothing from its "Do NOT state" list. Full arcs, endings included, sit inside a native <details> ("Toda su historia (con spoilers)").
+Stanley's card carries a content note (suicide). Three objects are provisional (Leroy: farm gate, Charlotte: the packed car, Pauly:
+transport plane) because no strong on-screen object was found for them; they are marked on the card.
+
+Art: original flat SVG objects (viewBox 200×160), decorative (aria-hidden); the object name is the visible figcaption.
+No stills, posters, logos, official typefaces, actor likeness or the films' Pennywise.
+Motion:
+  Float      every object bobs slowly on its plate (6 s, the same curve as the home balloon) with a soft shadow.
+  Wake       on hover or keyboard focus inside a card the object does its one thing: the boat rocks on the water, Ben's signature is
+             written, embers rise from the postcard, the token flips, the inhaler puffs, the spider drops over Stan's cap, one star turns
+             red in Will's telescope, the gate swings, the car's lamp flickers, the dagger glints, the reel turns, the sticks strike,
+             a faint glow leaks from Hallorann's box, the plane crosses its clouds.
+  Reveal     cards rise in as they enter the viewport (JS + no-preference only).
+  Ties       the red string between relatives draws itself when the strip enters the viewport.
+  Blood      the only blood is the title drip, as on the home.
+Accessibility: reduced motion keeps every object still in its rest pose. Without JS everything is visible and <details> still opens.
+Text never sits on art: plates and text blocks are separate. Focus ring as global.css.
+
+System colors used: #070b10 #0f1724 #141e2c #22303f #e6edf3 #b3c0cf #8b9bb0 #ff5c7a; era tokens from 01/04: --era-1962-ice #5d7389,
+--era-1962-window #e9b872, --era-1988-sun #f0a86a; blood #9e1028 / #4a0812 from 04. Fonts: --font-sans, --font-mono only.
+Proposed tokens (new, illustration only, never text on them):
+  --paper #e8dcc0, --paper-light #f3ead4, --paper-shade #b9ab8c, --paper-ink #5a4a32, --brass #c9a24a, --brass-dark #7d6224,
+  --metal #9aa8b8, --metal-dark #5d6b7c, --plastic #4f6f8f, --plastic-dark #33506c, --stone #4a505a, --stone-light #7a828e,
+  --stone-mid #5f6672, --stone-dark #353a42, --cap #d8a6b4, --cap-dark #a87484, --wood #7a5236, --wood-dark #4a3020,
+  --plate-1988 radial #1d1626 → #0f1724, --plate-1962 radial #13202e → #0f1724.
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>King Verse — Personajes</title>
+<script>document.documentElement.classList.add('js');if(matchMedia('(prefers-reduced-motion: no-preference)').matches)document.documentElement.classList.add('js-motion');</script>
+<style>
+:root {
+  --color-ink: #070b10; --color-night: #0f1724; --color-surface: #141e2c; --color-overlay: #22303f;
+  --color-text: #e6edf3; --color-subtext: #b3c0cf; --color-comment: #8b9bb0; --color-err: #ff5c7a;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --era-1962-ice: #5d7389; --era-1962-window: #e9b872; --era-1988-sun: #f0a86a; --blood: #9e1028; --blood-dark: #4a0812;
+  --paper: #e8dcc0; --paper-light: #f3ead4; --paper-shade: #b9ab8c; --paper-ink: #5a4a32;
+  --brass: #c9a24a; --brass-dark: #7d6224; --metal: #9aa8b8; --metal-dark: #5d6b7c; --plastic: #4f6f8f; --plastic-dark: #33506c;
+  --stone: #4a505a; --stone-light: #7a828e; --stone-mid: #5f6672; --stone-dark: #353a42; --cap: #d8a6b4; --cap-dark: #a87484;
+  --wood: #7a5236; --wood-dark: #4a3020;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--color-ink); color: var(--color-text); font-family: var(--font-sans); line-height: 1.6; scroll-behavior: smooth; }
+body { margin: 0; }
+a { color: var(--color-err); text-underline-offset: 0.2em; }
+a:hover { color: var(--color-text); }
+:focus-visible { outline: 2px solid var(--color-err); outline-offset: 3px; }
+.wrap { width: min(100% - 2rem, 72rem); margin-inline: auto; }
+
+/* header / footer as Base.astro */
+.site-header { border-bottom: 1px solid var(--color-overlay); }
+.site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 0.875rem; flex-wrap: wrap; }
+.brand { font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.04em; color: var(--color-text); text-decoration: none; }
+.site-header ul { display: flex; gap: 1.25rem; list-style: none; margin: 0; padding: 0; font-family: var(--font-mono); font-size: 0.875rem; }
+.site-header nav a { color: var(--color-subtext); text-decoration: none; }
+.site-header nav a[aria-current] { color: var(--color-text); text-decoration: underline; text-decoration-color: var(--color-err); }
+.site-footer { border-top: 1px solid var(--color-overlay); padding-block: 1.5rem; font-size: 0.875rem; color: var(--color-subtext); }
+.site-footer .credits { color: var(--color-comment); }
+
+/* hero */
+.hero { position: relative; overflow: hidden; padding-block: 5rem 3rem; }
+.hero h1 { font-family: var(--font-mono); font-size: clamp(2.5rem, 9vw, 5.5rem); line-height: 1; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 1.75rem; position: relative; display: inline-block; }
+.hero h1::after { content: ''; position: absolute; left: 62%; top: 92%; width: 6px; height: 0.22em; border-radius: 0 0 6px 6px; background: linear-gradient(var(--blood), var(--blood-dark)); }
+.hero .lead { font-size: 1.125rem; color: var(--color-subtext); max-width: 38rem; margin: 0 0 1.75rem; }
+.toc { display: flex; flex-wrap: wrap; gap: 0.75rem; list-style: none; margin: 0; padding: 0; font-family: var(--font-mono); font-size: 0.875rem; }
+.toc a { display: inline-block; padding: 0.45rem 0.8rem; border: 1px solid var(--color-overlay); border-radius: 9999px; color: var(--color-subtext); text-decoration: none; background: var(--color-ink); }
+.toc a:hover { border-color: var(--color-err); color: var(--color-text); }
+.hero-balloon { position: absolute; right: 8%; top: 2.5rem; width: clamp(5rem, 12vw, 9rem); pointer-events: none; }
+.hero-objects { position: absolute; inset: 0; pointer-events: none; }
+.hero-objects span { position: absolute; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--color-overlay); }
+
+/* sections */
+.group { padding-block: 3.5rem; border-top: 1px solid var(--color-overlay); }
+.group-head { display: grid; gap: 0.5rem; margin-bottom: 2rem; }
+.group-head .kicker { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-err); letter-spacing: 0.08em; text-transform: uppercase; margin: 0; }
+.group-head h2 { font-family: var(--font-mono); font-size: clamp(1.75rem, 5vw, 2.75rem); line-height: 1.1; margin: 0; letter-spacing: -0.02em; }
+.group-head p { color: var(--color-subtext); max-width: 40rem; margin: 0; }
+
+.cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); }
+.card article { height: 100%; display: flex; flex-direction: column; background: var(--color-night); border: 1px solid var(--color-overlay); border-radius: 0.5rem; overflow: hidden; transition: border-color 0.2s ease; }
+.card:hover article, .card:focus-within article { border-color: color-mix(in srgb, var(--color-err) 55%, transparent); }
+.plate { margin: 0; position: relative; aspect-ratio: 5 / 4; background: radial-gradient(ellipse at 50% 40%, #1d1626, var(--color-night) 70%); border-bottom: 1px solid var(--color-overlay); display: grid; place-items: center; }
+#derry .plate { background: radial-gradient(ellipse at 50% 40%, #13202e, var(--color-night) 70%); }
+.plate figcaption { position: absolute; left: 0.75rem; bottom: 0.6rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-comment); background: rgba(7, 11, 16, 0.85); padding: 0.1rem 0.4rem; border-radius: 0.25rem; }
+.art { width: 82%; height: auto; overflow: visible; }
+.card-body { padding: 1rem 1.25rem 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
+.eras { display: flex; gap: 0.4rem; list-style: none; margin: 0; padding: 0; }
+.eras li { font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-err); border: 1px solid color-mix(in srgb, var(--color-err) 45%, transparent); border-radius: 0.25rem; padding: 0 0.4rem; }
+.card h3 { font-family: var(--font-mono); font-size: 1.25rem; line-height: 1.2; margin: 0; }
+.tag { margin: -0.4rem 0 0; color: var(--color-comment); font-family: var(--font-mono); font-size: 0.8125rem; }
+.why { margin: 0; color: var(--color-subtext); }
+.fear, .link, .warn, .weak { margin: 0; font-size: 0.9375rem; color: var(--color-subtext); }
+.fear span, .link span { font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 0.35rem; }
+.warn { font-size: 0.8125rem; color: var(--color-text); border-left: 2px solid var(--color-err); padding-left: 0.6rem; }
+.weak { font-size: 0.8125rem; color: var(--color-comment); font-style: italic; }
+details { border-top: 1px solid var(--color-overlay); padding-top: 0.6rem; margin-top: auto; }
+summary { cursor: pointer; font-family: var(--font-mono); font-size: 0.875rem; color: var(--color-text); }
+summary span { color: var(--color-comment); }
+details p { color: var(--color-subtext); margin: 0.6rem 0 0; font-size: 0.9375rem; }
+.actors { margin: 0; font-size: 0.8125rem; color: var(--color-comment); }
+.note { font-family: var(--font-mono); font-size: 0.7em; line-height: 1; text-decoration: none; margin-left: 0.1em; }
+
+/* ties across eras */
+.ties { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.5rem; }
+.tie { background: var(--color-night); border: 1px solid var(--color-overlay); border-radius: 0.5rem; padding: 1.25rem; }
+.tie h3 { font-family: var(--font-mono); font-size: 1rem; margin: 0 0 1rem; }
+.chain { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2.5rem; }
+.chain li { position: relative; display: grid; gap: 0.15rem; }
+.chain li + li::before { content: ''; position: absolute; right: calc(100% + 0.4rem); top: 0.75rem; width: 1.7rem; height: 2px; background: var(--color-err); transform-origin: left; }
+.chain .year { font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-err); }
+.chain a { color: var(--color-text); font-weight: 600; text-decoration: none; }
+.chain a:hover { text-decoration: underline; text-decoration-color: var(--color-err); }
+.chain .role { font-size: 0.875rem; color: var(--color-comment); }
+.tie p { margin: 1rem 0 0; font-size: 0.875rem; color: var(--color-comment); }
+
+.sources ol { color: var(--color-subtext); font-size: 0.875rem; padding-left: 1.5rem; columns: 2 26rem; column-gap: 2.5rem; }
+.sources li { margin-bottom: 0.4rem; break-inside: avoid; }
+.sources li:target { color: var(--color-text); }
+
+@media (max-width: 40rem) {
+  .chain { grid-auto-flow: row; gap: 1rem; }
+  .chain li + li::before { right: auto; left: 0.2rem; top: -0.8rem; width: 2px; height: 0.6rem; }
+  .hero-balloon { opacity: 0.5; }
+}
+
+/* art details */
+.art .water path, .art .clouds path { fill: none; stroke: var(--era-1962-ice); stroke-width: 1.5; opacity: 0.5; }
+.art .clouds path { fill: var(--color-overlay); stroke: none; opacity: 0.8; }
+.art .embers circle { fill: var(--era-1988-sun); opacity: 0; }
+.art .puff circle { fill: var(--color-text); opacity: 0; }
+.art .stars circle { fill: var(--color-subtext); }
+.art .shadow { fill: #000; opacity: 0.35; }
+.art .obj, .art .spin, .art .spin2, .art .swing, .art .glint, .art .fly, .art .stick-a, .art .stick-b, .art .spider g { transform-box: fill-box; transform-origin: center; }
+.art .swing { transform-origin: left center; }
+.art .glint { opacity: 0.3; }
+.art .ink { stroke-dasharray: 120; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .art .obj { animation: float 6s ease-in-out infinite alternate; }
+  .card:nth-child(2n) .art .obj { animation-delay: -2s; }
+  .card:nth-child(3n) .art .obj { animation-delay: -4s; }
+  .hero-balloon { animation: float 6s ease-in-out infinite alternate; }
+  .hero h1::after { animation: drip 4s ease-in 1s infinite; transform-origin: top; }
+  @keyframes float { from { transform: translateY(3px) rotate(-1.5deg); } to { transform: translateY(-6px) rotate(1.5deg); } }
+  @keyframes drip { 0% { transform: scaleY(0); } 40%, 80% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+
+  .art .ink { stroke-dashoffset: 0; transition: stroke-dashoffset 1.2s ease; }
+  .card:is(:hover, :focus-within) .art .ink { animation: write 1.4s ease forwards; }
+  @keyframes write { from { stroke-dashoffset: 120; } to { stroke-dashoffset: 0; } }
+  .card:is(:hover, :focus-within) .art-boat .obj { animation: rock 1.6s ease-in-out infinite alternate; }
+  @keyframes rock { from { transform: rotate(-6deg) translateY(2px); } to { transform: rotate(6deg) translateY(-3px); } }
+  .card:is(:hover, :focus-within) .art .embers circle { animation: ember 2.4s ease-out infinite; }
+  .card:is(:hover, :focus-within) .art .embers circle:nth-child(2) { animation-delay: 0.6s; }
+  .card:is(:hover, :focus-within) .art .embers circle:nth-child(3) { animation-delay: 1.2s; }
+  .card:is(:hover, :focus-within) .art .embers circle:nth-child(4) { animation-delay: 1.8s; }
+  @keyframes ember { 0% { opacity: 0; transform: translateY(30px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
+  .card:is(:hover, :focus-within) .art .spin { animation: flip 1.2s ease-in-out infinite; }
+  @keyframes flip { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.08); } }
+  .card:is(:hover, :focus-within) .art .puff circle { animation: puff 1.8s ease-out infinite; }
+  .card:is(:hover, :focus-within) .art .puff circle:nth-child(2) { animation-delay: 0.15s; }
+  .card:is(:hover, :focus-within) .art .puff circle:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes puff { 0% { opacity: 0.5; transform: translateX(10px) scale(0.4); } 100% { opacity: 0; transform: translateX(-10px) scale(1.4); } }
+  .art .spider g { transform: translateY(-40px); transition: transform 1.4s cubic-bezier(.3,1.4,.5,1); }
+  .art .spider path { transform: scaleY(0.1); transform-origin: top; transform-box: fill-box; transition: transform 1.4s cubic-bezier(.3,1.4,.5,1); }
+  .card:is(:hover, :focus-within) .art .spider g { transform: none; }
+  .card:is(:hover, :focus-within) .art .spider path { transform: none; }
+  .art .stars .red { transition: fill 0.6s ease, r 0.6s ease; }
+  .card:is(:hover, :focus-within) .art .stars .red { fill: var(--color-err); r: 3.5px; }
+  .art .swing { transition: transform 1.2s ease; }
+  .card:is(:hover, :focus-within) .art .swing { transform: perspective(300px) rotateY(-38deg); }
+  .card:is(:hover, :focus-within) .art .lamp { animation: flicker 1.6s steps(1) infinite; }
+  @keyframes flicker { 0%, 100% { opacity: 1; } 40% { opacity: 0.2; } 48% { opacity: 1; } 70% { opacity: 0.4; } }
+  .card:is(:hover, :focus-within) .art .glint { animation: glint 1.6s ease-in-out infinite; }
+  @keyframes glint { 0%, 100% { opacity: 0; transform: scale(0.4); } 50% { opacity: 1; transform: scale(1.2) rotate(45deg); } }
+  .card:is(:hover, :focus-within) .art .spin2 { animation: turn 3s linear infinite; }
+  @keyframes turn { to { transform: rotate(360deg); } }
+  .card:is(:hover, :focus-within) .art .stick-a { animation: hit-a 0.5s ease-in-out infinite alternate; }
+  .card:is(:hover, :focus-within) .art .stick-b { animation: hit-a 0.5s ease-in-out 0.25s infinite alternate-reverse; }
+  .art .beat { opacity: 0; }
+  .card:is(:hover, :focus-within) .art .beat { animation: beat 0.5s steps(1) infinite; }
+  @keyframes hit-a { from { transform: rotate(0); } to { transform: rotate(-8deg); } }
+  @keyframes beat { 50% { opacity: 1; } }
+  .art .shine ellipse { transition: opacity 0.8s ease; }
+  .card:is(:hover, :focus-within) .art .shine ellipse { opacity: 0.55; }
+  .card:is(:hover, :focus-within) .art .fly { animation: fly 2.4s ease-in-out infinite alternate; }
+  @keyframes fly { from { transform: translate(-10px, 3px); } to { transform: translate(14px, -5px); } }
+
+  .js-motion .card { opacity: 0; transform: translateY(24px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.2,.7,.2,1); }
+  .js-motion .card.in { opacity: 1; transform: none; }
+  .js-motion .chain li + li::before { transform: scaleX(0); transition: transform 0.9s ease 0.3s; }
+  .js-motion .tie.in .chain li + li::before { transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 40rem) {
+  .js-motion .chain li + li::before { transform: scaleY(0); transform-origin: top; }
+  .js-motion .tie.in .chain li + li::before { transform: scaleY(1); }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#">KING VERSE</a>
+    <nav aria-label="Principal"><ul><li><a href="#">Inicio</a></li><li><a href="#" aria-current="page">Personajes</a></li><li><a href="#fuentes">Fuentes</a></li><li><a href="#" lang="en">EN</a></li></ul></nav>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <svg class="hero-balloon" viewBox="0 0 100 200" aria-hidden="true" focusable="false"><ellipse cx="50" cy="48" rx="34" ry="42" fill="var(--color-err)"/><ellipse cx="38" cy="32" rx="8" ry="12" fill="#fff" opacity=".35"/><path d="M46 90 h8 l-4 7 Z" fill="#d94a66"/><path d="M50 97 q-8 30 4 60 t-6 42" fill="none" stroke="#c9d3df" stroke-opacity=".55" stroke-width="1.2"/></svg>
+    <div class="wrap">
+      <h1>Personajes</h1>
+      <p class="lead">Aquí no hay caras. Cada personaje aparece como el objeto que lo identifica en pantalla, dibujado desde cero. Pasa el cursor o el foco por una ficha y el objeto despierta.</p>
+      <ul class="toc"><li><a href="#perdedores">Los Perdedores · 1988–89 y 2016</a></li><li><a href="#derry">Derry · 1962</a></li><li><a href="#lazos">Lazos entre épocas</a></li></ul>
+    </div>
+  </section>
+
+  <section class="group" id="perdedores" aria-labelledby="perdedores-title">
+    <div class="wrap">
+      <div class="group-head">
+        <p class="kicker">It (2017) · It Chapter Two (2019)</p>
+        <h2 id="perdedores-title">El Club de los Perdedores</h2>
+        <p>Siete chicos que enfrentan a Eso en el verano de 1989 y vuelven 27 años después, en 2016, a terminar lo que empezaron.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+      </div>
+      <ul class="cards">
+<li class="card" id="bill">
+  <article aria-labelledby="bill-name">
+    <figure class="plate"><svg class="art art-boat" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="water"><path d="M20 128 q20 -6 40 0 t40 0 t40 0 t40 0" /><path d="M40 140 q20 -5 40 0 t40 0 t40 0" /></g>
+<g class="obj"><path d="M48 104 L152 104 L134 126 L66 126 Z" fill="var(--paper)"/><path d="M100 36 L100 104 L58 104 Z" fill="var(--paper-light)"/><path d="M100 36 L100 104 L142 104 Z" fill="var(--paper-shade)"/><path d="M66 126 L100 112 L134 126" fill="none" stroke="var(--paper-shade)" stroke-width="2"/><path d="M48 104 H152" stroke="var(--paper-ink)" stroke-width="1.5"/></g></svg><figcaption>El barquito de papel</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1988–89</li><li>2016</li></ul>
+      <h3 id="bill-name">Bill Denbrough</h3>
+      <p class="tag">El que perdió a Georgie</p>
+      <p class="why">Le arma un barquito de papel a su hermano Georgie, que lo pierde en una alcantarilla y desaparece; Bill carga con esa culpa.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a></sup></p>
+      <p class="fear"><span>Su miedo</span> Un Georgie convertido en zombi, en el sótano de su casa.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup></p><p class="link"><span>Lazo</span> Hermano mayor de Georgie Denbrough.<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a></sup></p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>En la cisterna dispara contra Eso la pistola de Mike aunque está descargada: lo que importa es creer.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> De adulto es escritor, y todos le reprochan sus malos finales.<sup><a class="note" href="#source-dailybeast-it2-review" aria-label="Nota 4">[4]</a><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> En 2016 recupera el barquito y lo usa como su ofrenda para el Ritual de Chüd.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup> Bajo la casa de Neibolt por fin se perdona la muerte de Georgie; al final empieza una novela nueva.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p></details>
+      <p class="actors">Jaeden Lieberher (niño) · James McAvoy (adulto)<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="ben">
+  <article aria-labelledby="ben-name">
+    <figure class="plate"><svg class="art art-yearbook" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="obj"><g transform="rotate(-6 100 80)"><rect x="52" y="26" width="96" height="112" rx="2" fill="var(--paper)"/><path d="M100 26 V138" stroke="var(--paper-shade)" stroke-dasharray="3 3"/>
+<g fill="var(--paper-shade)"><rect x="60" y="36" width="14" height="16"/><rect x="78" y="36" width="14" height="16"/><rect x="60" y="58" width="14" height="16"/><rect x="78" y="58" width="14" height="16"/><rect x="108" y="36" width="14" height="16"/><rect x="126" y="36" width="14" height="16"/><rect x="108" y="58" width="14" height="16"/><rect x="126" y="58" width="14" height="16"/></g>
+<g stroke="var(--paper-shade)" stroke-width="2"><path d="M60 84 H92 M60 92 H86 M108 84 H140 M108 92 H134"/></g>
+<path class="ink" d="M66 116 c6 -14 10 6 16 -4 s8 -10 12 2 s10 -8 14 0 s10 6 20 -6" fill="none" stroke="var(--color-err)" stroke-width="2.5" stroke-linecap="round"/></g></g></svg><figcaption>La página del anuario</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1988–89</li><li>2016</li></ul>
+      <h3 id="ben-name">Ben Hanscom</h3>
+      <p class="tag">El chico nuevo de la biblioteca</p>
+      <p class="why">Beverly es la única que le firma el anuario; él guarda esa página en la billetera y en 2016 la usa como su ofrenda.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+      <p class="fear"><span>Su miedo</span> Las víctimas sin cabeza de la explosión de la Ferrería lo persiguen en la biblioteca.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup></p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Es tímido y pasa sus días en la biblioteca.<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a></sup> Le escribe a Beverly una postal con un poema y no la firma.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> En la cisterna la despierta de las luces muertas con un beso.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-collider-it-ending" aria-label="Nota 5">[5]</a></sup> De adulto es arquitecto.<sup><a class="note" href="#source-dailybeast-it2-review" aria-label="Nota 4">[4]</a></sup> En la pelea final salva a Bev y le dice que la ama; al final se van juntos.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p></details>
+      <p class="actors">Jeremy Ray Taylor (niño) · Jay Ryan (adulto)<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="beverly">
+  <article aria-labelledby="beverly-name">
+    <figure class="plate"><svg class="art art-postcard" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="embers"><circle cx="70" cy="40" r="2"/><circle cx="96" cy="30" r="1.5"/><circle cx="126" cy="38" r="2"/><circle cx="140" cy="26" r="1.5"/></g>
+<g class="obj"><g transform="rotate(4 100 90)"><rect x="40" y="52" width="120" height="80" rx="3" fill="var(--paper)"/><path d="M104 60 V124" stroke="var(--paper-shade)"/>
+<rect x="132" y="58" width="20" height="24" fill="none" stroke="var(--color-err)" stroke-width="1.5" stroke-dasharray="2 2"/>
+<g fill="none" stroke="var(--paper-ink)" stroke-width="1.6" stroke-linecap="round"><path d="M48 68 q6 -4 12 0 t12 0 t12 0 t10 0"/><path d="M48 80 q6 -4 12 0 t12 0 t12 0"/><path d="M48 92 q6 -4 12 0 t12 0 t12 0 t10 0"/><path d="M48 104 q6 -4 12 0 t12 0"/></g>
+<g stroke="var(--paper-shade)" stroke-width="1.5"><path d="M112 96 H152 M112 106 H152 M112 116 H144"/></g></g></g></svg><figcaption>La postal de «brasas de enero»</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1988–89</li><li>2016</li></ul>
+      <h3 id="beverly-name">Beverly Marsh</h3>
+      <p class="tag">La que no se deja</p>
+      <p class="why">Su ofrenda para el ritual es la postal con el poema que recibió de niña.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+      <p class="fear"><span>Su miedo</span> Pelo y sangre que brotan del lavabo de su baño.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup></p><p class="link"><span>Lazo</span> Ingrid Kersh, de la temporada de 1962, la conoce de niña en Juniper Hill.<sup><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a></sup></p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Intenta escapar de un padre abusivo.<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> En la casa de Neibolt le clava un atizador a Pennywise.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> Eso se la lleva; tras las luces muertas ve a los Perdedores volver de adultos.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> De adulta es diseñadora de moda y deja un matrimonio abusivo.<sup><a class="note" href="#source-dailybeast-it2-review" aria-label="Nota 4">[4]</a><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> Descubre que el poema era de Ben, no de Bill, y termina con él.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p></details>
+      <p class="actors">Sophia Lillis (niña) · Jessica Chastain (adulta)<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="richie">
+  <article aria-labelledby="richie-name">
+    <figure class="plate"><svg class="art art-token" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="obj"><g class="spin"><ellipse cx="100" cy="84" rx="44" ry="44" fill="var(--brass-dark)"/><circle cx="100" cy="80" r="44" fill="var(--brass)"/><circle cx="100" cy="80" r="34" fill="none" stroke="var(--brass-dark)" stroke-width="3"/>
+<path d="M100 58 L106 74 L123 74 L109 84 L114 100 L100 90 L86 100 L91 84 L77 74 L94 74 Z" fill="var(--brass-dark)"/></g></g></svg><figcaption>La ficha del salón de juegos</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1988–89</li><li>2016</li></ul>
+      <h3 id="richie-name">Richie Tozier</h3>
+      <p class="tag">El bocón de anteojos</p>
+      <p class="why">Su ofrenda para el ritual es una ficha del salón de videojuegos.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+      <p class="fear"><span>Su miedo</span> Los payasos.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup></p><p class="link"><span>Lazo</span> Hijo de Marge Truman, de 1962; según Polygon, ella lo llamó así por Rich Santos.<sup><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a></sup></p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Bromista y malhablado, con anteojos de cristales gruesos.<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a></sup> De adulto es comediante y esconde su sexualidad.<sup><a class="note" href="#source-dailybeast-it2-review" aria-label="Nota 4">[4]</a><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> En 2016 mata a Henry Bowers en la biblioteca para salvar a Mike.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> Al final vuelve a tallar «R + E» en el Puente de los Besos.<sup><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p></details>
+      <p class="actors">Finn Wolfhard (niño) · Bill Hader (adulto)<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="eddie">
+  <article aria-labelledby="eddie-name">
+    <figure class="plate"><svg class="art art-inhaler" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="puff"><circle cx="58" cy="104" r="6"/><circle cx="44" cy="98" r="9"/><circle cx="30" cy="92" r="11"/></g>
+<g class="obj"><rect x="98" y="30" width="26" height="62" rx="6" fill="var(--metal)"/><rect x="98" y="30" width="26" height="10" rx="4" fill="var(--metal-dark)"/>
+<path d="M92 80 h40 v40 a6 6 0 0 1 -6 6 h-54 a8 8 0 0 1 -8 -8 v-12 a6 6 0 0 1 6 -6 h22 z" fill="var(--plastic)"/><rect x="64" y="102" width="8" height="20" rx="2" fill="var(--plastic-dark)"/></g></svg><figcaption>El inhalador</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1988–89</li><li>2016</li></ul>
+      <h3 id="eddie-name">Eddie Kaspbrak</h3>
+      <p class="tag">El hipocondríaco</p>
+      <p class="why">Nunca suelta su inhalador, y en 2016 lo lleva como ofrenda al ritual.<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+      <p class="fear"><span>Su miedo</span> El leproso de la calle Neibolt.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup></p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Se quiebra el brazo en la casa de Neibolt.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> De adulto analiza riesgos y está casado con una mujer parecida a su madre.<sup><a class="note" href="#source-dailybeast-it2-review" aria-label="Nota 4">[4]</a><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> Hiere a Eso para salvar a Richie y muere apuñalado; su cuerpo queda en la cueva que se derrumba.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p></details>
+      <p class="actors">Jack Dylan Grazer (niño) · James Ransone (adulto)<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="mike">
+  <article aria-labelledby="mike-name">
+    <figure class="plate"><svg class="art art-rock" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="obj"><path d="M56 112 L64 72 L92 52 L132 58 L150 86 L142 116 L104 128 Z" fill="var(--stone)"/><path d="M64 72 L92 52 L104 80 Z" fill="var(--stone-light)"/><path d="M104 80 L132 58 L150 86 Z" fill="var(--stone-mid)"/><path d="M104 80 L142 116 L104 128 L56 112 Z" fill="var(--stone-dark)"/></g>
+<ellipse class="shadow" cx="102" cy="142" rx="44" ry="5"/></svg><figcaption>La piedra</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1988–89</li><li>2016</li></ul>
+      <h3 id="mike-name">Mike Hanlon</h3>
+      <p class="tag">El que se quedó</p>
+      <p class="why">Su ofrenda es la piedra que Bev le lanzó a Henry Bowers para salvarlo.<sup><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+      <p class="fear"><span>Su miedo</span> Visiones de sus padres ardiendo.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup></p><p class="link"><span>Lazo</span> Hijo de Will Hanlon y nieto de Leroy y Charlotte; crece en la granja con su abuelo.<sup><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup></p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Estudia en casa y la pandilla de Bowers lo acosa hasta que los Perdedores lo defienden en la guerra de piedras.<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> Empuja a Henry Bowers al pozo de Neibolt.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> Es el único que se queda en Derry, como bibliotecario, y llama a los demás para que vuelvan.<sup><a class="note" href="#source-dailybeast-it2-review" aria-label="Nota 4">[4]</a><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> Le arranca el corazón a Eso y al final se va de Derry.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p></details>
+      <p class="actors">Chosen Jacobs (niño) · Isaiah Mustafa (adulto)<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="stan">
+  <article aria-labelledby="stan-name">
+    <figure class="plate"><svg class="art art-cap" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="spider"><path d="M140 0 V44" stroke="var(--color-comment)" stroke-width="0.8"/><g transform="translate(140 48)"><ellipse rx="4" ry="5" fill="#05090e"/><g stroke="#05090e" stroke-width="1.2" fill="none"><path d="M-3 -2 l-7 -4 M-3 0 l-8 0 M-3 2 l-7 4 M-2 4 l-5 6 M3 -2 l7 -4 M3 0 l8 0 M3 2 l7 4 M2 4 l5 6"/></g></g></g>
+<g class="obj"><path d="M50 110 C50 62 150 62 150 110 Z" fill="var(--cap)"/><path d="M50 110 q5 8 10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0" fill="var(--cap-dark)"/><g fill="var(--cap-dark)" opacity=".5"><circle cx="78" cy="88" r="4"/><circle cx="102" cy="78" r="4"/><circle cx="124" cy="92" r="4"/></g></g></svg><figcaption>El gorro de baño</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1988–89</li><li>2016</li></ul>
+      <h3 id="stan-name">Stanley Uris</h3>
+      <p class="tag">El escéptico</p>
+      <p class="why">En la guarida reparte gorros de baño para que no se les metan arañas en el pelo; los Perdedores usan uno como su ofrenda.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+      <p class="fear"><span>Su miedo</span> Un cuadro deformado en la oficina de su padre.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup></p><p class="warn">Aviso: Menciona un suicidio.</p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Se prepara para su bar mitzvá, donde por fin le planta cara a su padre.<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a></sup> De adulto se quita la vida después de la llamada de Mike.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup> Sus cartas explican que lo hizo para que los demás siguieran unidos.<sup><a class="note" href="#source-collider-it-timeline" aria-label="Nota 1">[1]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p></details>
+      <p class="actors">Wyatt Oleff (niño) · Andy Bean (adulto)<sup><a class="note" href="#source-variety-it-review" aria-label="Nota 3">[3]</a><a class="note" href="#source-time-it2-ending" aria-label="Nota 2">[2]</a></sup></p>
+    </div>
+  </article>
+</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="group" id="derry" aria-labelledby="derry-title">
+    <div class="wrap">
+      <div class="group-head">
+        <p class="kicker">IT: Welcome to Derry · temporada 1</p>
+        <h2 id="derry-title">Derry, 1962</h2>
+        <p>Una base aérea, un cine, un grupo de chicos y una familia recién llegada, 27 años antes de los Perdedores.<sup><a class="note" href="#source-sky-derry-e1" aria-label="Nota 9">[9]</a><a class="note" href="#source-sky-derry-e2" aria-label="Nota 10">[10]</a></sup></p>
+      </div>
+      <ul class="cards">
+<li class="card" id="will">
+  <article aria-labelledby="will-name">
+    <figure class="plate"><svg class="art art-telescope" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="stars"><circle cx="34" cy="26" r="1.6"/><circle cx="62" cy="14" r="1.2"/><circle cx="166" cy="30" r="1.4"/><circle class="red" cx="176" cy="12" r="2"/></g>
+<g class="obj"><g stroke="var(--wood-dark)" stroke-width="4" stroke-linecap="round"><path d="M100 92 L76 146 M100 92 L124 146 M100 92 L100 146"/></g>
+<g transform="rotate(-28 100 86)"><rect x="54" y="78" width="96" height="18" rx="4" fill="var(--brass)"/><rect x="142" y="74" width="16" height="26" rx="3" fill="var(--brass-dark)"/><rect x="42" y="82" width="14" height="10" rx="2" fill="var(--brass-dark)"/></g></g></svg><figcaption>El telescopio</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1962</li></ul>
+      <h3 id="will-name">Will Hanlon</h3>
+      <p class="tag">El chico de ciencias</p>
+      <p class="why">Su padre le regala un telescopio, y por él ve una figura parecida a un payaso.<sup><a class="note" href="#source-sky-derry-e2" aria-label="Nota 10">[10]</a><a class="note" href="#source-sky-derry-e4" aria-label="Nota 12">[12]</a></sup></p>
+      <p class="link"><span>Lazo</span> Hijo de Leroy y Charlotte; futuro padre de Mike Hanlon.<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a></sup></p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Llega nuevo a Derry y Rich se hace su amigo el primer día.<sup><a class="note" href="#source-sky-derry-e2" aria-label="Nota 10">[10]</a><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup> Pennywise lo persigue porque su hijo ayudará a matarlo.<sup><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a></sup> En el final Pennywise se lo lleva, y él ayuda a clavar la daga junto al árbol muerto.<sup><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a></sup> Su familia se queda en la granja de Rose; le escribe una carta a Ronnie para que no lo olvide.<sup><a class="note" href="#source-sky-derry-e8" aria-label="Nota 11">[11]</a><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a></sup></p></details>
+      <p class="actors">Blake Cameron James<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="leroy">
+  <article aria-labelledby="leroy-name">
+    <figure class="plate"><svg class="art art-gate" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="field"><path d="M0 132 H200" stroke="var(--wood-dark)" stroke-width="2"/></g>
+<g class="obj"><rect x="38" y="44" width="12" height="96" fill="var(--wood-dark)"/><rect x="156" y="44" width="12" height="96" fill="var(--wood-dark)"/>
+<g class="swing"><g fill="var(--wood)"><rect x="50" y="58" width="104" height="10"/><rect x="50" y="84" width="104" height="10"/><rect x="50" y="110" width="104" height="10"/><rect x="50" y="58" width="9" height="62"/><rect x="145" y="58" width="9" height="62"/></g><path d="M56 116 L150 62" stroke="var(--wood)" stroke-width="9"/></g></g></svg><figcaption>El portón de la granja</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1962</li></ul>
+      <h3 id="leroy-name">Leroy Hanlon</h3>
+      <p class="tag">El mayor sin miedo</p>
+      <p class="why">Al final la familia se queda en la granja de Rose, la misma donde, ya mayor, cría a su nieto Mike.<sup><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a></sup></p>
+      <p class="weak">Objeto provisional: sin un objeto propio claro en pantalla.</p><p class="link"><span>Lazo</span> Esposo de Charlotte, padre de Will y abuelo de Mike.<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a></sup></p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Mayor y piloto condecorado, veterano de Corea, destinado a la base aérea de Derry.<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-sky-derry-e1" aria-label="Nota 9">[9]</a></sup> Una herida de guerra le quitó la capacidad de sentir miedo; por eso lo quiere el general Shaw.<sup><a class="note" href="#source-nerdist-operation-precept" aria-label="Nota 13">[13]</a></sup> Descubre que Shaw planea liberar a Eso, no encerrarlo.<sup><a class="note" href="#source-collider-derry-e7" aria-label="Nota 14">[14]</a><a class="note" href="#source-nerdist-operation-precept" aria-label="Nota 13">[13]</a></sup> Herido en la pierna y dado de baja con honores, guarda silencio y se queda en Derry.<sup><a class="note" href="#source-nerdist-operation-precept" aria-label="Nota 13">[13]</a></sup></p></details>
+      <p class="actors">Jovan Adepo<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-bellmedia-derry-trailer" aria-label="Nota 15">[15]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="charlotte">
+  <article aria-labelledby="charlotte-name">
+    <figure class="plate"><svg class="art art-car" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="obj"><g fill="var(--paper-shade)"><rect x="62" y="36" width="34" height="18" rx="2"/><rect x="100" y="40" width="28" height="14" rx="2"/></g><path d="M58 56 H134" stroke="var(--wood-dark)" stroke-width="2"/>
+<path d="M28 108 V86 q0 -6 6 -8 l26 -18 h74 l22 18 h12 q10 0 10 10 v20 Z" fill="var(--era-1962-ice)"/><g fill="var(--color-night)"><path d="M64 64 h32 v16 h-44 Z"/><path d="M102 64 h28 l16 16 h-44 Z"/></g>
+<circle class="lamp" cx="172" cy="94" r="4" fill="var(--era-1962-window)"/><g fill="#05090e"><circle cx="58" cy="110" r="13"/><circle cx="146" cy="110" r="13"/></g><g fill="var(--metal)"><circle cx="58" cy="110" r="5"/><circle cx="146" cy="110" r="5"/></g></g></svg><figcaption>El auto cargado</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1962</li></ul>
+      <h3 id="charlotte-name">Charlotte Hanlon</h3>
+      <p class="tag">La activista</p>
+      <p class="why">Con todo listo para irse de Derry, duda, y la familia decide quedarse.<sup><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a><a class="note" href="#source-sky-derry-e8" aria-label="Nota 11">[11]</a></sup></p>
+      <p class="weak">Objeto provisional: sin un objeto propio claro en pantalla.</p><p class="link"><span>Lazo</span> Esposa de Leroy, madre de Will y abuela de Mike.<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a></sup></p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>En Luisiana era activista por los derechos civiles.<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup> Ayuda a sacar a Hank Grogan de Derry rumbo a la frontera con Canadá.<sup><a class="note" href="#source-collider-derry-e7" aria-label="Nota 14">[14]</a></sup></p></details>
+      <p class="actors">Taylour Paige<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-bellmedia-derry-trailer" aria-label="Nota 15">[15]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="lilly">
+  <article aria-labelledby="lilly-name">
+    <figure class="plate"><svg class="art art-dagger" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="obj"><g transform="rotate(-35 100 80)"><path d="M100 18 L108 92 H92 Z" fill="var(--metal)"/><path d="M100 18 L100 92 H92 Z" fill="var(--metal-dark)"/><rect x="78" y="92" width="44" height="8" rx="3" fill="var(--brass-dark)"/><rect x="95" y="100" width="10" height="26" fill="var(--wood-dark)"/>
+<path d="M100 124 L104 132 L113 133 L106 139 L108 148 L100 143 L92 148 L94 139 L87 133 L96 132 Z" fill="var(--brass)"/></g><path class="glint" d="M78 52 l3 -9 l3 9 l9 3 l-9 3 l-3 9 l-3 -9 l-9 -3 Z" fill="var(--color-text)"/></g></svg><figcaption>La daga de estrella</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1962</li></ul>
+      <h3 id="lilly-name">Lilly Bainbridge</h3>
+      <p class="tag">La que llaman «Loony»</p>
+      <p class="why">Encuentra en las alcantarillas una daga de estrella y ve que detiene a la criatura.<sup><a class="note" href="#source-sky-derry-e5" aria-label="Nota 17">[17]</a><a class="note" href="#source-sky-derry-e6" aria-label="Nota 18">[18]</a></sup></p>
+      
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Le dicen «Loony» desde que pasó por Juniper Hill tras la muerte de su padre.<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup> Sobrevive con Ronnie a la masacre del cine Capitol.<sup><a class="note" href="#source-sky-derry-e1" aria-label="Nota 9">[9]</a></sup> En el final la daga le nubla la mente; Marge se la quita y ella se recupera.<sup><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a></sup> Con Ronnie, Marge y Will clava la daga y deja a Eso encerrado; se queda en Derry.<sup><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a><a class="note" href="#source-ign-derry-finale" aria-label="Nota 16">[16]</a></sup></p></details>
+      <p class="actors">Clara Stack<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="ronnie">
+  <article aria-labelledby="ronnie-name">
+    <figure class="plate"><svg class="art art-reel" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="obj"><path d="M128 104 C150 116 168 112 190 130" fill="none" stroke="#1c1408" stroke-width="12"/><path d="M128 104 C150 116 168 112 190 130" fill="none" stroke="var(--brass-dark)" stroke-width="12" stroke-dasharray="3 5" opacity=".6"/>
+<g class="spin2"><circle cx="96" cy="80" r="52" fill="var(--metal-dark)"/><circle cx="96" cy="80" r="46" fill="var(--metal)"/><g fill="var(--color-night)"><circle cx="96" cy="52" r="11"/><circle cx="122" cy="70" r="11"/><circle cx="113" cy="102" r="11"/><circle cx="79" cy="102" r="11"/><circle cx="70" cy="70" r="11"/></g><circle cx="96" cy="80" r="6" fill="var(--metal-dark)"/></g></g></svg><figcaption>El rollo de película</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1962</li></ul>
+      <h3 id="ronnie-name">Ronnie Grogan</h3>
+      <p class="tag">La hija del proyeccionista</p>
+      <p class="why">Ayuda a su padre en el cine, y es ella quien arranca el proyector la noche de la masacre.<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-sky-derry-e1" aria-label="Nota 9">[9]</a></sup></p>
+      <p class="link"><span>Lazo</span> Hija de Hank Grogan.<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup></p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Lucha por limpiar el nombre de su padre, acusado de las muertes.<sup><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a></sup> Escapa del incendio del Black Spot gracias a Hallorann.<sup><a class="note" href="#source-collider-derry-e7" aria-label="Nota 14">[14]</a></sup> Se va de Derry con Hank después de despedirse de Will con un beso; se espera que lo olvide.<sup><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a><a class="note" href="#source-ign-derry-finale" aria-label="Nota 16">[16]</a></sup></p></details>
+      <p class="actors">Amanda Christine<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="rich">
+  <article aria-labelledby="rich-name">
+    <figure class="plate"><svg class="art art-sticks" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="beat"><path d="M40 40 l-10 -8 M160 40 l10 -8 M100 22 v-12" stroke="var(--era-1988-sun)" stroke-width="2" stroke-linecap="round"/></g>
+<g class="obj"><g class="stick-a"><path d="M52 140 L138 44" stroke="var(--wood)" stroke-width="7" stroke-linecap="round"/><circle cx="140" cy="42" r="5" fill="var(--paper)"/></g><g class="stick-b"><path d="M148 140 L62 44" stroke="var(--wood-dark)" stroke-width="7" stroke-linecap="round"/><circle cx="60" cy="42" r="5" fill="var(--paper)"/></g></g></svg><figcaption>Las baquetas</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1962</li></ul>
+      <h3 id="rich-name">Rich Santos</h3>
+      <p class="tag">El baterista</p>
+      <p class="why">Toca la batería en el escenario del Black Spot.<sup><a class="note" href="#source-sky-derry-e6" aria-label="Nota 18">[18]</a></sup></p>
+      
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Chico cubanoamericano de la banda, se hace amigo de Will y está enamorado de Marge.<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-sky-derry-e3" aria-label="Nota 19">[19]</a></sup> Le regala a Marge un parche para el ojo.<sup><a class="note" href="#source-sky-derry-e6" aria-label="Nota 18">[18]</a></sup> En el incendio esconde a Marge y muere protegiéndola.<sup><a class="note" href="#source-collider-derry-e7" aria-label="Nota 14">[14]</a><a class="note" href="#source-sky-derry-e7" aria-label="Nota 20">[20]</a></sup> Su espíritu ayuda a clavar la daga en el final.<sup><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a></sup></p></details>
+      <p class="actors">Arian S. Cartaya<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="marge">
+  <article aria-labelledby="marge-name">
+    <figure class="plate"><svg class="art art-patch" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="obj"><path d="M20 70 C60 50 80 64 82 70 M118 70 C120 64 140 50 180 70" fill="none" stroke="#05090e" stroke-width="3"/><path d="M76 66 C76 54 124 54 124 66 C124 100 108 112 100 112 C92 112 76 100 76 66 Z" fill="#0a0e14" stroke="var(--color-overlay)" stroke-width="2"/><path d="M84 68 C90 62 110 62 116 68" fill="none" stroke="var(--color-comment)" stroke-width="1" opacity=".5"/></g></svg><figcaption>El parche</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1962</li></ul>
+      <h3 id="marge-name">Marge Truman</h3>
+      <p class="tag">La del parche</p>
+      <p class="why">Tras una grave herida en el ojo usa el parche que le regaló Rich.<sup><a class="note" href="#source-sky-derry-e5" aria-label="Nota 17">[17]</a><a class="note" href="#source-sky-derry-e6" aria-label="Nota 18">[18]</a><a class="note" href="#source-collider-derry-e7" aria-label="Nota 14">[14]</a></sup></p>
+      <p class="link"><span>Lazo</span> Futura madre de Richie Tozier.<sup><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a></sup></p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Amiga de Lilly, quiere entrar en el grupo popular de las «Pattycakes».<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup> Rich la salva del incendio del Black Spot.<sup><a class="note" href="#source-collider-derry-e7" aria-label="Nota 14">[14]</a></sup> Pennywise la persigue por el hijo que tendrá.<sup><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a></sup> Despide a Rich en su funeral y se queda en Derry.<sup><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a></sup></p></details>
+      <p class="actors">Matilda Lawler<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="hallorann">
+  <article aria-labelledby="hallorann-name">
+    <figure class="plate"><svg class="art art-slingshot" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="obj"><path d="M40 92 L58 60 L150 60 L132 92 Z" fill="var(--wood-dark)"/><g class="shine"><ellipse cx="96" cy="96" rx="52" ry="14" fill="var(--era-1962-window)" opacity=".18"/></g><rect x="40" y="92" width="112" height="44" fill="var(--wood)"/><rect x="40" y="92" width="112" height="8" fill="var(--wood-dark)"/><rect x="80" y="106" width="32" height="12" fill="var(--paper)" opacity=".85"/>
+<g stroke="var(--paper-shade)" stroke-width="5" stroke-linecap="round" fill="none"><path d="M96 98 V82 M96 82 L84 62 M96 82 L108 62"/></g><path d="M84 62 Q96 74 108 62" fill="none" stroke="var(--color-err)" stroke-width="1.5"/></g></svg><figcaption>La resortera en la caja de puros</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1962</li></ul>
+      <h3 id="hallorann-name">Dick Hallorann</h3>
+      <p class="tag">El del resplandor</p>
+      <p class="why">Usa una vieja resortera guardada en una caja de puros como brújula psíquica.<sup><a class="note" href="#source-sky-derry-e3" aria-label="Nota 19">[19]</a></sup></p>
+      
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Aviador con un don psíquico, el «resplandor»; Shaw lo recluta para encontrar a Eso.<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-nerdist-operation-precept" aria-label="Nota 13">[13]</a></sup> Saca a Hank, Ronnie y Will del incendio del Black Spot.<sup><a class="note" href="#source-collider-derry-e7" aria-label="Nota 14">[14]</a></sup> En el hielo congela a Pennywise con la mente.<sup><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a></sup> El té de Rose calma sus voces, y se va a trabajar a un hotel de Londres.<sup><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a><a class="note" href="#source-sky-derry-e8" aria-label="Nota 11">[11]</a><a class="note" href="#source-nerdist-operation-precept" aria-label="Nota 13">[13]</a></sup></p></details>
+      <p class="actors">Chris Chalk<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup></p>
+    </div>
+  </article>
+</li>
+<li class="card" id="pauly">
+  <article aria-labelledby="pauly-name">
+    <figure class="plate"><svg class="art art-plane" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><g class="clouds"><path d="M14 112 h50 a10 10 0 0 0 -16 -12 a14 14 0 0 0 -26 4 a8 8 0 0 0 -8 8 Z"/><path d="M130 132 h56 a10 10 0 0 0 -16 -12 a14 14 0 0 0 -28 4 a8 8 0 0 0 -12 8 Z"/></g>
+<g class="obj"><g class="fly"><path d="M30 80 q4 -12 20 -12 h86 q26 0 36 12 q-10 10 -36 10 h-86 q-16 0 -20 -10 Z" fill="var(--metal)"/><path d="M92 76 h44 l-30 -40 h-14 Z" fill="var(--metal-dark)"/><path d="M30 78 l-6 -22 h12 l14 14 Z" fill="var(--metal-dark)"/>
+<g fill="var(--color-night)"><circle cx="150" cy="78" r="3"/><circle cx="132" cy="78" r="3"/><circle cx="114" cy="78" r="3"/><circle cx="96" cy="78" r="3"/></g><rect x="112" y="40" width="4" height="14" fill="var(--color-comment)" class="prop"/></g></g></svg><figcaption>El avión de transporte</figcaption></figure>
+    <div class="card-body">
+      <ul class="eras" aria-label="Épocas"><li>1962</li></ul>
+      <h3 id="pauly-name">Pauly Russo</h3>
+      <p class="tag">El amigo de Corea</p>
+      <p class="why">Vuela con Leroy en el avión de transporte durante el vuelo de vigilancia.<sup><a class="note" href="#source-sky-derry-e3" aria-label="Nota 19">[19]</a></sup></p>
+      <p class="weak">Objeto provisional: sin un objeto propio claro en pantalla.</p>
+      <details><summary>Toda su historia <span>(con spoilers)</span></summary><p>Capitán y piloto, amigo leal de Leroy desde Corea.<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-sky-derry-e1" aria-label="Nota 9">[9]</a></sup> Derriba una puerta para salvar a Leroy de unos atacantes y se rompe la nariz.<sup><a class="note" href="#source-sky-derry-e1" aria-label="Nota 9">[9]</a></sup> Muere en el asalto a la Casa del Pozo.<sup><a class="note" href="#source-nerdist-operation-precept" aria-label="Nota 13">[13]</a></sup></p></details>
+      <p class="actors">Rudy Mancuso<sup><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a><a class="note" href="#source-bellmedia-derry-trailer" aria-label="Nota 15">[15]</a></sup></p>
+    </div>
+  </article>
+</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="group" id="lazos" aria-labelledby="lazos-title">
+    <div class="wrap">
+      <div class="group-head">
+        <p class="kicker">De 1962 a 2016</p>
+        <h2 id="lazos-title">Lazos entre épocas</h2>
+        <p>Eso no olvida a las familias. Dos linajes cruzan los ciclos.</p>
+      </div>
+      <ul class="ties">
+        <li class="tie">
+          <h3>Los Hanlon</h3>
+          <ol class="chain">
+            <li><span class="year">1962</span><a href="#leroy">Leroy</a><span class="role">y <a href="#charlotte">Charlotte</a></span></li>
+            <li><span class="year">1962</span><a href="#will">Will</a><span class="role">su hijo</span></li>
+            <li><span class="year">1988–89 · 2016</span><a href="#mike">Mike</a><span class="role">su nieto</span></li>
+          </ol>
+          <p>Ya mayor, Leroy cría a su nieto Mike en la granja familiar.<sup><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a><a class="note" href="#source-marieclaire-derry-cast" aria-label="Nota 8">[8]</a></sup></p>
+        </li>
+        <li class="tie">
+          <h3>Los Tozier</h3>
+          <ol class="chain">
+            <li><span class="year">1962</span><a href="#marge">Marge Truman</a><span class="role">salvada por <a href="#rich">Rich</a></span></li>
+            <li><span class="year">1988–89 · 2016</span><a href="#richie">Richie Tozier</a><span class="role">su hijo</span></li>
+          </ol>
+          <p>Pennywise persigue a Marge en 1962 por el hijo que tendrá.<sup><a class="note" href="#source-polygon-derry-ending" aria-label="Nota 6">[6]</a><a class="note" href="#source-radiotimes-derry-ending" aria-label="Nota 7">[7]</a></sup></p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="group sources" id="fuentes" aria-labelledby="fuentes-title">
+    <div class="wrap">
+      <div class="group-head"><h2 id="fuentes-title">Notas</h2><p>En el sitio, cada número enlaza a la página de fuentes.</p></div>
+      <ol>
+<li id="source-collider-it-timeline">Alyse Wax. «It Movie Timeline Explained: A Complete Guide to the History of Pennywise». <i>Collider</i>.</li>
+<li id="source-time-it2-ending">Megan McCluskey. «How to Make Sense of the Ending of IT Chapter Two». <i>TIME</i>.</li>
+<li id="source-variety-it-review">Andrew Barker. «&#x27;It&#x27; Review: Fresh Adaptation of Stephen King&#x27;s Horror Tome». <i>Variety</i>.</li>
+<li id="source-dailybeast-it2-review">Nick Schager. «&#x27;It Chapter 2&#x27; Review: One of the Finest Stephen King Adaptations Ever Goes Out With a Bang». <i>The Daily Beast</i>.</li>
+<li id="source-collider-it-ending">Haleigh Foutch. «IT Movie Ending Explained: What&#x27;s Next for Pennywise?». <i>Collider</i>.</li>
+<li id="source-polygon-derry-ending">Chris Hayner. «It: Welcome to Derry ending and post-credits scene explained: How it changes Pennywise canon». <i>Polygon</i>.</li>
+<li id="source-radiotimes-derry-ending">Megan Bull. «It: Welcome to Derry ending explained – who died and who survived?». <i>Radio Times</i>.</li>
+<li id="source-marieclaire-derry-cast">Quinci LeGardye. «The &#x27;It: Welcome to Derry&#x27; Cast: Your Guide». <i>Marie Claire</i>.</li>
+<li id="source-sky-derry-e1">Sky. «IT: Welcome to Derry - Season 1 Episode 1 &#x27;The Pilot&#x27; explained». <i>Sky</i>.</li>
+<li id="source-sky-derry-e2">Sky. «IT: Welcome to Derry - Season 1 Episode 2 &#x27;The Thing In The Dark&#x27; explained». <i>Sky</i>.</li>
+<li id="source-sky-derry-e8">Sky. «IT: Welcome to Derry - Season 1 Episode 8 &#x27;Winter Fire&#x27; explained». <i>Sky</i>.</li>
+<li id="source-sky-derry-e4">Sky. «IT: Welcome to Derry - Season 1 Episode 4 &#x27;The Great Swirling Apparatus of Our Planet&#x27;s Function&#x27; explained». <i>Sky</i>.</li>
+<li id="source-nerdist-operation-precept">Tai Gooden. «The Military and Operation Precept in WELCOME TO DERRY, Explained». <i>Nerdist</i>.</li>
+<li id="source-collider-derry-e7">Shawn Van Horn. «&#x27;IT: Welcome to Derry&#x27; Episode 7 Recap: Prepare To Have Your Heart Ripped Out by the Season&#x27;s Scariest, Saddest Hour». <i>Collider</i>.</li>
+<li id="source-bellmedia-derry-trailer">HBO. «HBO Releases Official Trailer And Key Art For The Original Drama Series IT: WELCOME TO DERRY, Debuting October 26». <i>Bell Media</i>.</li>
+<li id="source-ign-derry-finale">Tom Jorgensen. «It: Welcome to Derry Season Finale Review». <i>IGN Middle East</i>.</li>
+<li id="source-sky-derry-e5">Sky. «IT: Welcome to Derry - Season 1 Episode 5 &#x27;29 Neibolt Street&#x27; explained». <i>Sky</i>.</li>
+<li id="source-sky-derry-e6">Sky. «IT: Welcome to Derry - Season 1 Episode 6 &#x27;In The Name of The Father&#x27; explained». <i>Sky</i>.</li>
+<li id="source-sky-derry-e3">Sky. «IT: Welcome to Derry - Season 1 Episode 3 &#x27;Now You See It&#x27; explained». <i>Sky</i>.</li>
+<li id="source-sky-derry-e7">Sky. «IT: Welcome to Derry - Season 1 Episode 7 &#x27;The Black Spot&#x27; explained». <i>Sky</i>.</li>
+      </ol>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Sitio de fans no oficial y sin fines de lucro. No está afiliado a Stephen King, Warner Bros. ni HBO.</p>
+    <p class="credits">Ilustraciones y textos originales.</p>
+  </div>
+</footer>
+<script>
+if (document.documentElement.classList.contains('js-motion') && 'IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { rootMargin: '0px 0px -10% 0px' });
+  document.querySelectorAll('.card, .tie').forEach((el) => io.observe(el));
+}
+</script>
+</body>
+</html>
