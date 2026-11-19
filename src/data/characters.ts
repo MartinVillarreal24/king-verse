@@ -197,8 +197,8 @@ export const characters: Character[] = [
     id: 'leroy', name: 'Leroy Hanlon', group: 'derry-1962', eras: ['1962'], art: 'gate', provisional: true,
     tag: { es: 'El mayor sin miedo', en: 'The major without fear' },
     object: { es: 'El portón de la granja', en: 'The farm gate' },
-    why: s('Al final la familia se queda en la granja de Rose, la misma donde, ya mayor, cría a su nieto Mike.',
-      "In the end the family stays on Rose's farm, where, as an old man, he raises his grandson Mike.", RT, POL),
+    why: s('Al final la familia se queda en la granja de Rose; ya mayor, Leroy cría a su nieto Mike en la granja familiar.',
+      "In the end the family stays on Rose's farm; as an old man, Leroy raises his grandson Mike on the family farm.", RT, POL),
     link: s('Esposo de Charlotte, padre de Will y abuelo de Mike.', 'Husband of Charlotte, father of Will and grandfather of Mike.', MC, POL),
     story: [
       s('Mayor y piloto condecorado, veterano de Corea, destinado a la base aérea de Derry.',
@@ -280,7 +280,7 @@ export const characters: Character[] = [
       s('Amiga de Lilly, quiere entrar en el grupo popular de las «Pattycakes».', 'A friend of Lilly who wants into the popular “Pattycakes” clique.', MC),
       s('Rich la salva del incendio del Black Spot.', 'Rich saves her from the Black Spot fire.', C7),
       s('Pennywise la persigue por el hijo que tendrá.', 'Pennywise goes after her because of the son she will have.', POL),
-      s('Despide a Rich en su funeral y se queda en Derry.', 'She gives the eulogy at Rich’s funeral and stays in Derry.', RT),
+      s('Pronuncia el elogio fúnebre de Rich y se queda en Derry.', 'She gives the eulogy at Rich’s funeral and stays in Derry.', RT),
     ],
     actors: s('Matilda Lawler', 'Matilda Lawler', MC),
   },
@@ -320,8 +320,8 @@ export const characters: Character[] = [
 export const groupIntro: Record<Group, Sentence> = {
   losers: s('Siete chicos que enfrentan a Eso en el verano de 1989 y vuelven 27 años después, en 2016, a terminar lo que empezaron.',
     'Seven kids who face It in the summer of 1989 and come back 27 years later, in 2016, to finish what they started.', COL, TIME),
-  'derry-1962': s('Una base aérea, un cine, un grupo de chicos y una familia recién llegada, 27 años antes de los Perdedores.',
-    'An air base, a movie theater, a group of kids and a family just arrived in town, 27 years before the Losers.', E1, E2),
+  'derry-1962': s('Una base aérea, un cine, un grupo de chicos y una familia recién llegada a Derry.',
+    'An air base, a movie theater, a group of kids and a family just arrived in Derry.', E1, E2),
 };
 
 /** Family lines across eras: each member links to a card. */
